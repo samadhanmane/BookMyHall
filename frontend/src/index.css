@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*{
+  font-family: Outfit;
+}
+
+.active hr{
+  @apply block;
+}
+
+::-webkit-scrollbar{
+  @apply hidden;
+}
+
+.custom-calendar {
+  width: 100%; /* Adjust width as needed */
+  height: 400px; /* Adjust height as needed */
+}
+
+.custom-calendar .react-calendar__tile {
+  height: 60px; /* Adjust tile height */
+  width: 60px; /* Adjust tile width */
+  font-size: 1.2rem; /* Adjust font size for better visibility */
+}
+
+@media (max-width: 740px) {
+  .active p{
+    @apply text-white bg-primary;
+  }}
