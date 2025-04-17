@@ -1,0 +1,33 @@
+Only if you have nodejs and other related files this will run 
+I have used tailwind css using react and also used react router-dom and java script xml as well
+
+
+---------------Frontend part---------------
+1)To start frontend go to frontend directory:
+
+cd frontend 
+
+2)and then run:
+
+npm run dev 
+
+3)After click on localhost link:
+It will be looking like this
+
+Local:   http://localhost:5173/
+
+
+---------Backend part------------
+To start backend go to backend directory:
+cd backend 
+
+and then run:
+npm start server 
+
+If you are getting 
+
+Server Started 4000
+Database Connected
+
+then backend is running successfully
+
