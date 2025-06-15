@@ -9,6 +9,7 @@ const AdminContextProvider = (props) => {
 const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
 
     const [halls,setHalls] = useState([])
+    const [guestRooms, setGuestRooms] = useState({})
     const [appointments, setAppointments] = useState([])
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [dashData,setDashData] = useState(false)
@@ -18,7 +19,9 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
             const {data} = await axios.post(backendUrl + '/api/admin/all-halls',{},{headers:{aToken}})
             if(data.success){
                 setHalls(data.halls)
-                console.log(data.halls)
+                setGuestRooms(data.guestRooms)
+                console.log('Halls:', data.halls)
+                console.log('Guest Rooms:', data.guestRooms)
             }else{
                 toast.error(data.message)
             }
@@ -115,18 +118,33 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
         }
        }    
 
-       
-
-    
+       const deleteHallOrRoom = async (hallId) => {
+        try {
+            const { data } = await axios.post(
+                backendUrl + '/api/admin/delete-hall-or-room',
+                { hallId },
+                { headers: { aToken } }
+            );
+            if (data.success) {
+                toast.success(data.message);
+                getAllHalls(); // Refresh the list after deletion
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     const value = {
         backendUrl,halls,
+        guestRooms,
         getAllHalls,changeAvailability,
         appointments,setAppointments,
         getAllAppointments,cancelAppointment,
         dashData,getDashData,setAToken,aToken,
-        completeAppointment,requestAcceptance
-
+        completeAppointment,requestAcceptance,
+        deleteHallOrRoom
     }
     return (
         <AdminContext.Provider value={value}>

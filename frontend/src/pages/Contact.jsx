@@ -1,30 +1,50 @@
-import React from 'react'
-import { assets } from '../assets/assets'
+import React from 'react';
+import { assets } from '../assets/assets';
 
 const Contact = () => {
-
-
   return (
-    <div>
-      <div className='text-center text-2xl pt-10 text-black-500 '>
-        <p>CONTACT <span className='text-black-700 font-semibold'>US</span></p>
+    <div className="px-4 md:px-20 font-[Poppins] bg-white text-[#030303]">
+      <div className="text-center pt-12 text-3xl font-medium">
+        <p>
+          CONTACT <span className="text-[#123458] font-semibold">US</span>
+        </p>
       </div>
-        
-        <div className='my-10 flex flex-col justify-center md:flex-row gap-10 mb-28 text-sm '>
-          <img className='w-full md:max-w-[360px] shadow-lg rounded-lg shadow-black' src={assets.High_Capacity_img} alt="" />
-          <div className='flex flex-col justify-center items-start gap-6'>
-            <p className='font-semibold text-lg text-black-600'>OUR OFFICE</p>
-            <p className='text-black-500'>Student section,Design Building <br /> MITAOE,Alandi,Pune 412105,Maharashtra,India</p>
-            <p className='text-black-500'>Tel: +91-8010427685 <br /> Email: samadhanmane2324@gmail.com</p>
-            <p className='font-semibold text-lg text-black-600'>Have any doubt?</p>
-            <p className='text-black-500'>To learn more about our team</p>
-            <button className='border border-black px-8 py-4 text-sm hover:bg-black hover:text-white transition-all duration-500 cursor-pointer shadow-md shadow-black'>
-              Contact Office
-            </button>
-          </div>
-        </div>
-    </div>
-  )
-}
 
-export default Contact
+      <div className="my-14 flex flex-col md:flex-row gap-12 md:gap-20 border border-gray-200 rounded-xl p-6 shadow-sm">
+        <img
+          className="w-full md:max-w-[360px] rounded-lg shadow-md object-cover"
+          src={assets.High_Capacity_img}
+          alt="Office"
+        />
+
+        <div className="flex flex-col justify-center gap-6 text-sm">
+          <div>
+            <p className="text-lg font-semibold text-[#123458] mb-2">OUR OFFICE</p>
+            <p className="text-[#030303]">
+              Student Section, Design Building <br />
+              MITAOE, Alandi, Pune 412105, Maharashtra, India
+            </p>
+          </div>
+
+          <div>
+            <p className="text-[#030303]">
+              Tel: +91-9071123436, +91-8793323500, 020-30253500 <br />
+              Email: admissions@mitaoe.ac.in
+            </p>
+          </div>
+
+          <div>
+            <p className="text-lg font-semibold text-[#123458] mb-2">Have any doubt?</p>
+            <p className="text-[#030303]">To learn more about our team</p>
+          </div>
+
+          <button className="mt-2 w-fit px-6 py-2 bg-[#123458] text-white border border-[#123458] hover:bg-white hover:text-[#123458] transition-all duration-300 rounded-md shadow">
+            Contact Office
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Contact;

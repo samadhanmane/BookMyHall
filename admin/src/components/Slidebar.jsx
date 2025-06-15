@@ -5,61 +5,60 @@ import { assets } from '../assets/assets'
 import { HallContext } from '../context/HallContext'
 
 const Slidebar = () => {
-  
-  const {aToken} = useContext(AdminContext)
-  const {dToken} = useContext(HallContext)
-  
+  const { aToken } = useContext(AdminContext)
+  const { dToken } = useContext(HallContext)
 
+  const linkClass = ({ isActive }) =>
+    `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer transition 
+     ${isActive ? 'bg-[#F2F3FF] border-r-4 border-[#123458] shadow-sm' : 'hover:bg-gray-100'} 
+     text-[#030303]`
 
-    return (
-    <div className='min-h-screen bg-white border-r shadow-sm shadow-black'>
-        {
-            aToken && <ul className='text-[#515151] mt-5 '>
-                <NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer  ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary shadow-sm shadow-black' : ''}` } to={'/admin-dashboard'}>
-                    <img src={assets.home_icon} alt="" />
-                    <p className='hidden md:block'>Dashboard</p>
-                </NavLink>
+  const navTextClass = 'hidden md:block text-sm font-medium'
 
-                <NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary shadow-sm shadow-black' : ''}` } to={'/all-appointments'}>
-                    <img src={assets.appointment_icon} alt="" />
-                    <p className='hidden md:block'>Appontments</p>
-                </NavLink>
-                
-<NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary shadow-sm shadow-black' : ''}` } to={'/add-hall'}>
-                    <img src={assets.add_icon} alt="" />
-                    <p className='hidden md:block'>Add Hall</p>
-                </NavLink>
-                
-                <NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary shadow-sm shadow-black' : ''}` } to={'/hall-list'}>
-                    <img src={assets.people_icon} alt="" />
-                    <p className='hidden md:block'>Hall List</p>
-                </NavLink>
-                
-                
-            </ul>
-        }
+  return (
+    <div className='min-h-screen bg-white border-r border-gray-200 shadow-sm font-poppins'>
+      {aToken && (
+        <ul className='mt-5'>
+          <NavLink to='/admin-dashboard' className={linkClass}>
+            <img src={assets.home_icon} alt="dashboard" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Dashboard</p>
+          </NavLink>
 
-{
-            dToken && <ul className='text-[#515151] mt-5'>
-                <NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}` } to={'/hall-dashboard'}>
-                    <img src={assets.home_icon} alt="" />
-                    <p className='hidden md:block'>Dashboard</p>
-                </NavLink>
+          <NavLink to='/all-appointments' className={linkClass}>
+            <img src={assets.appointment_icon} alt="appointments" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Appointments</p>
+          </NavLink>
 
-                <NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}` } to={'/hall-appointments'}>
-                    <img src={assets.appointment_icon} alt="" />
-                    <p className='hidden md:block'>Appontments</p>
-                </NavLink>
-                
-                <NavLink className={({isActive})=> `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}` } to={'/hall-profile'}>
-                    <img src={assets.people_icon} alt="" />
-                    <p className='hidden md:block'>Profile</p>
-                </NavLink>
-                
-                
-            </ul>
-        }
+          <NavLink to='/add-hall' className={linkClass}>
+            <img src={assets.add_icon} alt="add hall" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Add Hall</p>
+          </NavLink>
 
+          <NavLink to='/hall-list' className={linkClass}>
+            <img src={assets.people_icon} alt="hall list" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Hall List</p>
+          </NavLink>
+        </ul>
+      )}
+
+      {dToken && (
+        <ul className='mt-5'>
+          <NavLink to='/hall-dashboard' className={linkClass}>
+            <img src={assets.home_icon} alt="dashboard" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Dashboard</p>
+          </NavLink>
+
+          <NavLink to='/hall-appointments' className={linkClass}>
+            <img src={assets.appointment_icon} alt="appointments" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Appointments</p>
+          </NavLink>
+
+          <NavLink to='/hall-profile' className={linkClass}>
+            <img src={assets.people_icon} alt="profile" className='w-5 h-5 object-contain' />
+            <p className={navTextClass}>Profile</p>
+          </NavLink>
+        </ul>
+      )}
     </div>
   )
 }

@@ -4,12 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // tailwind.config.js
   theme: {
     extend: {
-      colors:{
-        primary: "#FF5722",
-      }
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
+      },
+      colors: {
+        primary: '#123458',
+        base: '#030303',
+      },
     },
   },
-  plugins: [],
 }

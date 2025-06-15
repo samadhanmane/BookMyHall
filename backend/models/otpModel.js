@@ -11,9 +11,18 @@ const otpSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    type: {
+        type: String,
+        required: true,
+        enum: ['user', 'hall'],
+    },
     expiresAt: {
         type: Date,
         required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
     }
 });
 
@@ -21,5 +30,8 @@ const otpSchema = new mongoose.Schema({
 otpSchema.methods.isExpired = function() {
     return Date.now() > this.expiresAt.getTime();
 };
+
+// Add index for faster queries
+otpSchema.index({ email: 1, type: 1 });
 
 export default mongoose.model('OTP', otpSchema);

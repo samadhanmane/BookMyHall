@@ -7,62 +7,75 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const { backendUrl, token, setToken } = useContext(AppContext);
   const navigate = useNavigate();
-  const [state, setState] = useState('Sign Up');
 
+  const [authMode, setAuthMode] = useState('Sign Up');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [errors, setErrors] = useState({});
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     const errors = {};
     if (!email) errors.email = 'Email is required';
     if (!password) errors.password = 'Password is required';
-    if (state === 'Sign Up' && !name) errors.name = 'Name is required';
+    if (authMode === 'Sign Up' && !name) errors.name = 'Name is required';
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setName('');
+    setOtp('');
+    setNewPassword('');
+  };
+
   const onSubmitHandler = async (event) => {
     event.preventDefault();
-    if (forgotPassword) return; // Don't handle regular login if in forgot password mode
-
+    if (forgotPassword) return;
     if (!validateForm()) return;
 
     try {
+      setIsLoading(true);
       let response;
-      if (state === 'Sign Up') {
+
+      if (authMode === 'Sign Up') {
         response = await axios.post(backendUrl + '/api/user/register', { name, password, email });
       } else {
         response = await axios.post(backendUrl + '/api/user/login', { password, email });
-       
       }
 
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         setToken(response.data.token);
+        clearForm();
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const [forgotPassword, setForgotPassword] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
 
   const handleForgotPassword = async () => {
     if (!email) {
       toast.error('Please enter your email first');
       return;
     }
-  
+
+    setIsLoading(true);
     try {
-      const response = await axios.post(backendUrl + '/api/user/forgot-password', { email });
-      console.log('Forgot password response:', response.data);
-      
+      const response = await axios.post(backendUrl + '/api/user/forgot-password', { 
+        email,
+        type: 'user'
+      });
       if (response.data.success) {
         toast.success('OTP sent to your email');
         setForgotPassword(true);
@@ -70,46 +83,41 @@ const Login = () => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.error('Forgot password error:', error);
       toast.error(error.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setIsLoading(false);
     }
   };
-  
 
   const handleResetPassword = async (event) => {
     event.preventDefault();
-  
+
     if (!otp || !newPassword) {
       toast.error('Please enter both OTP and new password');
       return;
     }
-  
+
     try {
-      console.log('Sending reset request with:', { email, otp, newPassword });
-      
       const response = await axios.post(backendUrl + '/api/user/reset-password', {
         email,
         otp,
-        newPassword
+        newPassword,
+        type: 'user'
       });
-      
-  
 
       if (response.data.success) {
         toast.success('Password reset successfully');
+        clearForm();
         setForgotPassword(false);
-        setOtp('');
-        setNewPassword('');
-        setState('Login');
+        setAuthMode('Login');
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.error('Reset password error:', error);
       toast.error(error.response?.data?.message || 'Failed to reset password');
     }
   };
-  
+
   useEffect(() => {
     if (token) {
       navigate('/');
@@ -117,104 +125,129 @@ const Login = () => {
   }, [token]);
 
   return (
-    <div className="min-h-[80vh] flex items-center">
-      {forgotPassword ? (
-        // Separate form for password reset
-        <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
-          <p className="text-2xl font-semibold">Reset Password</p>
-          <div className="w-full">
-            <p>Enter OTP sent to your email</p>
-            <input 
-              className="border border-zinc-300 rounded w-full p-2 mt-1" 
-              type="text" 
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-            />
-          </div>
-          <div className="w-full">
-            <p>New Password</p>
-            <input 
-              className="border border-zinc-300 rounded w-full p-2 mt-1" 
-              type="password" 
-              placeholder="Enter new password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-          </div>
-          <button 
-            onClick={handleResetPassword}
-            className="bg-primary text-white w-full py-2 rounded-md text-base"
-          >
-            Reset Password
-          </button>
-          <button 
-            onClick={() => setForgotPassword(false)}
-            className="text-primary underline cursor-pointer"
-          >
-            Back to Login
-          </button>
-        </div>
-      ) : (
-        // Regular login/signup form
-        <form onSubmit={onSubmitHandler} className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
-          <p className="text-2xl font-semibold">{state === 'Sign Up' ? "Create Account" : "Login"}</p>
-          <p>Please {state === 'Sign Up' ? "Sign up" : "log in"} to book an appointment</p>
+    <div className="min-h-[80vh] flex items-center justify-center font-poppins bg-white text-[#030303]">
+      <div className="w-full max-w-md border border-gray-200 shadow-md rounded-lg p-8">
+        {forgotPassword ? (
+          <div className="flex flex-col gap-4">
+            <h2 className="text-2xl font-semibold text-[#123458]">Reset Password</h2>
 
-          {state === 'Sign Up' && (
-            <div className="w-full">
-              <p>Full Name</p>
-              <input className="border border-zinc-300 rounded w-full p-2 mt-1" type="text" onChange={(e) => setName(e.target.value)} value={name} />
-              {errors.name && <p className="text-red-500">{errors.name}</p>}
+            <div>
+              <label className="block text-sm mb-1">OTP sent to your email</label>
+              <input
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                type="text"
+                placeholder="Enter OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
             </div>
-          )}
 
-          <div className="w-full">
-            <p>Email</p>
-            <input className="border border-zinc-300 rounded w-full p-2 mt-1" type="email" onChange={(e) => setEmail(e.target.value)} value={email} />
-            {errors.email && <p className="text-red-500">{errors.email}</p>}
+            <div>
+              <label className="block text-sm mb-1">New Password</label>
+              <input
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+
+            <button
+              onClick={handleResetPassword}
+              className="bg-[#123458] text-white w-full py-2 rounded-md hover:opacity-90 transition-all duration-150"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Resetting...' : 'Reset Password'}
+            </button>
+
+            <button
+              onClick={() => setForgotPassword(false)}
+              className="text-[#123458] underline text-sm hover:opacity-80"
+            >
+              Back to Login
+            </button>
           </div>
+        ) : (
+          <form onSubmit={onSubmitHandler} className="flex flex-col gap-4">
+            <h2 className="text-2xl font-semibold text-[#123458]">
+              {authMode === 'Sign Up' ? 'Create Account' : 'Login'}
+            </h2>
+            <p className="text-sm">Please {authMode === 'Sign Up' ? 'sign up' : 'log in'} to book a seminar hall</p>
 
-          <div className="w-full">
-            <p>Password</p>
-            <input className="border border-zinc-300 rounded w-full p-2 mt-1" type="password" onChange={(e) => setPassword(e.target.value)} value={password} />
-            {errors.password && <p className="text-red-500">{errors.password}</p>}
-          </div>
+            {authMode === 'Sign Up' && (
+              <div>
+                <label className="block text-sm mb-1">Full Name</label>
+                <input
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
+              </div>
+            )}
 
-          <button type="submit" className="bg-primary text-white w-full py-2 rounded-md text-base">
-            {state === 'Sign Up' ? 'Create Account' : 'Login'}
-          </button>
+            <div>
+              <label className="block text-sm mb-1">Email</label>
+              <input
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+            </div>
 
-          {state === 'Sign Up' ? (
-            <p>
-              Already have an account?{' '}
-              <span onClick={() => setState('Login')} className="text-primary cursor-pointer underline">
-                Login here
-              </span>
-            </p>
-          ) : (
-            <>
-              <p>
-                Create a new account?{' '}
-                <span onClick={() => setState('Sign Up')} className="text-primary cursor-pointer underline">
-                  Click here
+            <div>
+              <label className="block text-sm mb-1">Password</label>
+              <input
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
+            </div>
+
+            <button
+              type="submit"
+              className="bg-[#123458] text-white w-full py-2 rounded-md hover:opacity-90 transition-all duration-150"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Please wait...' : authMode === 'Sign Up' ? 'Create Account' : 'Login'}
+            </button>
+
+            {authMode === 'Sign Up' ? (
+              <p className="text-sm">
+                Already have an account?{' '}
+                <span onClick={() => setAuthMode('Login')} className="text-[#123458] underline cursor-pointer">
+                  Login here
                 </span>
               </p>
-              {state === 'Login' && (
-                <button 
-                  type="button" 
+            ) : (
+              <>
+                <p className="text-sm">
+                  New user?{' '}
+                  <span onClick={() => setAuthMode('Sign Up')} className="text-[#123458] underline cursor-pointer">
+                    Sign up
+                  </span>
+                </p>
+                <button
+                  type="button"
                   onClick={handleForgotPassword}
-                  className="text-primary underline cursor-pointer"
+                  className="text-sm text-[#123458] underline mt-1 hover:opacity-80"
+                  disabled={isLoading}
                 >
-                  Forgot Password?
+                  {isLoading ? 'Sending OTP...' : 'Forgot Password?'}
                 </button>
-              )}
-            </>
-          )}
-        </form>
-      )}
+              </>
+            )}
+          </form>
+        )}
+      </div>
     </div>
   );
 };
 
-export default Login; 
+export default Login;

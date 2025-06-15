@@ -1,6 +1,5 @@
 import appointment_img from './appointment_img.png'
 import header_img from './header_img.png'
-import group_profiles from './group_profiles.png'
 import profile_pic from './profile_pic.png'
 import contact_image from './contact_image.png'
 import about_image from './about_image.png'
@@ -19,7 +18,7 @@ import header_hall from './header_hall.png'
 import High_Capacity_img from './High_Capacity_img.jpg'
 import logo_hall from './logo_hall.jpeg'
 import mitaoe from './mitaoe.jpeg'
-import headerlogo from  './headerlogo.svg'
+import headerlogo from './headerlogo.svg'
 import hall1 from './hall1.jpeg'
 import hall2 from './hall2.jpeg'
 import hall3 from './hall3.jpeg'
@@ -36,7 +35,6 @@ import High_Capacity from './High_Capacity.svg'
 export const assets = {
     appointment_img,
     header_img,
-    group_profiles,
     logo,
     chats_icon,
     verified_icon,
@@ -62,7 +60,7 @@ export const assets = {
     hall4,
     mitaoe_logo
 
-    
+
 }
 
 export const specialityData = [
@@ -70,7 +68,7 @@ export const specialityData = [
         speciality: 'High Capacity',
         image: High_Capacity
     },
-    
+
     {
         speciality: 'Low Capacity',
         image: Low_Capacity
@@ -85,7 +83,6 @@ export const halls = [
         speciality: 'Low Capacity',
         experience: '50 seats',
         about: 'A Small Seminar Hall is ideal for intimate sessions, workshops, or training with small groups. It typically features a projector, a whiteboard, and comfortable seating for around 20-30 people. With a capacity to accommodate 20-30 attendees, it provides a focused and interactive environment for personal or small group interactions.',
-        fees: 50,
         address: {
             line1: '309,3rd floor, H-wing',
             line2: 'Mitaoe, Alandi, Pune'
@@ -98,7 +95,6 @@ export const halls = [
         speciality: 'High Capacity',
         experience: '100 seats',
         about: 'A Medium-Sized Seminar Hall is well-suited for larger presentations, meetings, or educational seminars. This hall is equipped with audiovisual tools, a stage for speakers, and seating arrangements for 50-80 people. It strikes a balance between engagement and space, offering room for between 50-80 individuals, making it ideal for events that require a more expansive yet intimate setting.',
-        fees: 60,
         address: {
             line1: '109,ground floor, D-wing',
             line2: 'MitAoe, Alandi, Pune'
@@ -111,7 +107,6 @@ export const halls = [
         speciality: 'High Capacity',
         experience: '150 seats',
         about: 'A Large Seminar Hall is designed to host conferences, seminars, or corporate events with large audiences. It includes high-quality sound systems, multiple screens, and seating for over 100 people. With a capacity to host 100+ attendees, it provides a professional and expansive environment for significant events, ensuring comfort and visibility for all participants.',
-        fees: 30,
         address: {
             line1: '101, 1st floor, Design Building',
             line2: 'MitAoe, Alandi, Pune'

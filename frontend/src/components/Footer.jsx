@@ -1,40 +1,47 @@
-import React from 'react'
-import { assets } from '../assets/assets'
+import React from 'react';
+import { assets } from '../assets/assets';
 
 const Footer = () => {
   return (
-    <div className='md:mx-10'>
-        <div className='flex flex-col sm:grid grid-cols-[3fr_1fr_1fr] gap-14 my-10 mt-40 text-sm'>
-            {/*----------left side------------- */}
-            <div>
-                <img className='mb-5 w-40' src={assets.headerlogo} alt="" />
-                <p className='w-full md:w-2/3 text-black-600 leading-6'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quia molestias non aliquam eum corrupti et? Maiores, error placeat veniam modi voluptas cumque iusto, consequatur laboriosam est esse quasi? Aspernatur, tempore.</p>
-            </div>
-            {/*----------center side------------- */}
-            <div>
-                <p className='text-xl font-medium mb-5'>COMPANY</p>
-                <ul className='flex flex-col gap-2  text-black-600'>
-                    <li>Home</li>
-                    <li>About us</li>
-                    <li>Contact us</li>
-                    <li>Privacy Policy</li>
-                </ul>
-            </div>
-            {/*----------right side------------- */}
-            <div>
-                <p className='text-xl font-medium mb-5'>GET IN TOUCH</p>
-                <ul className='flex flex-col gap-2  text-black-600'>
-                    <li>+91-8010427685</li>
-                    <li>samadhanmane2324@gmail.com</li>
-                </ul>
-            </div>
+    <footer className="bg-white border-t border-[#e0e0e0] shadow-sm font-[Poppins] text-[#030303]">
+      <div className="container mx-auto px-6 md:px-10 py-12 grid gap-10 md:grid-cols-[3fr_1fr_1fr] text-sm">
+        
+        {/* Left Section */}
+        <div className="border-b md:border-b-0 md:border-r border-[#e0e0e0] pr-0 md:pr-8 pb-6 md:pb-0">
+          <img className="mb-5 w-40" src={assets.headerlogo} alt="MITAOE Logo" />
+          <p className="text-[#030303]/80 leading-6 max-w-sm">
+            The Hall Booking Portal is developed to simplify and digitize the reservation of campus venues for academic, training, and institutional events.
+          </p>
         </div>
-        <div>
-            {/*---------Copyright Text--------- */}
-            <p className='py-5 text-sm text-center'>Copyright 2024 @ Samadhan Mane - All Right Reserved.</p>
-        </div>
-    </div>
-  )
-}
 
-export default Footer
+        {/* Middle Section */}
+        <div className="border-b md:border-b-0 md:border-r border-[#e0e0e0] pr-0 md:pr-8 pb-6 md:pb-0">
+          <p className="text-lg font-medium mb-4">MITAOE</p>
+          <ul className="flex flex-col gap-2 text-[#030303]/80">
+            <li>Home</li>
+            <li>About</li>
+            <li>Contact</li>
+            <li>Terms & Policies</li>
+          </ul>
+        </div>
+
+        {/* Right Section */}
+        <div>
+          <p className="text-lg font-medium mb-4">GET IN TOUCH</p>
+          <ul className="flex flex-col gap-2 text-[#030303]/80">
+            <li>MIT Academy of Engineering, Alandi road, Pune - 412 105</li>
+            <li>+91-9071123436</li>
+            <li>+91-8793323500</li>
+            <li>020-30253500</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="text-center py-5 text-sm text-[#030303]/70 border-t border-[#e0e0e0]">
+        © 2025 MITAOE Hall Booking System. All rights reserved.
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

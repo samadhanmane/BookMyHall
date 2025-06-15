@@ -8,15 +8,17 @@ import RelatedHalls from "../components/RelatedHalls";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+
 const Appointment = () => {
   
   const { hallId } = useParams();
-  const { halls, getHallsData, currencySymbol, backendUrl, token } = useContext(AppContext);
+  const { halls, getHallsData,  backendUrl, token } = useContext(AppContext);
  
   const [HallInfo, setHallInfo] = useState(null);
   const [HallSlots, setHallSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [slotTime, setSlotTime] = useState("");
+  const [isBooking, setIsBooking] = useState(false); // Add loading state
   
   const navigate = useNavigate();
 
@@ -24,6 +26,10 @@ const Appointment = () => {
     const HallInfo = halls.find((hall) => hall._id === hallId);
     setHallInfo(HallInfo);
   };
+
+
+  
+
 
   const getAvailableSlots = () => {
     if (!HallInfo) return;
@@ -33,17 +39,44 @@ const Appointment = () => {
     const bookedSlots = HallInfo.slots_booked || {};
     const isToday = selectedDay.toDateString() === today.toDateString();
 
-    const timeSlots = [
+    // Format the selected date to match the bookedSlots format (YYYY-M-D)
+    const formattedDate = `${selectedDay.getFullYear()}-${selectedDay.getMonth() + 1}-${selectedDay.getDate()}`;
+
+    // Different time slots based on whether it's a hall or guest room
+    const timeSlots = HallInfo.isGuestRoom ? [
+      { time: "Full Day (10:00AM - 05:00PM)", datetime: new Date(selectedDay.setHours(10, 0)) }
+    ] : [
       { time: "10:00AM - 01:00PM", datetime: new Date(selectedDay.setHours(10, 0)) },
       { time: "02:00PM - 05:00PM", datetime: new Date(selectedDay.setHours(14, 0)) },
+      { time: "Full Day (10:00AM - 05:00PM)", datetime: new Date(selectedDay.setHours(10, 0)) },
     ];
 
-    // Filter out past slots for today
+    // Filter out past slots for today and slots already booked by the user
     const availableSlots = timeSlots.filter((slot) => {
-      const slotDate = slot.datetime.toLocaleDateString();
-      const isBooked = bookedSlots[slotDate]?.includes(slot.time);
+      const isBooked = bookedSlots[formattedDate]?.includes(slot.time);
       const isPast = isToday && slot.datetime < today;
-      return !isBooked && !isPast;
+      
+      // For guest rooms, only check if the full day slot is booked
+      if (HallInfo.isGuestRoom) {
+        return !isBooked && !isPast;
+      }
+      
+      // For halls, check all slot combinations
+      if (bookedSlots[formattedDate]?.includes("Full Day (10:00AM - 05:00PM)")) {
+        return false;
+      }
+      
+      if (slot.time === "Full Day (10:00AM - 05:00PM)" && 
+          (bookedSlots[formattedDate]?.includes("10:00AM - 01:00PM") || 
+           bookedSlots[formattedDate]?.includes("02:00PM - 05:00PM"))) {
+        return false;
+      }
+
+      // Check if the user has already booked this slot
+      const userBookedSlots = HallInfo.user_booked_slots || {};
+      const isUserBooked = userBookedSlots[formattedDate]?.includes(slot.time);
+
+      return !isBooked && !isPast && !isUserBooked;
     });
 
     setHallSlots(availableSlots);
@@ -56,11 +89,13 @@ const Appointment = () => {
     }
 
     try {
+      setIsBooking(true); // Start loading
       const date = selectedDate;
+
       let day = date.getDate();
       let month = date.getMonth() + 1;
       let year = date.getFullYear();
-      const slotDate = `${day}-${month}-${year}`;
+      const slotDate = `${year}-${month}-${day}`;
 
       const { data } = await axios.post(
         backendUrl + "/api/user/book-appointment",
@@ -73,11 +108,13 @@ const Appointment = () => {
         getHallsData();
         navigate("/my-appointments");
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to book appointment");
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.message);
+      console.error(error);
+      toast.error(error?.response?.data?.message || error.message || "Something went wrong");
+    } finally {
+      setIsBooking(false); // End loading
     }
   };
 
@@ -132,17 +169,120 @@ const Appointment = () => {
             tileDisabled={({ date }) =>
               date < new Date(new Date().setDate(new Date().getDate() - 1))
             }
-            tileClassName={({ date }) => {
-              if (!HallInfo || !HallInfo.slots_booked) return "";
+            tileClassName={({ date, view }) => {
+              if (view !== 'month') return '';
+              if (!HallInfo || !HallInfo.slots_booked) return '';
 
-              const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+              const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
               const bookedSlots = HallInfo.slots_booked[formattedDate];
+              const isSelected = date.toDateString() === selectedDate.toDateString();
 
-              if (bookedSlots?.length === 2) return " fully-booked "; // Fully booked
-              if (bookedSlots?.length === 1) return " partially-booked "; // Partially booked
-              return ""; // Available
+              let className = '';
+              
+              if (isSelected) {
+                className += ' selected-date';
+              }
+
+              // Check if full day is booked or both slots are booked
+              if (bookedSlots?.includes("Full Day (10:00AM - 05:00PM)") || 
+                  (bookedSlots?.includes("10:00AM - 01:00PM") && 
+                   bookedSlots?.includes("02:00PM - 05:00PM"))) {
+                className += ' fully-booked';
+              } else if (bookedSlots?.length === 1) {
+                className += ' partially-booked';
+              }
+
+              return className;
+            }}
+            tileContent={({ date }) => {
+              if (!HallInfo) return null;
+          
+              const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+              const bookedSlots = HallInfo.slots_booked || {};
+              const bookings = HallInfo.bookings || [];
+          
+              
+
+              // Check if there are any slots booked for this date
+              const slotsForDate = bookedSlots[formattedDate];
+              if (slotsForDate && slotsForDate.length > 0) {
+                return (
+                  <div className="relative group">
+                    <span className="w-2 h-2 bg-red-600 block rounded-full mx-auto"></span>
+          
+                    {/* Tooltip - Centered on Screen */}
+                    <div className="fixed left-1/2 top-1/3 transform -translate-x-1/2 z-[9999] hidden group-hover:flex flex-col bg-white text-black p-4 rounded shadow-lg text-sm w-80 border border-gray-400 pointer-events-none">
+                      <p className="font-semibold text-lg text-center mb-2">📅 {formattedDate}</p>
+                      <div className="space-y-3">
+                        {slotsForDate.map((slotTime, index) => {
+                          // Find the booking for this slot
+                          const booking = bookings.find(b => 
+                            b.slotDate === formattedDate && 
+                            b.slotTime === slotTime &&
+                            !b.cancelled &&
+                            !b.isCompleted
+                          );
+
+                          return (
+                            <div key={index} className="border-b pb-2 last:border-b-0">
+                              <p className="font-medium text-center mb-1">
+                                🕒 <strong>{slotTime}</strong>
+                              </p>
+                              {booking && booking.userData ? (
+                                <div className="text-sm">
+                                  <p className="flex items-center gap-2">
+                                    <span className="font-medium">👤 Name:</span>
+                                    {booking.userData.name}
+                                  </p>
+                                  <p className="flex items-center gap-2">
+                                    <span className="font-medium">📱 Phone:</span>
+                                    {booking.userData.phone}
+                                  </p>
+                                  <p className="flex items-center gap-2">
+                                    <span className="font-medium">📧 Email:</span>
+                                    {booking.userData.email}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-center text-gray-600">
+                                  Slot is booked
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
             }}
           />
+
+          <style>
+            {`
+              .react-calendar__tile.selected-date {
+                background: #006edc !important;
+                color: white !important;
+              }
+              .react-calendar__tile.fully-booked {
+                background: #ff6b6b !important;
+                color: white !important;
+              }
+              .react-calendar__tile.partially-booked {
+                background: #fff3cd !important;
+              }
+              .react-calendar__tile.selected-date.fully-booked {
+                background: #ff0000 !important;
+                color: white !important;
+              }
+              .react-calendar__tile.selected-date.partially-booked {
+                background: #ffc107 !important;
+                color: white !important;
+              }
+            `}
+          </style>
 
           <div className="flex gap-4 mt-4">
             {/* Fully Booked */}
@@ -160,7 +300,7 @@ const Appointment = () => {
             {/* Weekends */}
             <div className="flex items-center gap-2">
               <span className="w-4 h-4 bg-gray-300 block rounded"></span>
-              <p className="text-sm font-medium text-gray-700">N/A</p>
+              <p className="text-sm font-medium text-gray-700">Not available</p>
             </div>
           </div>
 
@@ -182,10 +322,10 @@ const Appointment = () => {
           </div>
           <button
             onClick={bookAppointment}
-            disabled={!slotTime}
+            disabled={!slotTime || isBooking}
             className="bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6 shadow-lg shadow-black disabled:bg-gray-400"
           >
-            Book an Appointment
+            {isBooking ? "Booking..." : "Book an Appointment"}
           </button>
         </div>
 

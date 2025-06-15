@@ -1,25 +1,33 @@
 import jwt from 'jsonwebtoken'
+import hallModel from '../models/hallModel.js'
 
 // admin authentication middleware
-const authHall = async (req,res,next) =>{
+const authHall = async (req, res, next) => {
     try {
+        // Get token from headers, case-insensitive
+        const token = req.headers.token || req.headers.dtoken || req.headers.dToken;
 
-        const {dtoken} = req.headers
-        if (!dtoken){
-           return res.json({success:false,message:'Not Authorized Login Again'})
+        if (!token) {
+            return res.json({ success: false, message: 'Not Authorized Login Again' })
         }
-        
-        const token_decode = jwt.verify(dtoken, process.env.JWT_SECRET)
-       
-        req.body.hallId = token_decode.id
-       
 
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        // Find hall
+        const hall = await hallModel.findById(decoded.id)
+
+        if (!hall) {
+            return res.json({ success: false, message: 'Not Authorized Login Again' })
+        }
+
+        // Attach hall to request
+        req.hall = hall
         next()
 
-    }catch (error){
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    } catch (error) {
+        res.json({ success: false, message: 'Not Authorized Login Again' })
     }
-
 }
+
 export default authHall

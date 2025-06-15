@@ -8,61 +8,78 @@ import appointmentModel from '../models/appointmentModel.js';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import OTPModel from '../models/otpModel.js';
+import { sendEmail, getOtpTemplate, getBookingConfirmationTemplate, getBookingCancellationTemplate, getBookingApprovalTemplate, getHallBookingConfirmationTemplate, getHallBookingCancellationTemplate } from '../services/emailService.js';
 
 const sendOtp = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, type } = req.body; // type can be 'user' or 'hall'
+        
+        console.log('Sending OTP request:', { email, type });
 
-        // Check if user exists
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return res.json({ success: false, message: 'User does not exist' });
+        // Validate required fields
+        if (!email || !type) {
+            console.error('Missing required fields:', { email, type });
+            return res.json({ success: false, message: 'Email and type are required' });
+        }
+
+        // Validate type
+        if (type !== 'user' && type !== 'hall') {
+            console.error('Invalid type specified:', type);
+            return res.json({ success: false, message: 'Invalid type specified. Must be "user" or "hall"' });
+        }
+
+        // Check if user/hall exists based on type
+        let entity;
+        if (type === 'user') {
+            entity = await userModel.findOne({ email });
+        } else if (type === 'hall') {
+            entity = await hallModel.findOne({ email });
+        }
+
+        console.log('Entity found:', entity ? 'Yes' : 'No');
+
+        if (!entity) {
+            console.error(`${type} does not exist:`, email);
+            return res.json({ success: false, message: `${type} does not exist` });
         }
 
         // First, delete any existing OTP for this email
         console.log('Deleting existing OTP for:', email);
-        await OTPModel.deleteMany({ email }); // Using deleteMany to ensure all old OTPs are removed
+        await OTPModel.deleteMany({ email, type });
 
         // Generate new OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log('Generated OTP:', otp);
         
         // Save new OTP
         const otpDoc = await OTPModel.create({
             email,
             otp: otp,
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes expiry
+            type, // Store the type (user/hall) with the OTP
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes expiry
         });
 
         console.log('New OTP Created:', {
             email,
+            type,
             otp,
             storedOtp: otpDoc.otp,
             expiresAt: otpDoc.expiresAt
         });
 
-        // Send email
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            }
+        // Send email using the email service
+        const emailSent = await sendEmail({
+            to: email,
+            subject: 'Password Reset OTP - BookMyHall',
+            html: getOtpTemplate(otp)
         });
 
-        await transporter.sendMail({
-            from: process.env.EMAIL,
-            to: email,
-            subject: 'Password Reset OTP',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #333;">Password Reset Request</h2>
-                    <p>Your OTP for password reset of booking halls of MITAOE is:</p>
-                    <h1 style="color: #4CAF50; font-size: 32px; letter-spacing: 2px;">${otp}</h1>
-                    <p>This OTP will expire in 10 minutes.</p>
-                    <p style="color: #666;">If you didn't request this password reset, please ignore this email.</p>
-                </div>
-            `
-        });
+        console.log('Email sent:', emailSent);
+
+        if (!emailSent) {
+            console.error('Failed to send OTP email to:', email);
+            return res.json({ success: false, message: 'Failed to send OTP email. Please try again.' });
+        }
 
         res.json({ success: true, message: 'OTP sent successfully to your email' });
 
@@ -74,23 +91,40 @@ const sendOtp = async (req, res) => {
 
 const verifyOtp = async (req, res) => {
     try {
-        const { email, otp, newPassword } = req.body;
+        const { email, otp, newPassword, type } = req.body;
+        
+        console.log('Verifying OTP:', { email, type, otp });
+
+        // Validate required fields
+        if (!email || !otp || !newPassword || !type) {
+            console.error('Missing required fields:', { email, otp, newPassword, type });
+            return res.json({ success: false, message: 'Missing required fields. Please provide email, OTP, new password, and type.' });
+        }
 
         // Find the stored OTP
-        const otpRecord = await OTPModel.findOne({ email });
+        const otpRecord = await OTPModel.findOne({ email, type });
+        console.log('OTP Record found:', otpRecord ? 'Yes' : 'No');
         
         if (!otpRecord) {
+            console.error('OTP not found for:', { email, type });
             return res.json({ success: false, message: 'OTP has expired or not found. Please request a new OTP.' });
         }
 
         // Check expiration
-        if (Date.now() > new Date(otpRecord.expiresAt).getTime()) {
-            await OTPModel.deleteOne({ email });
+        const isExpired = otpRecord.isExpired();
+        console.log('OTP Expired:', isExpired);
+        
+        if (isExpired) {
+            await OTPModel.deleteOne({ email, type });
+            console.log('Deleted expired OTP for:', { email, type });
             return res.json({ success: false, message: 'OTP has expired. Please request a new one.' });
         }
 
         // Verify OTP
-        if (otpRecord.otp !== otp) {
+        const isOtpValid = otpRecord.otp === otp;
+        console.log('OTP Valid:', isOtpValid);
+        
+        if (!isOtpValid) {
             return res.json({ success: false, message: 'Invalid OTP. Please try again.' });
         }
 
@@ -98,18 +132,30 @@ const verifyOtp = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        // Update password
-        const updateResult = await userModel.updateOne(
-            { email }, 
-            { password: hashedPassword }
-        );
+        // Update password based on type
+        let updateResult;
+        if (type === 'user') {
+            updateResult = await userModel.updateOne(
+                { email }, 
+                { password: hashedPassword }
+            );
+        } else if (type === 'hall') {
+            updateResult = await hallModel.updateOne(
+                { email }, 
+                { password: hashedPassword }
+            );
+        }
+        
+        console.log('Password update result:', updateResult);
         
         if (updateResult.modifiedCount === 0) {
+            console.error('Failed to update password for:', { email, type });
             return res.json({ success: false, message: 'Failed to update password. Please try again.' });
         }
 
         // Delete used OTP after successful password reset
-        await OTPModel.deleteOne({ email });
+        await OTPModel.deleteOne({ email, type });
+        console.log('Deleted used OTP for:', { email, type });
 
         res.json({ success: true, message: 'Password reset successful. You can now login with your new password.' });
 
@@ -224,6 +270,7 @@ const bookAppointment = async (req, res) => {
         const { hallId, slotDate, slotTime } = req.body;
         const userId = req.body.userId;
 
+        // Get hall data without password
         const hallData = await hallModel.findById(hallId).select('-password');
         if (!hallData.available) {
             return res.json({ success: false, message: 'Hall is not available for booking' });
@@ -231,34 +278,39 @@ const bookAppointment = async (req, res) => {
 
         let slots_booked = hallData.slots_booked;
 
-        // checking for slots availability
-        if (slots_booked[slotDate]) {
-            if (slots_booked[slotDate].includes(slotTime)) {
-                return res.json({ success: false, message: 'slot is not available for booking' });
-            } else {
-                slots_booked[slotDate].push(slotTime);
+        // Handle guest room bookings
+        if (hallData.isGuestRoom) {
+            // Check availability for the date
+            if (slots_booked[slotDate] && slots_booked[slotDate].includes('full-day')) {
+                return res.json({ success: false, message: `Room is not available for ${slotDate}` });
             }
         } else {
-            slots_booked[slotDate] = [];
-            slots_booked[slotDate].push(slotTime);
+            // Handle regular hall bookings
+            const isFullDay = slotTime === 'full-day';
+            const timeSlots = isFullDay ? ['10-1', '2-5'] : [slotTime];
+
+            // Check if any of the required slots are already booked
+            if (slots_booked[slotDate]) {
+                for (const slot of timeSlots) {
+                    if (slots_booked[slotDate].includes(slot)) {
+                        return res.json({ success: false, message: `${slot} slot is not available for booking` });
+                    }
+                }
+            } else {
+                slots_booked[slotDate] = [];
+            }
         }
 
-        
-
+        // Get user data without password
         const userData = await userModel.findById(userId).select('-password');
-        delete hallData.slots_booked;
-        
-        // Parallel fetch of user and hall data
-        const [user, hall] = await Promise.all([
-            userModel.findById(userId),
-            hallModel.findById(hallId)
-        ]);
+        if (!userData) {
+            return res.json({ success: false, message: 'User not found' });
+        }
 
-        if (!user || !hall) {
-            return res.json({ 
-                success: false, 
-                message: !user ? 'User not found' : 'Hall not found' 
-            });
+        // Get hall data for appointment
+        const hall = await hallModel.findById(hallId);
+        if (!hall) {
+            return res.json({ success: false, message: 'Hall not found' });
         }
 
         const dateTimestamp = new Date(slotDate).getTime();
@@ -268,83 +320,66 @@ const bookAppointment = async (req, res) => {
             userId,
             hallId,
             slotDate,
-            slotTime,
+            slotTime: hallData.isGuestRoom ? 'full-day' : slotTime, // Guest rooms are always full-day
             date: dateTimestamp,
             status: 'pending',
             hallData: hall,
-            userData: user
+            userData: userData
         };
 
         const newAppointment = await appointmentModel(appointmentData);
         await newAppointment.save();
 
-         // save new slots data in hallData
-         await hallModel.findByIdAndUpdate(hallId, { slots_booked });
-        // Configure email transporter
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
+        // Update slots_booked for guest rooms
+        if (hallData.isGuestRoom) {
+            if (!slots_booked[slotDate]) {
+                slots_booked[slotDate] = [];
             }
-        });
+            slots_booked[slotDate].push('full-day');
+        } else {
+            // Update slots_booked for regular halls
+            if (!slots_booked[slotDate]) {
+                slots_booked[slotDate] = [];
+            }
+            slots_booked[slotDate].push(...(slotTime === 'full-day' ? ['10-1', '2-5'] : [slotTime]));
+        }
 
-        // Send emails without waiting
-        Promise.all([
-            transporter.sendMail({
-                from: process.env.EMAIL,
-                to: hall.email,
-                subject: 'New Booking Request',
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #333;">New Booking Request</h2>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
-                            <h3 style="color: #4CAF50;">Booking Details:</h3>
-                            <p><strong>User Name:</strong> ${user.name}</p>
-                            <p><strong>User Email:</strong> ${user.email}</p>
-                            <p><strong>User Phone:</strong> ${user.phone || 'Not provided'}</p>
-                            <p><strong>Date:</strong> ${slotDate}</p>
-                            <p><strong>Time Slot:</strong> ${slotTime}</p>
-                           
-                            <p><strong>Status:</strong> Pending</p>
-                        </div>
-                        <p style="color: #666; margin-top: 20px;">Please check your dashboard for more details and to manage this booking.</p>
-                    </div>
-                `
-            }),
-            transporter.sendMail({
-                from: process.env.EMAIL,
-                to: user.email,
-                subject: 'Booking Confirmation',
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #333;">Booking Confirmation</h2>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
-                            <h3 style="color: #4CAF50;">Your booking details:</h3>
-                            <p><strong>Hall Name:</strong> ${hall.name}</p>
-                            <p><strong>Date:</strong> ${slotDate}</p>
-                            <p><strong>Time Slot:</strong> ${slotTime}</p>
-
-                            <p><strong>Status:</strong> Pending</p>
-                        </div>
-                        <p style="color: #666; margin-top: 20px;">You can check your booking status in the My Appointments section.</p>
-                    </div>
-                `
-            })
-        ]).catch(error => {
-            console.error('Error sending emails:', error);
-        });
-
-        // save new slots data in hallData
+        // Update hall's slots_booked
         await hallModel.findByIdAndUpdate(hallId, { slots_booked });
 
-        res.json({ 
-            success: true, 
-            message: 'Appointment booked successfully. Confirmation emails will be sent shortly.' 
-        });
+        // Send email notifications
+        try {
+            // Email to user
+            await sendEmail({
+                to: userData.email,
+                subject: "Booking Confirmation - BookMyHall",
+                html: getBookingConfirmationTemplate(
+                    userData,
+                    hallData,
+                    slotDate,
+                    hallData.isGuestRoom ? 'full-day' : slotTime
+                )
+            });
 
+            // Email to hall/guest room coordinator
+            await sendEmail({
+                to: hallData.email,
+                subject: "New Booking Confirmation - BookMyHall",
+                html: getHallBookingConfirmationTemplate(
+                    userData,
+                    hallData,
+                    slotDate,
+                    hallData.isGuestRoom ? 'full-day' : slotTime
+                )
+            });
+        } catch (emailError) {
+            console.error('Error sending email notifications:', emailError);
+            // Continue with the booking even if email sending fails
+        }
+
+        res.json({ success: true, message: 'Booking successful' });
     } catch (error) {
-        console.error('Error in bookAppointment:', error);
+        console.log(error);
         res.json({ success: false, message: error.message });
     }
 };
@@ -384,55 +419,20 @@ const cancelAppointment = async (req, res) => {
         appointmentData.status = 'cancelled';
         await appointmentData.save();
 
-        // Configure email transporter
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        });
-
         // Send cancellation emails without waiting
         Promise.all([
             // Email to hall
-            transporter.sendMail({
-                from: process.env.EMAIL,
+            sendEmail({
                 to: hall.email,
-                subject: 'Booking Cancellation Notice',
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #333;">Booking Cancellation Notice</h2>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
-                            <h3 style="color: #ff4444;">Booking has been cancelled:</h3>
-                            <p><strong>User Name:</strong> ${user.name}</p>
-                            <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
-                            <p><strong>Time Slot:</strong> ${appointmentData.slotTime}</p>
-                            
-                        </div>
-                        <p style="color: #666; margin-top: 20px;">This slot is now available for new bookings.</p>
-                    </div>
-                `
+                subject: 'Booking Cancellation Notice - BookMyHall',
+                html: getHallBookingCancellationTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             }),
 
             // Email to user
-            transporter.sendMail({
-                from: process.env.EMAIL,
+            sendEmail({
                 to: user.email,
-                subject: 'Booking Cancellation Confirmation',
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #333;">Booking Cancellation Confirmation</h2>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
-                            <h3 style="color: #ff4444;">Your booking has been cancelled:</h3>
-                            <p><strong>Hall Name:</strong> ${hall.name}</p>
-                            <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
-                            <p><strong>Time Slot:</strong> ${appointmentData.slotTime}</p>
-                           
-                        </div>
-                        <p style="color: #666; margin-top: 20px;">You can make a new booking from our website.</p>
-                    </div>
-                `
+                subject: 'Booking Cancellation Confirmation - BookMyHall',
+                html: getBookingCancellationTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             })
         ]).catch(error => {
             console.error('Error sending cancellation emails:', error);
@@ -475,56 +475,20 @@ const approveBooking = async (req, res) => {
             hallModel.findById(appointmentData.hallId)
         ]);
 
-        // Configure email transporter
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        });
-
         // Send approval emails without waiting
         Promise.all([
             // Email to hall
-            transporter.sendMail({
-                from: process.env.EMAIL,
+            sendEmail({
                 to: hall.email,
-                subject: 'Booking Approval Confirmation',
-                html: `
-                     
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #333;">Booking Approved!</h2>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
-                            <h3 style="color: #4CAF50;">Your booking has been approved:</h3>
-                            <p><strong>Hall Name:</strong> ${hall.name}</p>
-                            <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
-                            <p><strong>Time Slot:</strong> ${appointmentData.slotTime}</p>
-                            <p><strong>Status:</strong> "Approved"</p>
-                        </div>
-                        <p style="color: #666; margin-top: 20px;">Thank you for using our service!</p>
-                    </div>
-                `
+                subject: 'Booking Approval Confirmation - BookMyHall',
+                html: getBookingApprovalTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             }),
 
             // Email to user
-            transporter.sendMail({
-                from: process.env.EMAIL,
+            sendEmail({
                 to: user.email,
-                subject: 'Your Booking has been Approved!',
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                        <h2 style="color: #333;">Booking Approved!</h2>
-                        <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
-                            <h3 style="color: #4CAF50;">Your booking has been approved:</h3>
-                            <p><strong>Hall Name:</strong> ${hall.name}</p>
-                            <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
-                            <p><strong>Time Slot:</strong> ${appointmentData.slotTime}</p>
-                            <p><strong>Status:</strong> "Approved"</p>
-                        </div>
-                        <p style="color: #666; margin-top: 20px;">Thank you for using our service!</p>
-                    </div>
-                `
+                subject: 'Your Booking has been Approved! - BookMyHall',
+                html: getBookingApprovalTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             })
         ]).catch(error => {
             console.error('Error sending approval emails:', error);
