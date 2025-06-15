@@ -17,7 +17,7 @@ const Navbar = () => {
   }
 
   const handleAdminLogin = () => {
-    window.open(`${adminUrl}/login`, '_blank')
+    window.open(`${adminUrl}`, '_blank')
   }
 
   // Close dropdown when clicking outside
