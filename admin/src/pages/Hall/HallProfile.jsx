@@ -430,21 +430,37 @@ const HallProfile = () => {
 
       {/* Experience */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Experience</label>
-                <select 
+        <label className="block text-sm font-medium text-gray-700"> {isHall ? 'Seats' : 'Beds'}</label>
+        <select 
           value={editForm.experience}
           onChange={(e) => setEditForm(prev => ({ ...prev, experience: e.target.value }))}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="10 Seats">10 Seats</option>
-                  <option value="20 Seats">20 Seats</option>
-                  <option value="30 Seats">30 Seats</option>
-                  <option value="40 Seats">40 Seats</option>
-                  <option value="50 Seats">50 Seats</option>
-                  <option value="100 Seats">100 Seats</option>
-                  <option value="200 Seats">200 Seats</option>
-                </select>
-          </div>
+        >
+          {isHall ? (
+            <>
+              <option value="10 Seats">10 Seats</option>
+              <option value="20 Seats">20 Seats</option>
+              <option value="30 Seats">30 Seats</option>
+              <option value="40 Seats">40 Seats</option>
+              <option value="50 Seats">50 Seats</option>
+              <option value="100 Seats">100 Seats</option>
+              <option value="200 Seats">200 Seats</option>
+            </>
+          ) : (
+            <>
+              <option value="1 Bed">1 Bed</option>
+              <option value="2 Beds">2 Beds</option>
+              <option value="3 Beds">3 Beds</option>
+              <option value="4 Beds">4 Beds</option>
+              <option value="5 Beds">5 Beds</option>
+              <option value="6 Beds">6 Beds</option>
+              <option value="7 Beds">7 Beds</option>
+              <option value="8 Beds">8 Beds</option>
+              <option value="9 Beds">9 Beds</option>
+            </>
+          )}
+        </select>
+      </div>
 
       {/* About */}
           <div>
@@ -479,7 +495,7 @@ const HallProfile = () => {
           onChange={(e) => setEditForm(prev => ({
                       ...prev, 
             address: { ...prev.address, line2: e.target.value }
-          }))}
+                    }))} 
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
           </div>
