@@ -61,7 +61,7 @@ const HallProfile = () => {
       );
 
       if (response.data.success) {
-        const imageUrl = `${backendUrl}${response.data.imageUrl}`;
+        const imageUrl = response.data.imageUrl;
         setEditForm(prev => ({ ...prev, image: imageUrl }));
         setImagePreview(imageUrl);
         toast.success('Image uploaded successfully');

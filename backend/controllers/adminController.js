@@ -92,8 +92,8 @@ const addHalls = async (req, res) => {
         } else {
             // For halls, always require password
             if (!password || password.length < 6) {
-                return res.json({ success: false, message: "Please enter a strong password" });
-            }
+            return res.json({ success: false, message: "Please enter a strong password" });
+        }
 
             // Check if email already exists for halls
             const existingHall = await hallModel.findOne({ email, isGuestRoom: false });
@@ -105,7 +105,7 @@ const addHalls = async (req, res) => {
         // Hashing password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt)
-      
+
         // Optimize image upload to Cloudinary
         let imageUrl;
         try {
@@ -122,7 +122,7 @@ const addHalls = async (req, res) => {
             console.error('Image upload error:', uploadError);
             return res.json({ success: false, message: "Failed to upload image. Please try again." });
         }
-           
+
         const hallData = {
             name,
             email,

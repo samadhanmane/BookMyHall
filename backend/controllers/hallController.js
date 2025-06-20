@@ -11,6 +11,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { v2 as cloudinary } from "cloudinary";
+import connectCloudinary from "../config/cloudinary.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -269,44 +271,44 @@ const appointmentRequest = async (req, res) => {
             });
         }
 
-        if (appointmentData.isAccepted) {
-            return res.json({
-                success: false,
-                message: "This time slot has already been booked and cannot be accepted again."
+            if (appointmentData.isAccepted) {
+                return res.json({
+                    success: false,
+                    message: "This time slot has already been booked and cannot be accepted again."
+                });
+            }
+
+            // Update the appointment to accepted
+            await appointmentModel.findByIdAndUpdate(appointmentId, { isAccepted: true });
+            
+            // Send acceptance emails
+            const hallData = await hallModel.findById(hallId);
+            
+            // Email to user
+            await sendEmail({
+                to: appointmentData.userData.email,
+                subject: "Booking Confirmed - BookMyHall",
+                html: getBookingApprovalTemplate(
+                    appointmentData.userData,
+                    hallData,
+                    appointmentData.slotDate,
+                    appointmentData.slotTime
+                )
             });
-        }
 
-        // Update the appointment to accepted
-        await appointmentModel.findByIdAndUpdate(appointmentId, { isAccepted: true });
-        
-        // Send acceptance emails
-        const hallData = await hallModel.findById(hallId);
-        
-        // Email to user
-        await sendEmail({
-            to: appointmentData.userData.email,
-            subject: "Booking Confirmed - BookMyHall",
-            html: getBookingApprovalTemplate(
-                appointmentData.userData,
-                hallData,
-                appointmentData.slotDate,
-                appointmentData.slotTime
-            )
-        });
-
-        // Email to hall coordinator
-        await sendEmail({
-            to: hallData.email,
-            subject: "New Booking Confirmed - BookMyHall",
-            html: getHallBookingConfirmationTemplate(
-                appointmentData.userData,
-                hallData,
-                appointmentData.slotDate,
-                appointmentData.slotTime
-            )
-        });
-        
-        res.json({ success: true, message: "Appointment accepted successfully" });
+            // Email to hall coordinator
+            await sendEmail({
+                to: hallData.email,
+                subject: "New Booking Confirmed - BookMyHall",
+                html: getHallBookingConfirmationTemplate(
+                    appointmentData.userData,
+                    hallData,
+                    appointmentData.slotDate,
+                    appointmentData.slotTime
+                )
+            });
+            
+            res.json({ success: true, message: "Appointment accepted successfully" });
     } catch (error) {
         console.error('Error in appointmentRequest:', error);
         res.json({ success: false, message: error.message });
@@ -342,51 +344,51 @@ const appointmentComplete = async (req,res) => {
         }
 
         await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true });
-        
-        // Send completion emails
-        const hallData = await hallModel.findById(hallId);
-        
-        // Email to user
-        await sendEmail({
-            to: appointmentData.userData.email,
-            subject: "Booking Completed - BookMyHall",
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                    <h2 style="color: #333; text-align: center;">BookMyHall - Thank You!</h2>
-                    <p>Dear ${appointmentData.userData.name},</p>
-                    <p>Your booking for <strong>${hallData.name}</strong> has been completed.</p>
-                    <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
-                    <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
-                    <p>We hope you had a great experience. Please consider leaving a review!</p>
-                    <p>Thank you for choosing BookMyHall!</p>
-                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                        <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+            
+            // Send completion emails
+            const hallData = await hallModel.findById(hallId);
+            
+            // Email to user
+            await sendEmail({
+                to: appointmentData.userData.email,
+                subject: "Booking Completed - BookMyHall",
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                        <h2 style="color: #333; text-align: center;">BookMyHall - Thank You!</h2>
+                        <p>Dear ${appointmentData.userData.name},</p>
+                        <p>Your booking for <strong>${hallData.name}</strong> has been completed.</p>
+                        <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
+                        <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
+                        <p>We hope you had a great experience. Please consider leaving a review!</p>
+                        <p>Thank you for choosing BookMyHall!</p>
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
+                            <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+                        </div>
                     </div>
-                </div>
-            `
-        });
+                `
+            });
 
-        // Email to hall coordinator
-        await sendEmail({
-            to: hallData.email,
-            subject: "Booking Completed - BookMyHall",
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                    <h2 style="color: #333; text-align: center;">BookMyHall - Booking Completed</h2>
-                    <p>A booking has been completed for your hall.</p>
-                    <p><strong>Hall:</strong> ${hallData.name}</p>
-                    <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
-                    <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
-                    <p><strong>User Details:</strong></p>
-                    <p>Name: ${appointmentData.userData.name}</p>
-                    <p>Email: ${appointmentData.userData.email}</p>
-                    <p>Phone: ${appointmentData.userData.phone}</p>
-                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                        <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+            // Email to hall coordinator
+            await sendEmail({
+                to: hallData.email,
+                subject: "Booking Completed - BookMyHall",
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                        <h2 style="color: #333; text-align: center;">BookMyHall - Booking Completed</h2>
+                        <p>A booking has been completed for your hall.</p>
+                        <p><strong>Hall:</strong> ${hallData.name}</p>
+                        <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
+                        <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
+                        <p><strong>User Details:</strong></p>
+                        <p>Name: ${appointmentData.userData.name}</p>
+                        <p>Email: ${appointmentData.userData.email}</p>
+                        <p>Phone: ${appointmentData.userData.phone}</p>
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
+                            <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+                        </div>
                     </div>
-                </div>
-            `
-        });
+                `
+            });
 
         res.json({success: true, message: "Appointment completed successfully"});
     } catch(error) {
@@ -404,7 +406,7 @@ const appointmentCancel = async (req,res) => {
         
         const appointmentData = await appointmentModel.findById(appointmentId);
         console.log('Found appointment:', appointmentData);
-        
+       
         if (!appointmentData) {
             return res.json({
                 success: false,
@@ -424,33 +426,33 @@ const appointmentCancel = async (req,res) => {
         }
 
         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true });
-        
-        // Send cancellation emails
-        const hallData = await hallModel.findById(hallId);
-        
-        // Email to user
-        await sendEmail({
-            to: appointmentData.userData.email,
-            subject: "Booking Cancelled - BookMyHall",
-            html: getBookingCancellationTemplate(
-                appointmentData.userData,
-                hallData,
-                appointmentData.slotDate,
-                appointmentData.slotTime
-            )
-        });
+            
+            // Send cancellation emails
+            const hallData = await hallModel.findById(hallId);
+            
+            // Email to user
+            await sendEmail({
+                to: appointmentData.userData.email,
+                subject: "Booking Cancelled - BookMyHall",
+                html: getBookingCancellationTemplate(
+                    appointmentData.userData,
+                    hallData,
+                    appointmentData.slotDate,
+                    appointmentData.slotTime
+                )
+            });
 
-        // Email to hall coordinator
-        await sendEmail({
-            to: hallData.email,
-            subject: "Booking Cancelled - BookMyHall",
-            html: getHallBookingCancellationTemplate(
-                appointmentData.userData,
-                hallData,
-                appointmentData.slotDate,
-                appointmentData.slotTime
-            )
-        });
+            // Email to hall coordinator
+            await sendEmail({
+                to: hallData.email,
+                subject: "Booking Cancelled - BookMyHall",
+                html: getHallBookingCancellationTemplate(
+                    appointmentData.userData,
+                    hallData,
+                    appointmentData.slotDate,
+                    appointmentData.slotTime
+                )
+            });
 
         res.json({success: true, message: "Appointment cancelled successfully"});
     } catch(error) {
@@ -712,6 +714,8 @@ const getCoordinatorGuestRooms = async (req, res) => {
 }
 
 // API to update guest room
+// NOTE: The frontend should first upload the image using the uploadImage endpoint (which returns a Cloudinary URL),
+// then send that URL in the 'image' field when calling updateGuestRoom. The DB will always store a Cloudinary URL.
 const updateGuestRoom = async (req, res) => {
     try {
         const { roomId, name, speciality, experience, about, address, available, image } = req.body;
@@ -740,7 +744,7 @@ const updateGuestRoom = async (req, res) => {
                 about,
                 address,
                 available,
-                image // Add image field to the update
+                image // This should be a Cloudinary URL
             },
             { new: true, select: '-password' } // Return updated document without password
         );
@@ -759,8 +763,10 @@ const updateGuestRoom = async (req, res) => {
     }
 };
 
-export const uploadImage = (req, res) => {
-    upload(req, res, function (err) {
+export const uploadImage = async (req, res) => {
+    // Ensure Cloudinary is configured
+    await connectCloudinary();
+    upload(req, res, async function (err) {
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading
             console.error('Multer error:', err);
@@ -785,13 +791,33 @@ export const uploadImage = (req, res) => {
             });
         }
 
-        // Return the file path
-        const imageUrl = `/uploads/${req.file.filename}`;
-        res.json({
-            success: true,
-            message: 'Image uploaded successfully',
-            imageUrl: imageUrl
-        });
+        try {
+            // Upload to Cloudinary
+            const imageUpload = await cloudinary.uploader.upload(req.file.path, {
+                quality: "auto",
+                fetch_format: "auto",
+                transformation: [
+                    { width: 800, crop: "limit" },
+                    { quality: "auto" }
+                ]
+            });
+            const imageUrl = imageUpload.secure_url;
+
+            // Clean up the local file
+            fs.unlinkSync(req.file.path);
+
+            return res.json({
+                success: true,
+                message: 'Image uploaded successfully',
+                imageUrl: imageUrl
+            });
+        } catch (uploadError) {
+            console.error('Cloudinary upload error:', uploadError);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to upload image to Cloudinary.'
+            });
+        }
     });
 };
 

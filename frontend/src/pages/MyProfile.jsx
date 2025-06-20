@@ -76,7 +76,7 @@ const MyProfile = () => {
   if (!userData) {
     return <div className="min-h-screen px-6 sm:px-10 py-10 bg-white font-poppins text-[#030303]">
       <p>Loading profile data...</p>
-    </div>
+      </div>
   }
 
   return (
@@ -107,7 +107,7 @@ const MyProfile = () => {
               </p>
             </div>
           </div>
-        </div>
+      </div>
 
         {/* Guest Rooms Section */}
         <div className='p-6 border rounded-lg shadow-md shadow-[#00000010] bg-white'>
@@ -144,7 +144,7 @@ const MyProfile = () => {
                   </div>
                 </div>
               ))}
-            </div>
+        </div>
           )}
         </div>
       </div>
