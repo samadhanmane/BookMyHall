@@ -1,15 +1,25 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { HallContext } from '../../context/HallContext'
 import { AppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets.js'
+import FeedbackModal from '../../components/FeedbackModal'
+import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
 const HallAppointments = () => {
-  const { dToken, appointments, getAppointments, completeAppointment, cancelAppointment, requestAppointment } = useContext(HallContext)
+  const { dToken, appointments, getAppointments, completeAppointment, cancelAppointment, requestAppointment, feedbacks, getFeedbacks } = useContext(HallContext)
   const { calculateAge, slotDateFormat } = useContext(AppContext)
+  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [selectedFeedback, setSelectedFeedback] = useState(null)
+  const [reviewLoading, setReviewLoading] = useState(false)
+  const [adminRating, setAdminRating] = useState(0)
+  const [adminMessage, setAdminMessage] = useState('')
+  const [openFeedback, setOpenFeedback] = useState(null)
 
   useEffect(() => {
     if (dToken) {
       getAppointments()
+      getFeedbacks()
     }
   }, [dToken])
 
@@ -38,9 +48,58 @@ const HallAppointments = () => {
     getAppointments()
   }
 
+  const openReviewModal = (feedback) => {
+    setSelectedFeedback(feedback)
+    setAdminRating(feedback.adminRating || 0)
+    setAdminMessage(feedback.adminMessage || '')
+    setReviewModalOpen(true)
+    setOpenFeedback(feedback)
+  }
+
+  const handleShowFeedback = (feedback) => {
+    setOpenFeedback(feedback)
+    setSelectedFeedback(feedback)
+    setAdminRating(feedback.adminRating || 0)
+    setAdminMessage(feedback.adminMessage || '')
+    setReviewModalOpen(true)
+  }
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault()
+    if (!selectedFeedback) return
+    setReviewLoading(true)
+    try {
+      const res = await axios.patch(
+        import.meta.env.VITE_BACKEND_URL + '/api/hall/review-feedback',
+        {
+          feedbackId: selectedFeedback._id,
+          adminRating,
+          adminMessage,
+        },
+        { headers: { dToken } }
+      )
+      if (res.data.success) {
+        toast.success('Feedback reviewed!')
+        setReviewModalOpen(false)
+        setSelectedFeedback(null)
+        getFeedbacks()
+      } else {
+        toast.error(res.data.message || 'Failed to review feedback')
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to review feedback')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  const getFeedbacksForAppointment = (appointmentId) => {
+    return feedbacks.filter(fb => (fb.appointmentId === appointmentId) || (fb.appointmentId && fb.appointmentId._id === appointmentId))
+  }
+
   const hallAppointments = appointments.filter(
     (appointment) => appointment.hallId === dToken.hallId
-  );
+  )
 
   const downloadCSV = () => {
     if (appointments.length === 0) {
@@ -91,25 +150,26 @@ const HallAppointments = () => {
       </div>
 
       <div className="bg-white border rounded-md overflow-y-scroll max-h-[80vh] min-h-[50vh] shadow-sm">
-        <div className="hidden sm:grid grid-cols-[0.5fr_2fr_2fr_2fr_2fr_1fr_1fr] px-6 py-3 border-b font-medium text-sm text-[#030303] bg-[#f9f9f9]">
-          <p>#</p>
-          <p>User</p>
-          <p>Email</p>
-          <p>Date & Time</p>
-          <p>Status</p>
-          <p>Action</p>
-          <p>Complete</p>
+        <div className="hidden sm:grid grid-cols-[0.5fr_2fr_2fr_2fr_1fr_1fr_1fr_1fr] px-6 py-3 border-b font-medium text-sm text-[#030303] bg-[#f9f9f9]">
+          <p className="text-center">#</p>
+          <p className="text-center">User</p>
+          <p className="text-center">Email</p>
+          <p className="text-center">Date & Time</p>
+          <p className="text-center">Status</p>
+          <p className="text-center">Feedback</p>
+          <p className="text-center">Action</p>
+          <p className="text-center">Complete</p>
         </div>
 
         {appointments.length > 0 ? (
           appointments.slice().reverse().map((item, index) => (
             <div
               key={item._id}
-              className="grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_2fr_2fr_2fr_1fr_1fr] gap-2 px-6 py-3 items-center border-b hover:shadow-sm transition text-sm"
+              className="grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_2fr_2fr_1fr_1fr_1fr_1fr] gap-2 px-6 py-3 items-center border-b hover:shadow-sm transition text-sm"
             >
-              <p className="sm:block hidden">{index + 1}</p>
+              <p className="sm:block hidden text-center">{index + 1}</p>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 justify-center text-center">
                 <img
                   className="w-8 h-8 rounded-full object-cover shadow-sm border"
                   src={item.userData.image}
@@ -118,11 +178,11 @@ const HallAppointments = () => {
                 <p>{item.userData.name}</p>
               </div>
 
-              <p className="sm:block hidden">{item.userData.email}</p>
+              <p className="sm:block hidden text-center">{item.userData.email}</p>
 
-              <p>{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
+              <p className="text-center">{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
 
-              <p>
+              <p className="text-center">
                 {item.cancelled ? (
                   <span className="text-red-600 font-semibold text-sm">Cancelled</span>
                 ) : item.isAccepted ? (
@@ -132,7 +192,23 @@ const HallAppointments = () => {
                 )}
               </p>
 
-              <div className="flex gap-3 justify-center">
+              <div className="flex flex-wrap gap-2 justify-center text-center">
+                {item.isCompleted && getFeedbacksForAppointment(item._id).length > 0 ? (
+                  getFeedbacksForAppointment(item._id).map(fb => (
+                    <button
+                      key={fb._id}
+                      className="px-3 py-1 rounded bg-[#123458] text-white text-xs shadow hover:bg-[#0e2e47] transition"
+                      onClick={() => handleShowFeedback(fb)}
+                    >
+                      Feedback
+                    </button>
+                  ))
+                ) : (
+                  <span className="text-gray-400 text-xs">-</span>
+                )}
+              </div>
+
+              <div className="flex gap-3 justify-center text-center">
                 {!item.cancelled && !item.isAccepted && (
                   <>
                     <img
@@ -151,7 +227,7 @@ const HallAppointments = () => {
                 )}
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center text-center">
                 {item.isAccepted && !item.isCompleted && (
                   <img
                     onClick={() => handleCompleteAppointment(item._id)}
@@ -170,6 +246,19 @@ const HallAppointments = () => {
           <p className="p-4 text-center text-[#123458] font-medium">No appointments found.</p>
         )}
       </div>
+
+      <FeedbackModal
+        open={reviewModalOpen && !!openFeedback}
+        onClose={() => { setReviewModalOpen(false); setOpenFeedback(null); setSelectedFeedback(null); }}
+        onSubmit={handleReviewSubmit}
+        loading={reviewLoading}
+        adminMode={true}
+        adminRating={adminRating}
+        setAdminRating={setAdminRating}
+        adminMessage={adminMessage}
+        setAdminMessage={setAdminMessage}
+        feedback={openFeedback}
+      />
     </div>
   )
 }

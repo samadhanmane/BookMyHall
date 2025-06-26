@@ -2,6 +2,7 @@ import express from 'express'
 import { registerUser,loginUser, getProfile,updateProfile,bookAppointment,listAppointment,cancelAppointment,sendOtp,verifyOtp } from '../controllers/userController.js'
 import authUser from '../middlewares/authUser.js'
 import upload from '../middlewares/multer.js'
+import { submitFeedback, getUserFeedbacks } from '../controllers/hallController.js'
 
 const userRouter = express.Router()
 
@@ -19,5 +20,7 @@ userRouter.post('/update-profile', upload.single('image'), authUser, updateProfi
 userRouter.post('/book-appointment', authUser, bookAppointment)
 userRouter.get('/appointments', authUser, listAppointment)
 userRouter.post('/cancel-appointment', authUser, cancelAppointment)
+userRouter.post('/feedback', authUser, submitFeedback)
+userRouter.get('/feedbacks', authUser, getUserFeedbacks)
 
 export default userRouter

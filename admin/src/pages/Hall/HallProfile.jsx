@@ -286,13 +286,13 @@ const HallProfile = () => {
 
   const handleEmailUpdate = async () => {
     try {
-      if (!profileData.email) {
+      if (!editForm.email) {
         return toast.error('Please enter a new email address')
       }
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(profileData.email)) {
+      if (!emailRegex.test(editForm.email)) {
         return toast.error('Invalid email format');
       }
 
@@ -301,9 +301,10 @@ const HallProfile = () => {
       // Show a loading toast
       const loadingToast = toast.loading('Updating email...');
       
+      // Send hallId (or roomId) and newEmail
       const { data } = await axios.post(
         backendUrl + '/api/hall/update-email',
-        { newEmail: profileData.email },
+        { hallId: profileData._id, newEmail: editForm.email },
         { headers: { dToken } }
       )
 
@@ -407,13 +408,21 @@ const HallProfile = () => {
       {/* Email */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
+        <input
+          type="email"
           value={editForm.email}
           onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
-          </div>
+        <button
+          type="button"
+          className="mt-2 px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+          onClick={handleEmailUpdate}
+        >
+          Change Email
+        </button>
+        <p className="text-xs text-gray-500 mt-1">To update the email, use the Change Email button. The Save button will not update the email field.</p>
+      </div>
 
       {/* Speciality */}
       <div>
@@ -516,6 +525,7 @@ const HallProfile = () => {
         <button
           onClick={() => isHall ? handleEditHallSubmit(item._id) : handleEditRoomSubmit(item._id)}
           className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          disabled={editForm.email !== item.email}
         >
           Save
         </button>

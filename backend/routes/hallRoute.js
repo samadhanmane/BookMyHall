@@ -1,5 +1,5 @@
 import express from 'express'
-import { hallList,loginHall,appointmentsHall,appointmentComplete,appointmentCancel,hallDashboard,hallProfile,updateHallProfile,appointmentRequest,sendOtp,verifyOtp,changeAvailability,updateHallEmail,getCoordinatorGuestRooms,updateGuestRoom,uploadImage, getHalls } from '../controllers/hallController.js'
+import { hallList,loginHall,appointmentsHall,appointmentComplete,appointmentCancel,hallDashboard,hallProfile,updateHallProfile,appointmentRequest,sendOtp,verifyOtp,changeAvailability,updateHallEmail,getCoordinatorGuestRooms,updateGuestRoom,uploadImage, getHalls, getHallFeedbacks, reviewFeedback, getHallRatings } from '../controllers/hallController.js'
 import authHall from '../middlewares/authHall.js'
 
 const hallRouter = express.Router()
@@ -26,5 +26,8 @@ hallRouter.get('/coordinator-guest-rooms', authHall, getCoordinatorGuestRooms)
 hallRouter.post('/update-guest-room', authHall, updateGuestRoom)
 hallRouter.post('/upload-image', authHall, uploadImage)
 hallRouter.get('/get-halls', authHall, getHalls)
+hallRouter.get('/feedbacks', authHall, getHallFeedbacks)
+hallRouter.patch('/review-feedback', authHall, reviewFeedback)
+hallRouter.get('/ratings', getHallRatings)
 
 export default hallRouter

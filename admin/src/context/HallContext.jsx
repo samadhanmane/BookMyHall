@@ -20,6 +20,8 @@ const HallContextProvider = (props) => {
 
     const [loading, setLoading] = useState(true);
 
+    const [feedbacks, setFeedbacks] = useState([]);
+
     // Add axios interceptor to log requests
     useEffect(() => {
         const requestInterceptor = axios.interceptors.request.use(
@@ -223,6 +225,19 @@ const HallContextProvider = (props) => {
         }
     }, [dToken]);
 
+    const getFeedbacks = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/hall/feedbacks', { headers: { dToken } });
+            if (data.success) {
+                setFeedbacks(data.feedbacks);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message || 'Failed to fetch feedbacks');
+        }
+    };
+
     const value = {
         backendUrl,
         dToken,
@@ -237,7 +252,9 @@ const HallContextProvider = (props) => {
         profileData,setProfileData,
         getProfileData,
         requestAppointment,
-        loading
+        loading,
+        feedbacks,
+        getFeedbacks
     }
 
     return (

@@ -19,6 +19,7 @@ const Appointment = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [slotTime, setSlotTime] = useState("");
   const [isBooking, setIsBooking] = useState(false); // Add loading state
+  const [hallRating, setHallRating] = useState(null);
   
   const navigate = useNavigate();
 
@@ -26,10 +27,6 @@ const Appointment = () => {
     const HallInfo = halls.find((hall) => hall._id === hallId);
     setHallInfo(HallInfo);
   };
-
-
-  
-
 
   const getAvailableSlots = () => {
     if (!HallInfo) return;
@@ -126,6 +123,44 @@ const Appointment = () => {
     getAvailableSlots();
   }, [HallInfo, selectedDate]);
 
+  useEffect(() => {
+    // Fetch hall rating for this hall
+    const fetchRating = async () => {
+      try {
+        const { data } = await axios.get(
+          backendUrl + '/api/hall/ratings'
+        );
+        if (data.success) {
+          const rating = data.ratings.find(r => r._id === hallId);
+          setHallRating(rating);
+        }
+      } catch (error) {
+        // ignore error for now
+      }
+    };
+    if (hallId) fetchRating();
+  }, [hallId, backendUrl]);
+
+  // Helper to render fractional stars
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      const fillPercent = Math.max(0, Math.min(1, rating - (i - 1)));
+      stars.push(
+        <span key={i} className="relative inline-block w-6 h-6">
+          {/* Empty star */}
+          <span className="absolute left-0 top-0 w-full h-full text-gray-300 select-none">★</span>
+          {/* Filled star */}
+          <span
+            className="absolute left-0 top-0 text-yellow-400 overflow-hidden select-none"
+            style={{ width: `${fillPercent * 100}%` }}
+          >★</span>
+        </span>
+      );
+    }
+    return stars;
+  };
+
   return (
     HallInfo && (
       <div>
@@ -139,23 +174,29 @@ const Appointment = () => {
           </div>
 
           <div className="flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0 shadow-2xl shadow-black">
-            <p className="flex items-center gap-2 text-2xl font-medium text-black-900 ">
-              {HallInfo.name}
-              <img className="w-5" src={assets.verified_icon} alt="" />
-            </p>
-            <div className="flex items-center gap-2 text-sm mt-1 text-black-600">
-              <p> {HallInfo.speciality}</p>
-              <button className="py-0.5 px-2 border text-xs rounded-full">
-                {HallInfo.experience}
-              </button>
-            </div>
             <div>
-              <p className="flex items-center gap-1 text-sm font-medium text-black-900 mt-3">
-                About <img src={assets.info_icon} alt="" />
+              <p className="flex items-center gap-2 text-2xl font-medium text-black-900 ">
+                {HallInfo.name}
+                <img className="w-5" src={assets.verified_icon} alt="" />
               </p>
-              <p className="text-sm text-black-500 max-w-[700px] mt-1 ">
-                {HallInfo.about}
-              </p>
+              <div className="flex items-center gap-2 text-sm mt-1 text-black-600">
+                <p> {HallInfo.speciality}</p>
+                <button className="py-0.5 px-2 border text-xs rounded-full">
+                  {HallInfo.experience}
+                </button>
+              </div>
+              <div>
+                <p className="flex items-center gap-1 text-sm font-medium text-black-900 mt-3">
+                  About <img src={assets.info_icon} alt="" />
+                </p>
+                <p className="text-sm text-black-500 max-w-[700px] mt-1">
+                  {HallInfo.about}
+                </p>
+                <p className="flex items-center gap-3 text-md text-black-500 max-w-[900px] mt-4">
+                  <span className="font-medium">Rating:</span>
+                  <span className="flex items-center gap-1 text-2xl align-middle">{renderStars(hallRating ? hallRating.averageRating : 0)}</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

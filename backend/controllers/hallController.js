@@ -13,6 +13,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { v2 as cloudinary } from "cloudinary";
 import connectCloudinary from "../config/cloudinary.js";
+import feedbackModel from '../models/feedbackModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -605,7 +606,7 @@ const updateHallEmail = async (req, res) => {
             return res.json({ success: false, message: "Email is already in use by another hall" });
         }
 
-        // Get the current hall to get the old email
+        // Get the current hall to get the old email and type
         const currentHall = await hallModel.findById(hallId);
         if (!currentHall) {
             return res.json({ success: false, message: "Hall not found" });
@@ -614,15 +615,27 @@ const updateHallEmail = async (req, res) => {
         const oldEmail = currentHall.email;
         const hallName = currentHall.name;
 
-        // Update the hall's email
-        const updatedHall = await hallModel.findByIdAndUpdate(
-            hallId,
-            { email: newEmail },
-            { new: true }
-        );
-
-        if (!updatedHall) {
-            return res.json({ success: false, message: "Hall not found" });
+        let updateResult;
+        if (currentHall.isGuestRoom) {
+            // DEBUG: Update all documents with the old email, regardless of isGuestRoom
+            const trimmedOldEmail = oldEmail.trim();
+            const trimmedNewEmail = newEmail.trim();
+            console.log('DEBUG: Updating all docs with email:', trimmedOldEmail, 'to new email:', trimmedNewEmail);
+            updateResult = await hallModel.updateMany(
+                { email: trimmedOldEmail },
+                { email: trimmedNewEmail }
+            );
+            console.log('DEBUG: Update result:', updateResult);
+            // Fetch and log all docs with the new email to verify
+            const updatedRooms = await hallModel.find({ email: trimmedNewEmail });
+            console.log('DEBUG: Docs with new email:', updatedRooms.map(r => ({ id: r._id, email: r.email, isGuestRoom: r.isGuestRoom })));
+        } else {
+            // Update only this hall
+            updateResult = await hallModel.findByIdAndUpdate(
+                hallId,
+                { email: newEmail.trim() },
+                { new: true }
+            );
         }
 
         // Send confirmation email to both old and new email addresses
@@ -677,8 +690,8 @@ const updateHallEmail = async (req, res) => {
             success: true, 
             message: "Email updated successfully",
             data: {
-                hallId: updatedHall._id,
-                newEmail: updatedHall.email
+                hallId: currentHall._id,
+                newEmail: newEmail
             }
         });
     } catch (error) {
@@ -839,6 +852,111 @@ const getHalls = async (req, res) => {
     }
 };
 
+// API to submit feedback for a completed appointment
+const submitFeedback = async (req, res) => {
+    try {
+        const { appointmentId, cleanliness, descriptionMatch, electricity, otherComments, rating, userId } = req.body;
+        // const userId = req.user._id; // use userId from req.body
+
+        // Find the appointment and check if it is completed
+        const appointment = await appointmentModel.findById(appointmentId);
+        if (!appointment || !appointment.isCompleted) {
+            return res.status(400).json({ success: false, message: 'Appointment not found or not completed yet.' });
+        }
+
+        // Prevent duplicate feedback for the same appointment
+        const existingFeedback = await feedbackModel.findOne({ appointmentId, userId });
+        if (existingFeedback) {
+            return res.status(400).json({ success: false, message: 'Feedback already submitted for this appointment.' });
+        }
+
+        const feedback = new feedbackModel({
+            appointmentId,
+            hallId: appointment.hallId,
+            userId,
+            cleanliness,
+            descriptionMatch,
+            electricity,
+            otherComments,
+            rating
+        });
+        await feedback.save();
+        res.json({ success: true, message: 'Feedback submitted successfully.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+// API to get all feedbacks submitted by a user
+const getUserFeedbacks = async (req, res) => {
+    try {
+        const userId = req.body.userId;
+        const feedbacks = await feedbackModel.find({ userId }).populate('appointmentId hallId');
+        res.json({ success: true, feedbacks });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+// API to get all feedbacks for a hall
+const getHallFeedbacks = async (req, res) => {
+    try {
+        const hallId = req.hall._id;
+        const feedbacks = await feedbackModel.find({ hallId }).populate('appointmentId userId');
+        res.json({ success: true, feedbacks });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+// API for hall coordinator to review feedback
+const reviewFeedback = async (req, res) => {
+    try {
+        const { feedbackId, adminRating, adminMessage } = req.body;
+        const hallId = req.hall._id;
+        const feedback = await feedbackModel.findById(feedbackId);
+        if (!feedback) {
+            return res.status(404).json({ success: false, message: 'Feedback not found.' });
+        }
+        if (feedback.hallId.toString() !== hallId.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to review this feedback.' });
+        }
+        feedback.adminRating = adminRating;
+        feedback.adminMessage = adminMessage;
+        feedback.reviewedBy = hallId;
+        feedback.adminReviewedAt = new Date();
+        await feedback.save();
+        res.json({ success: true, message: 'Feedback reviewed successfully.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+// API to get average rating and count for each hall
+const getHallRatings = async (req, res) => {
+  try {
+    console.log('GET /api/hall/ratings called');
+    const ratings = await feedbackModel.aggregate([
+      {
+        $group: {
+          _id: "$hallId",
+          averageRating: { $avg: "$rating" },
+          ratingCount: { $sum: 1 }
+        }
+      }
+    ]);
+    console.log('Aggregated ratings:', ratings);
+    res.json({ success: true, ratings });
+  } catch (error) {
+    console.error('Error in getHallRatings:', error);
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
 export {changeAvailability,
     hallList,
     loginHall,
@@ -857,4 +975,9 @@ export {changeAvailability,
     getCoordinatorGuestRooms,
     updateGuestRoom,
     getHalls,
+    submitFeedback,
+    getUserFeedbacks,
+    getHallFeedbacks,
+    reviewFeedback,
+    getHallRatings,
 }

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
+import axios from 'axios';
 
 const Halls = () => {
   const { speciality } = useParams();
@@ -11,6 +12,7 @@ const Halls = () => {
     type: null,
     capacity: null
   });
+  const [hallRatings, setHallRatings] = useState({});
   const navigate = useNavigate();
 
   const applyFilter = () => {
@@ -47,6 +49,26 @@ const Halls = () => {
   useEffect(() => {
     applyFilter();
   }, [halls, activeFilters]);
+
+  useEffect(() => {
+    // Fetch hall ratings
+    const fetchRatings = async () => {
+      try {
+        const { data } = await axios.get(import.meta.env.VITE_BACKEND_URL + '/api/hall/ratings');
+        if (data.success) {
+          // Map ratings by hallId for quick lookup
+          const ratingsMap = {};
+          data.ratings.forEach(r => {
+            ratingsMap[r._id] = r;
+          });
+          setHallRatings(ratingsMap);
+        }
+      } catch (error) {
+        // ignore error for now
+      }
+    };
+    fetchRatings();
+  }, []);
 
   return (
     <div className="px-4 md:px-20 py-10 font-[Poppins] bg-white text-[#030303]">
@@ -129,7 +151,19 @@ const Halls = () => {
                   }`}></span>
                   <p>{item.available ? 'Available' : 'Not Available'}</p>
                 </div>
-                <p className="text-lg font-semibold text-[#030303]">{item.name}</p>
+                
+                <p className="text-lg font-semibold text-[#030303] flex items-center gap-2">
+                  {item.name}
+                  {hallRatings[item._id] && (
+                    <span className="flex items-center gap-1 ml-2">
+                      {[1,2,3,4,5].map(star => (
+                        <span key={star} className={`text-base ${star <= Math.round(hallRatings[item._id].averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                      ))}
+                      <span className="text-xs text-gray-500 ml-1">({hallRatings[item._id].averageRating.toFixed(1)})</span>
+                      <span className="text-xs text-gray-400 ml-1">[{hallRatings[item._id].ratingCount}]</span>
+                    </span>
+                  )}
+                </p>
                 <p className="text-sm text-[#123458]">{item.speciality}</p>
                 <p className="text-xs text-gray-500 mt-1">{item.isGuestRoom ? 'Guest Room' : 'Hall'}</p>
               </div>
