@@ -39,8 +39,8 @@ const Appointment = () => {
     // Format the selected date to match the bookedSlots format (YYYY-M-D)
     const formattedDate = `${selectedDay.getFullYear()}-${selectedDay.getMonth() + 1}-${selectedDay.getDate()}`;
 
-    // Different time slots based on whether it's a hall or guest room
-    const timeSlots = HallInfo.isGuestRoom ? [
+    // Different time slots based on whether it's a hall or guest room or vehicle
+    const timeSlots = (HallInfo.category === 'guest_room' || HallInfo.category === 'vehicle') ? [
       { time: "Full Day (10:00AM - 05:00PM)", datetime: new Date(selectedDay.setHours(10, 0)) }
     ] : [
       { time: "10:00AM - 01:00PM", datetime: new Date(selectedDay.setHours(10, 0)) },
@@ -53,8 +53,8 @@ const Appointment = () => {
       const isBooked = bookedSlots[formattedDate]?.includes(slot.time);
       const isPast = isToday && slot.datetime < today;
       
-      // For guest rooms, only check if the full day slot is booked
-      if (HallInfo.isGuestRoom) {
+      // For guest rooms or vehicles, only check if the full day slot is booked
+      if (HallInfo.category === 'guest_room' || HallInfo.category === 'vehicle') {
         return !isBooked && !isPast;
       }
       
@@ -180,7 +180,6 @@ const Appointment = () => {
                 <img className="w-5" src={assets.verified_icon} alt="" />
               </p>
               <div className="flex items-center gap-2 text-sm mt-1 text-black-600">
-                <p> {HallInfo.speciality}</p>
                 <button className="py-0.5 px-2 border text-xs rounded-full">
                   {HallInfo.experience}
                 </button>
@@ -189,7 +188,7 @@ const Appointment = () => {
                 <p className="flex items-center gap-1 text-sm font-medium text-black-900 mt-3">
                   About <img src={assets.info_icon} alt="" />
                 </p>
-                <p className="text-sm text-black-500 max-w-[700px] mt-1">
+                <p className="text-sm text-black-500 max-w-[700px] mt-1" style={{ whiteSpace: 'pre-line' }}>
                   {HallInfo.about}
                 </p>
                 <p className="flex items-center gap-3 text-md text-black-500 max-w-[900px] mt-4">
@@ -370,7 +369,7 @@ const Appointment = () => {
           </button>
         </div>
 
-        <RelatedHalls HallId={hallId} speciality={HallInfo.speciality} />
+        <RelatedHalls HallId={hallId} />
       </div>
     )
   );

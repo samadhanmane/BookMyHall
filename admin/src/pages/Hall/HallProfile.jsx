@@ -10,13 +10,13 @@ const HallProfile = () => {
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false)
   const [guestRooms, setGuestRooms] = useState([])
   const [halls, setHalls] = useState([])
+  const [vehicles, setVehicles] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingRoom, setEditingRoom] = useState(null)
   const [editingHall, setEditingHall] = useState(null)
   const [editForm, setEditForm] = useState({
     name: '',
     email: '',
-    speciality: '',
     experience: '',
     about: '',
     address: { line1: '', line2: '' },
@@ -82,7 +82,6 @@ const HallProfile = () => {
     setEditForm({
       name: room.name,
       email: room.email,
-      speciality: room.speciality,
       experience: room.experience,
       about: room.about,
       address: { ...room.address },
@@ -98,7 +97,6 @@ const HallProfile = () => {
     setEditForm({
       name: hall.name,
       email: hall.email,
-      speciality: hall.speciality,
       experience: hall.experience,
       about: hall.about,
       address: { ...hall.address },
@@ -182,7 +180,6 @@ const HallProfile = () => {
     setEditForm({
       name: '',
       email: '',
-      speciality: '',
       experience: '',
       about: '',
       address: { line1: '', line2: '' },
@@ -210,7 +207,7 @@ const HallProfile = () => {
       if (response.data.success) {
         console.log('Halls fetched:', response.data);
         // Only show halls in the halls section, never show guest rooms here
-        const filteredHalls = response.data.halls.filter(hall => !hall.isGuestRoom);
+        const filteredHalls = response.data.halls.filter(hall => hall.category === 'hall');
         setHalls(filteredHalls.filter(hall => hall && hall._id)); // Filter out invalid halls
       } else {
         console.error('Failed to fetch halls:', response.data);
@@ -243,18 +240,22 @@ const HallProfile = () => {
 
       if (response.data.success) {
         console.log('Guest rooms fetched:', response.data);
-        // Only show guest rooms in the guest rooms section
-        const filteredGuestRooms = response.data.halls.filter(hall => hall.isGuestRoom);
+        // Split into guest rooms and vehicles
+        const filteredGuestRooms = response.data.halls.filter(hall => hall.category === 'guest_room');
+        const filteredVehicles = response.data.halls.filter(hall => hall.category === 'vehicle');
         setGuestRooms(filteredGuestRooms.filter(room => room && room._id)); // Filter out invalid rooms
+        setVehicles(filteredVehicles.filter(vehicle => vehicle && vehicle._id));
       } else {
         console.error('Failed to fetch guest rooms:', response.data);
         toast.error(response.data.message || 'Failed to fetch guest rooms');
         setGuestRooms([]);
+        setVehicles([]);
       }
     } catch (error) {
       console.error('Error fetching guest rooms:', error);
       toast.error(error.response?.data?.message || error.message || 'Failed to fetch guest rooms');
       setGuestRooms([]);
+      setVehicles([]);
     } finally {
       setLoading(false);
     }
@@ -477,8 +478,8 @@ const HallProfile = () => {
         <textarea
           value={editForm.about}
           onChange={(e) => setEditForm(prev => ({ ...prev, about: e.target.value }))}
-          rows="3"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          rows="6"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-y"
         />
           </div>
 
@@ -597,7 +598,7 @@ const HallProfile = () => {
                           <p className="text-gray-600">{room.experience || 'No experience'}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">{room.about || 'No description available'}</p>
+                          <p className="text-gray-600" style={{ whiteSpace: 'pre-line' }}>{room.about || 'No description available'}</p>
                         </div>
                         <div className="text-sm text-gray-500">
                           <p>Address:</p>
@@ -616,6 +617,63 @@ const HallProfile = () => {
             >
               Edit
             </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Vehicles Section */}
+      {vehicles && vehicles.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Vehicles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehicles.map((vehicle) => (
+              vehicle && vehicle._id && (
+                <div key={vehicle._id} className="bg-white rounded-lg shadow-lg p-6">
+                  {/* You can reuse the guest room edit form for vehicles */}
+                  {editingRoom === vehicle._id ? (
+                    renderEditForm(vehicle, false)
+                  ) : (
+                    <>
+                      <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
+                        <img 
+                          src={vehicle.image || 'https://placehold.co/300x200/e2e8f0/475569?text=No+Image'} 
+                          alt={vehicle.name || 'Vehicle'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">{vehicle.name || 'Unnamed Vehicle'}</h3>
+                          <p className="text-gray-600">{vehicle.speciality || 'No speciality'}</p>
+                          <p className="text-gray-600">{vehicle.experience || 'No experience'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600" style={{ whiteSpace: 'pre-line' }}>{vehicle.about || 'No description available'}</p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <p>Address:</p>
+                          <p>{vehicle.address?.line1 || 'No address line 1'}</p>
+                          <p>{vehicle.address?.line2 || 'No address line 2'}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className={`px-2 py-1 rounded-full text-sm ${
+                            vehicle.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {vehicle.available ? 'Available' : 'Not Available'}
+                          </span>
+                          <button 
+                            onClick={() => handleEditRoomClick(vehicle)}
+                            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            Edit
+                          </button>
                         </div>
                       </div>
                     </>
@@ -653,7 +711,7 @@ const HallProfile = () => {
                           <p className="text-gray-600">{hall.experience || 'No experience'}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">{hall.about || 'No description available'}</p>
+                          <p className="text-gray-600" style={{ whiteSpace: 'pre-line' }}>{hall.about || 'No description available'}</p>
                         </div>
                         <div className="text-sm text-gray-500">
                           <p>Address:</p>

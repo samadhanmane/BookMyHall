@@ -13,10 +13,9 @@ const AddHall = () => {
   const [password, setPassword] = useState('')
   const [experience, setExperience] = useState('10 Seats')
   const [about, setAbout] = useState('')
-  const [speciality, setSpeciality] = useState('High Capacity')
   const [address1, setAddress1] = useState('')
   const [address2, setAddress2] = useState('')
-  const [isGuestRoom, setIsGuestRoom] = useState(false)
+  const [category, setCategory] = useState('hall')
   const [existingCoordinators, setExistingCoordinators] = useState([])
   const [selectedCoordinator, setSelectedCoordinator] = useState('')
   const [isNewCoordinator, setIsNewCoordinator] = useState(false)
@@ -26,12 +25,12 @@ const AddHall = () => {
 
   // Update experience when switching between hall and guest room
   useEffect(() => {
-    if (isGuestRoom) {
+    if (category === 'guest_room' || category === 'vehicle') {
       setExperience('1 Bed')
     } else {
       setExperience('10 Seats')
     }
-  }, [isGuestRoom])
+  }, [category])
 
   // Fetch existing guest room coordinators
   useEffect(() => {
@@ -43,8 +42,11 @@ const AddHall = () => {
           }
         })
         if (data.success) {
-          // Get unique coordinator emails from guestRooms object
-          const coordinators = Object.keys(data.guestRooms || {})
+          // Get unique coordinator emails from halls, guestRooms, and vehicles objects
+          const hallEmails = (data.halls || []).map(hall => hall.email)
+          const guestRoomEmails = Object.keys(data.guestRooms || {})
+          const vehicleEmails = Object.keys(data.vehicles || {})
+          const coordinators = Array.from(new Set([...hallEmails, ...guestRoomEmails, ...vehicleEmails]))
           setExistingCoordinators(coordinators)
           console.log('Found coordinators:', coordinators)
         }
@@ -87,7 +89,7 @@ const AddHall = () => {
       return
     }
 
-    if (isGuestRoom) {
+    if (category === 'guest_room' || category === 'vehicle') {
       if (!selectedCoordinator) {
         toast.error('Please select a coordinator or create a new one')
         setLoading(false)
@@ -111,14 +113,13 @@ const AddHall = () => {
     formData.append('name', name)
     formData.append('email', email)
     formData.append('password', password)
-    formData.append('speciality', speciality)
     formData.append('experience', experience)
     formData.append('about', about)
     formData.append('address', JSON.stringify({
       line1: address1,
       line2: address2
     }))
-    formData.append('isGuestRoom', isGuestRoom.toString())
+    formData.append('category', category)
 
     try {
       const { data } = await axios.post(backendUrl + '/api/admin/add-hall', formData, {
@@ -136,7 +137,6 @@ const AddHall = () => {
         setPassword('')
         setExperience('10 Seats')
         setAbout('')
-        setSpeciality('High Capacity')
         setAddress1('')
         setAddress2('')
         setSelectedCoordinator('')
@@ -154,7 +154,7 @@ const AddHall = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Add {isGuestRoom ? 'Guest Room' : 'Hall'}</h1>
+      <h1 className="text-2xl font-bold mb-4">Add {category === 'guest_room' ? 'Guest Room' : category === 'vehicle' ? 'Vehicle' : 'Hall'}</h1>
       <form onSubmit={onSubmitHandler} className="space-y-4">
         {/* Type Selection */}
         <div className="flex items-center gap-4 border-b pb-6">
@@ -163,14 +163,8 @@ const AddHall = () => {
               type="radio"
               id="hall"
               name="type"
-              checked={!isGuestRoom}
-              onChange={() => {
-                setIsGuestRoom(false);
-                setSelectedCoordinator('');
-                setIsNewCoordinator(false);
-                setEmail('');
-                setPassword('');
-              }}
+              checked={category === 'hall'}
+              onChange={() => setCategory('hall')}
               className="accent-[#123458]"
             />
             <label htmlFor="hall" className="text-sm text-[#030303]">Hall</label>
@@ -180,15 +174,22 @@ const AddHall = () => {
               type="radio"
               id="guestRoom"
               name="type"
-              checked={isGuestRoom}
-              onChange={() => {
-                setIsGuestRoom(true);
-                setEmail('');
-                setPassword('');
-              }}
+              checked={category === 'guest_room'}
+              onChange={() => setCategory('guest_room')}
               className="accent-[#123458]"
             />
             <label htmlFor="guestRoom" className="text-sm text-[#030303]">Guest Room</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="radio"
+              id="vehicle"
+              name="type"
+              checked={category === 'vehicle'}
+              onChange={() => setCategory('vehicle')}
+              className="accent-[#123458]"
+            />
+            <label htmlFor="vehicle" className="text-sm text-[#030303]">Vehicle</label>
           </div>
         </div>
 
@@ -202,11 +203,11 @@ const AddHall = () => {
             />
           </label>
           <input onChange={(e) => setHallImg(e.target.files[0])} type="file" id="hall-img" hidden />
-          <p className="text-sm text-[#030303]">Upload {isGuestRoom ? 'guest room' : 'hall'} <br /> picture</p>
+          <p className="text-sm text-[#030303]">Upload {category === 'guest_room' ? 'guest room' : category === 'vehicle' ? 'vehicle' : 'hall'} <br /> picture</p>
         </div>
 
         {/* Guest Room Coordinator Selection or Hall Email/Password */}
-        {isGuestRoom ? (
+        {category === 'guest_room' || category === 'vehicle' ? (
           <div className="border-b pb-6">
             <p className="mb-2 text-sm text-[#030303]">Select Coordinator</p>
             <select
@@ -284,7 +285,7 @@ const AddHall = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                placeholder={`Enter ${isGuestRoom ? 'guest room' : 'hall'} name`}
+                placeholder={`Enter ${category === 'guest_room' ? 'guest room' : category === 'vehicle' ? 'vehicle' : 'hall'} name`}
               />
             </div>
 
@@ -294,7 +295,7 @@ const AddHall = () => {
                 value={about}
                 onChange={(e) => setAbout(e.target.value)}
                 className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                placeholder={`Enter ${isGuestRoom ? 'guest room' : 'hall'} description`}
+                placeholder={`Enter ${category === 'guest_room' ? 'guest room' : category === 'vehicle' ? 'vehicle' : 'hall'} description`}
                 rows="3"
               />
             </div>
@@ -323,13 +324,13 @@ const AddHall = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Capacity ({isGuestRoom ? 'Beds' : 'Seats'})</label>
+              <label className="text-sm font-medium">Capacity ({category === 'guest_room' ? 'Beds' : category === 'vehicle' ? 'Capacity' : 'Seats'})</label>
               <select
                 value={experience}
                 onChange={(e) => setExperience(e.target.value)}
                 className="border rounded p-2"
               >
-                {isGuestRoom ? (
+                {category === 'guest_room' ? (
                   <>
                     <option value="1 Bed">1 Bed</option>
                     <option value="5 Beds">2 Beds</option>
@@ -340,6 +341,14 @@ const AddHall = () => {
                     <option value="30 Beds">7 Beds</option>
                     <option value="40 Beds">8 Beds</option>
                     <option value="50 Beds">9 Beds</option>
+                  </>
+                ) : category === 'vehicle' ? (
+                  <>
+                    <option value="1 Capacity">1 Capacity</option>
+                    <option value="2 Capacities">2 Capacities</option>
+                    <option value="3 Capacities">3 Capacities</option>
+                    <option value="4 Capacities">4 Capacities</option>
+                    <option value="5 Capacities">5 Capacities</option>
                   </>
                 ) : (
                   <>
@@ -366,10 +375,10 @@ const AddHall = () => {
             {loading ? (
               <>
                 <FaSpinner className="animate-spin" />
-                Adding {isGuestRoom ? 'Guest Room' : 'Hall'}...
+                Adding {category === 'guest_room' ? 'Guest Room' : category === 'vehicle' ? 'Vehicle' : 'Hall'}...
               </>
             ) : (
-              `Add ${isGuestRoom ? 'Guest Room' : 'Hall'}`
+              `Add ${category === 'guest_room' ? 'Guest Room' : category === 'vehicle' ? 'Vehicle' : 'Hall'}`
             )}
           </button>
         </div>

@@ -123,6 +123,14 @@ const Navbar = () => {
             >
               ADMIN LOGIN
             </li>
+            {!token && (
+              <li
+                onClick={() => { navigate('/login'); setShowMenu(false); }}
+                className='w-full text-center py-2 rounded bg-[#123458] text-white font-semibold mt-4 cursor-pointer'
+              >
+                Create Account
+              </li>
+            )}
           </ul>
         </div>
       </div>

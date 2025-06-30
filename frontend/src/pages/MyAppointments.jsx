@@ -158,7 +158,6 @@ const MyAppointments = () => {
 
               <div className="flex-1 text-sm text-zinc-700">
                 <p className="text-base font-semibold text-[#030303] mb-1">{item.hallData.name}</p>
-                <p className="mb-1">{item.speciality}</p>
                 <p className="font-medium text-[#030303]">Address:</p>
                 <p className="text-xs">{item.hallData.address.line1}</p>
                 <p className="text-xs">{item.hallData.address.line2}</p>

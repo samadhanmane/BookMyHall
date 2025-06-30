@@ -59,11 +59,11 @@ const Dashboard = () => {
             >
               <img
                 className='rounded-md w-12 h-12 object-cover shadow-sm shadow-black'
-                src={item.hallData.image}
-                alt="hall"
+                src={item.hallData?.image || assets.hall_icon}
+                alt={item.hallData?.name || "hall"}
               />
               <div className='flex-1 text-sm'>
-                <p className='font-medium'>{item.hallData.name}</p>
+                <p className='font-medium'>{item.hallData?.name || "Unknown Hall"}</p>
                 <p className='text-sm text-gray-600'>{slotDateFormat(item.slotDate)}</p>
               </div>
 

@@ -13,6 +13,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
     const [appointments, setAppointments] = useState([])
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [dashData,setDashData] = useState(false)
+    const [vehicles, setVehicles] = useState({})
 
     const getAllHalls = async () =>{
         try{
@@ -20,8 +21,10 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
             if(data.success){
                 setHalls(data.halls)
                 setGuestRooms(data.guestRooms)
+                setVehicles(data.vehicles)
                 console.log('Halls:', data.halls)
                 console.log('Guest Rooms:', data.guestRooms)
+                console.log('Vehicles:', data.vehicles)
             }else{
                 toast.error(data.message)
             }
@@ -139,6 +142,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
     const value = {
         backendUrl,halls,
         guestRooms,
+        vehicles,
         getAllHalls,changeAvailability,
         appointments,setAppointments,
         getAllAppointments,cancelAppointment,

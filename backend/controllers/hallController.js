@@ -501,8 +501,8 @@ const hallProfile = async (req,res) => {
 // API to update hall profile data from hall panel
 const updateHallProfile = async (req,res) => {
     try {
-        const {hallId,address,available,about,speciality,name,experience} = req.body;
-        await hallModel.findByIdAndUpdate(hallId,{address,available,about,speciality,name,experience});
+        const {hallId,address,available,about,name,experience} = req.body;
+        await hallModel.findByIdAndUpdate(hallId,{address,available,about,name,experience});
         res.json({success:true,message:"Profile updated successfully"});
     } catch(error) {
         console.log(error);
@@ -700,18 +700,18 @@ const updateHallEmail = async (req, res) => {
     }
 }
 
-// Get all guest rooms for a coordinator
+// Get all guest rooms and vehicles for a coordinator
 const getCoordinatorGuestRooms = async (req, res) => {
     try {
         const email = req.hall.email;
         const guestRooms = await hallModel.find({ 
             email: email,
-            isGuestRoom: true 
+            category: { $in: ['guest_room', 'vehicle'] }
         }).select('-password');
 
         res.json({ 
             success: true, 
-            message: guestRooms.length > 0 ? "Guest rooms fetched successfully" : "No guest rooms found for this coordinator",
+            message: guestRooms.length > 0 ? "Guest rooms and vehicles fetched successfully" : "No guest rooms or vehicles found for this coordinator",
             data: {
                 email: email,
                 guestRooms: guestRooms || []
@@ -721,38 +721,36 @@ const getCoordinatorGuestRooms = async (req, res) => {
     } catch(error) {
         res.json({ 
             success: false, 
-            message: error.message || "Failed to fetch guest rooms"
+            message: error.message || "Failed to fetch guest rooms and vehicles"
         });
     }
 }
 
-// API to update guest room
-// NOTE: The frontend should first upload the image using the uploadImage endpoint (which returns a Cloudinary URL),
-// then send that URL in the 'image' field when calling updateGuestRoom. The DB will always store a Cloudinary URL.
+// API to update guest room or vehicle
 const updateGuestRoom = async (req, res) => {
     try {
-        const { roomId, name, speciality, experience, about, address, available, image } = req.body;
+        const { roomId, name, experience, about, address, available, image } = req.body;
         const hallId = req.hall._id;
 
-        // Find the room and verify it belongs to the authenticated hall
+        // Find the room/vehicle and verify it belongs to the authenticated hall
         const room = await hallModel.findOne({
             _id: roomId,
-            email: req.hall.email
+            email: req.hall.email,
+            category: { $in: ['guest_room', 'vehicle'] }
         });
 
         if (!room) {
             return res.status(404).json({
                 success: false,
-                message: 'Room not found or unauthorized'
+                message: 'Room or vehicle not found or unauthorized'
             });
         }
 
-        // Update the room
+        // Update the room/vehicle
         const updatedRoom = await hallModel.findByIdAndUpdate(
             roomId,
             {
                 name,
-                speciality,
                 experience,
                 about,
                 address,
@@ -764,14 +762,14 @@ const updateGuestRoom = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Guest room updated successfully',
+            message: 'Guest room or vehicle updated successfully',
             room: updatedRoom
         });
     } catch (error) {
-        console.error('Error updating guest room:', error);
+        console.error('Error updating guest room or vehicle:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to update guest room'
+            message: error.message || 'Failed to update guest room or vehicle'
         });
     }
 };

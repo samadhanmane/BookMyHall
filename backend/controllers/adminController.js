@@ -9,11 +9,11 @@ import userModel from "../models/userModel.js"
 // API for adding halls and guest rooms
 const addHalls = async (req, res) => {
     try {
-        const { name, email, password, speciality, experience, about, address, isGuestRoom } = req.body;
+        const { name, email, password, experience, about, address, category } = req.body;
         const imageFile = req.file;
        
-        // Checking for all data to add halls/guest rooms
-        if (!name || !email || !speciality || !experience || !about || !address) {
+        // Checking for all data to add halls/guest rooms/vehicles
+        if (!name || !email || !experience || !about || !address) {
             return res.json({ success: false, message: "Please fill all the fields." });
         }
 
@@ -22,21 +22,21 @@ const addHalls = async (req, res) => {
             return res.json({ success: false, message: "Please enter a valid email" });
         }
 
-        // For guest rooms, check if this email already exists
-        if (isGuestRoom === 'true') {
-            const existingGuestRoom = await hallModel.findOne({ email, isGuestRoom: true });
-            if (existingGuestRoom) {
-                // If guest room coordinator exists, we don't need a password
+        // For guest rooms or vehicles, check if this email already exists
+        if (category === 'guest_room' || category === 'vehicle') {
+            // Check for any existing coordinator with this email (any category)
+            const existingCoordinator = await hallModel.findOne({ email });
+            if (existingCoordinator) {
+                // If coordinator exists, we don't need a password
                 if (!password) {
                     // Use the existing coordinator's password
                     const hallData = {
                         name,
                         email,
-                        password: existingGuestRoom.password, // Use existing password
-                        speciality,
+                        password: existingCoordinator.password, // Use existing password
                         experience,
                         about,
-                        isGuestRoom: true,
+                        category,
                         address: JSON.parse(address),
                         date: Date.now()
                     };
@@ -60,7 +60,7 @@ const addHalls = async (req, res) => {
 
                     hallData.image = imageUrl;
 
-                    // Create and save the new guest room
+                    // Create and save the new guest room/vehicle
                     const newHall = new hallModel(hallData);
                     await newHall.save();
 
@@ -74,17 +74,17 @@ const addHalls = async (req, res) => {
 
                     return res.json({ 
                         success: true, 
-                        message: "Guest Room added successfully",
+                        message: `${category === 'guest_room' ? 'Guest Room' : 'Vehicle'} added successfully`,
                         data: {
                             id: newHall._id,
                             name: newHall.name,
                             email: newHall.email,
-                            isGuestRoom: newHall.isGuestRoom
+                            category: newHall.category
                         }
                     });
                 }
             } else {
-                // For new guest room coordinators, require password
+                // For new coordinators, require password
                 if (!password || password.length < 6) {
                     return res.json({ success: false, message: "Please enter a strong password for new coordinator" });
                 }
@@ -96,7 +96,7 @@ const addHalls = async (req, res) => {
         }
 
             // Check if email already exists for halls
-            const existingHall = await hallModel.findOne({ email, isGuestRoom: false });
+            const existingHall = await hallModel.findOne({ email, category: 'hall' });
             if (existingHall) {
                 return res.json({ success: false, message: "This email is already registered for a hall" });
             }
@@ -128,15 +128,14 @@ const addHalls = async (req, res) => {
             email,
             image: imageUrl, 
             password: hashedPassword,
-            speciality,
             experience,
             about,
-            isGuestRoom: isGuestRoom === 'true',
+            category: category || 'hall',
             address: JSON.parse(address),
             date: Date.now()
         };
 
-        // Create and save the new hall/guest room
+        // Create and save the new hall/guest room/vehicle
         const newHall = new hallModel(hallData);
         await newHall.save();
 
@@ -150,12 +149,12 @@ const addHalls = async (req, res) => {
 
         res.json({ 
             success: true, 
-            message: isGuestRoom === 'true' ? "Guest Room added successfully" : "Hall added successfully",
+            message: category === 'guest_room' ? "Guest Room added successfully" : category === 'vehicle' ? "Vehicle added successfully" : "Hall added successfully",
             data: {
                 id: newHall._id,
                 name: newHall.name,
                 email: newHall.email,
-                isGuestRoom: newHall.isGuestRoom
+                category: newHall.category
             }
         });
 
@@ -188,11 +187,12 @@ const allHalls = async (req, res) => {
     try {
         const halls = await hallModel.find({}).select('-password');
         
-        // Separate halls and guest rooms
-        const hallsList = halls.filter(hall => !hall.isGuestRoom);
-        const guestRoomsList = halls.filter(hall => hall.isGuestRoom);
+        // Separate halls, guest rooms, and vehicles
+        const hallsList = halls.filter(hall => hall.category === 'hall');
+        const guestRoomsList = halls.filter(hall => hall.category === 'guest_room');
+        const vehiclesList = halls.filter(hall => hall.category === 'vehicle');
 
-        // Group guest rooms by email
+        // Group guest rooms and vehicles by email
         const guestRoomsByEmail = guestRoomsList.reduce((acc, room) => {
             if (!acc[room.email]) {
                 acc[room.email] = [];
@@ -200,14 +200,21 @@ const allHalls = async (req, res) => {
             acc[room.email].push(room);
             return acc;
         }, {});
+        const vehiclesByEmail = vehiclesList.reduce((acc, vehicle) => {
+            if (!acc[vehicle.email]) {
+                acc[vehicle.email] = [];
+            }
+            acc[vehicle.email].push(vehicle);
+            return acc;
+        }, {});
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             halls: hallsList,
-            guestRooms: guestRoomsByEmail
+            guestRooms: guestRoomsByEmail,
+            vehicles: vehiclesByEmail
         });
-    } catch(error) {
-        console.log(error);
+    } catch (error) {
         res.json({ success: false, message: error.message });
     }
 }
@@ -337,7 +344,7 @@ const getCoordinatorGuestRooms = async (req, res) => {
         // Find all guest rooms for this email using find() instead of findOne()
         const guestRooms = await hallModel.find({ 
             email: email,
-            isGuestRoom: true 
+            category: 'guest_room' 
         }).select('-password'); // Exclude password from response
 
         console.log('Found guest rooms:', guestRooms);
@@ -454,7 +461,7 @@ const deleteHallOrRoom = async (req, res) => {
 
         res.json({ 
             success: true, 
-            message: `${hall.isGuestRoom ? 'Guest Room' : 'Hall'} deleted successfully. All associated appointments have been cancelled.` 
+            message: `${hall.category === 'guest_room' ? 'Guest Room' : 'Hall'} deleted successfully. All associated appointments have been cancelled.` 
         });
     } catch (error) {
         console.error('Error in deleteHallOrRoom:', error);

@@ -3,7 +3,7 @@ import { AdminContext } from '../../context/AdminContext'
 import { toast } from 'react-toastify'
 
 const HallsList = () => {
-  const { halls, guestRooms, aToken, getAllHalls, changeAvailability, deleteHallOrRoom } = useContext(AdminContext)
+  const { halls, guestRooms, vehicles, aToken, getAllHalls, changeAvailability, deleteHallOrRoom } = useContext(AdminContext)
 
   useEffect(() => {
     if (aToken) {
@@ -71,6 +71,19 @@ const HallsList = () => {
             <h2 className="text-lg font-medium text-gray-700 mb-3">Managed by: {email}</h2>
             <div className="w-full flex flex-wrap gap-6">
               {rooms.map((room, index) => renderVenueCard(room, index))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Vehicles Section */}
+      <div>
+        <h1 className="text-xl font-semibold text-[#030303] mb-4 border-b border-[#123458] pb-2">All Vehicles</h1>
+        {Object.entries(vehicles || {}).map(([email, vehiclesArr]) => (
+          <div key={email} className="mb-6">
+            <h2 className="text-lg font-medium text-gray-700 mb-3">Managed by: {email}</h2>
+            <div className="w-full flex flex-wrap gap-6">
+              {vehiclesArr.map((vehicle, index) => renderVenueCard(vehicle, index))}
             </div>
           </div>
         ))}

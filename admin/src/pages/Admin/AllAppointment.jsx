@@ -38,7 +38,7 @@ const AllAppointment = () => {
     const rows = appointments.slice().reverse().map((item, index) => [
       index + 1,
       item.userData.name,
-      item.userData.email,
+      item.userData?.email || "No Email",
       slotDateFormat(item.slotDate),
       item.slotTime,
       item.hallData.name,
@@ -96,22 +96,22 @@ const AllAppointment = () => {
             <div className="flex items-center gap-2">
               <img
                 className="w-8 h-8 object-cover rounded-full border shadow-sm"
-                src={item.userData.image}
-                alt="user"
+                src={item.userData?.image || assets.patients_icon}
+                alt={item.userData?.name || "user"}
               />
-              <p className="text-[#030303]">{item.userData.name}</p>
+              <p className="text-[#030303]">{item.userData?.name || "Unknown User"}</p>
             </div>
-            <p className="text-[#030303]">{item.userData.email}</p>
+            <p className="text-[#030303]">{item.userData?.email || "No Email"}</p>
             <p className="text-[#030303]">
               {slotDateFormat(item.slotDate)}, {item.slotTime}
             </p>
             <div className="flex items-center gap-2">
               <img
                 className="w-8 h-8 object-cover border shadow-sm bg-gray-200"
-                src={item.hallData.image}
-                alt="hall"
+                src={item.hallData?.image || assets.hall_icon}
+                alt={item.hallData?.name || "hall"}
               />
-              <p className="text-[#030303]">{item.hallData.name}</p>
+              <p className="text-[#030303]">{item.hallData?.name || "Unknown Hall"}</p>
             </div>
 
             {item.cancelled ? (

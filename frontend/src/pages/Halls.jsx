@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 
@@ -9,26 +9,28 @@ const Halls = () => {
   const [filterHall, setFilterHall] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
-    type: null,
-    capacity: null
+    type: null
   });
   const [hallRatings, setHallRatings] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
 
   const applyFilter = () => {
     let filteredHalls = halls;
     
-    // Apply type filter
+    // Type filter
     if (activeFilters.type === 'Halls') {
-      filteredHalls = filteredHalls.filter(hall => !hall.isGuestRoom);
+      filteredHalls = filteredHalls.filter(hall => hall.category === 'hall');
     } else if (activeFilters.type === 'Guest Rooms') {
-      filteredHalls = filteredHalls.filter(hall => hall.isGuestRoom);
+      filteredHalls = filteredHalls.filter(hall => hall.category === 'guest_room');
+    } else if (activeFilters.type === 'Vehicles') {
+      filteredHalls = filteredHalls.filter(hall => hall.category === 'vehicle');
     }
 
-    // Apply capacity filter
-    if (activeFilters.capacity) {
-      filteredHalls = filteredHalls.filter(hall => hall.speciality === activeFilters.capacity);
-    }
+    // Only show valid categories
+    filteredHalls = filteredHalls.filter(
+      hall => hall.category === 'hall' || hall.category === 'guest_room' || hall.category === 'vehicle'
+    );
 
     setFilterHall(filteredHalls);
   };
@@ -70,6 +72,15 @@ const Halls = () => {
     fetchRatings();
   }, []);
 
+  // On mount, check for ?type=... in URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const type = params.get('type');
+    if (type === 'Halls' || type === 'Guest Rooms' || type === 'Vehicles') {
+      setActiveFilters(prev => ({ ...prev, type }));
+    }
+  }, [location.search]);
+
   return (
     <div className="px-4 md:px-20 py-10 font-[Poppins] bg-white text-[#030303]">
       <p className="text-xl font-semibold mb-6 border-b border-[#123458] pb-2">Browse through the hall specialties</p>
@@ -92,7 +103,7 @@ const Halls = () => {
         >
           {/* Type Filters */}
           <p className="text-[#123458] font-semibold mb-1">Type:</p>
-          {['Halls', 'Guest Rooms'].map(type => (
+          {['Halls', 'Guest Rooms', 'Vehicles'].map(type => (
             <p
               key={type}
               onClick={() => handleFilterClick('type', type)}
@@ -104,24 +115,10 @@ const Halls = () => {
             </p>
           ))}
 
-          {/* Capacity Filters */}
-          <p className="text-[#123458] font-semibold mb-1 mt-4">Capacity:</p>
-          {['High Capacity', 'Low Capacity'].map(type => (
-            <p
-              key={type}
-              onClick={() => handleFilterClick('capacity', type)}
-              className={`w-[94vw] sm:w-auto pl-4 pr-10 py-2 rounded border border-[#123458] shadow-sm cursor-pointer transition-colors duration-200 ${
-                activeFilters.capacity === type ? 'bg-[#123458] text-white' : 'text-[#123458] bg-white'
-              } hover:bg-[#123458] hover:text-white`}
-            >
-              {type}
-            </p>
-          ))}
-
           {/* Clear Filters Button */}
-          {(activeFilters.type || activeFilters.capacity) && (
+          {activeFilters.type && (
             <button
-              onClick={() => setActiveFilters({ type: null, capacity: null })}
+              onClick={() => setActiveFilters({ type: null })}
               className="w-[94vw] sm:w-auto pl-4 pr-10 py-2 rounded border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors duration-200 mt-4"
             >
               Clear All Filters
@@ -152,20 +149,20 @@ const Halls = () => {
                   <p>{item.available ? 'Available' : 'Not Available'}</p>
                 </div>
                 
-                <p className="text-lg font-semibold text-[#030303] flex items-center gap-2">
+                <p className="text-lg font-semibold text-[#030303]">
                   {item.name}
-                  {hallRatings[item._id] && (
-                    <span className="flex items-center gap-1 ml-2">
-                      {[1,2,3,4,5].map(star => (
-                        <span key={star} className={`text-base ${star <= Math.round(hallRatings[item._id].averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
-                      ))}
-                      <span className="text-xs text-gray-500 ml-1">({hallRatings[item._id].averageRating.toFixed(1)})</span>
-                      <span className="text-xs text-gray-400 ml-1">[{hallRatings[item._id].ratingCount}]</span>
-                    </span>
-                  )}
                 </p>
-                <p className="text-sm text-[#123458]">{item.speciality}</p>
-                <p className="text-xs text-gray-500 mt-1">{item.isGuestRoom ? 'Guest Room' : 'Hall'}</p>
+               
+                {hallRatings[item._id] && (
+                  <div className="flex items-center gap-1 mt-1" style={{ fontSize: '2rem' }}>
+                    {[1,2,3,4,5].map(star => (
+                      <span key={star} className={`text-base ${star <= Math.round(hallRatings[item._id].averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                    ))}
+                  </div>
+                )}
+                 <p className="text-xs text-gray-500 mt-1" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+                  {item.category === 'guest_room' ? 'Guest Room' : item.category === 'vehicle' ? 'Vehicle' : 'Hall'}
+                </p>
               </div>
             </div>
           ))}

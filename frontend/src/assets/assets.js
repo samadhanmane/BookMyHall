@@ -24,13 +24,8 @@ import hall2 from './hall2.jpeg'
 import hall3 from './hall3.jpeg'
 import hall4 from './hall4.jpeg'
 import mitaoe_logo from './MITAOE-logo.png'
-
-
-
-import Low_Capacity from './Low_Capacity.svg'
-import High_Capacity from './High_Capacity.svg'
-
-
+import guestroom from './guestroom.jpg'
+import vehicle from './vehicle.jpg'
 
 export const assets = {
     appointment_img,
@@ -58,29 +53,18 @@ export const assets = {
     hall2,
     hall3,
     hall4,
-    mitaoe_logo
-
-
+    mitaoe_logo,
+    guestroom,
+    vehicle
 }
 
-export const specialityData = [
-    {
-        speciality: 'High Capacity',
-        image: High_Capacity
-    },
-
-    {
-        speciality: 'Low Capacity',
-        image: Low_Capacity
-    },
-]
+export const specialityData = []
 
 export const halls = [
     {
         _id: 'doc1',
         name: 'Hall-1',
         image: hall1,
-        speciality: 'Low Capacity',
         experience: '50 seats',
         about: 'A Small Seminar Hall is ideal for intimate sessions, workshops, or training with small groups. It typically features a projector, a whiteboard, and comfortable seating for around 20-30 people. With a capacity to accommodate 20-30 attendees, it provides a focused and interactive environment for personal or small group interactions.',
         address: {
@@ -92,7 +76,6 @@ export const halls = [
         _id: 'doc2',
         name: 'Hall-2',
         image: hall2,
-        speciality: 'High Capacity',
         experience: '100 seats',
         about: 'A Medium-Sized Seminar Hall is well-suited for larger presentations, meetings, or educational seminars. This hall is equipped with audiovisual tools, a stage for speakers, and seating arrangements for 50-80 people. It strikes a balance between engagement and space, offering room for between 50-80 individuals, making it ideal for events that require a more expansive yet intimate setting.',
         address: {
@@ -104,7 +87,6 @@ export const halls = [
         _id: 'doc3',
         name: 'Hall-3',
         image: hall3,
-        speciality: 'High Capacity',
         experience: '150 seats',
         about: 'A Large Seminar Hall is designed to host conferences, seminars, or corporate events with large audiences. It includes high-quality sound systems, multiple screens, and seating for over 100 people. With a capacity to host 100+ attendees, it provides a professional and expansive environment for significant events, ensuring comfort and visibility for all participants.',
         address: {
