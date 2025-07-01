@@ -10,7 +10,7 @@ const Home = () => {
         <Header />
       </section>
 
-     /* {/* Booking Process Guide */}
+      {/* Booking Process Guide */}
       <section className="px-4 md:px-20 py-10 border-b border-[#123458] shadow-sm bg-white">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-[#123458]">How to Book</h2>
         <div className="flex flex-col md:flex-row justify-center items-center gap-8">
@@ -39,7 +39,7 @@ const Home = () => {
 
       <section className="px-4 md:px-20 py-10">
         <TopHalls />
-      </section> */
+      </section> 
 
       
     </div>
