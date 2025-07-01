@@ -5,6 +5,7 @@ import hallModel from "../models/hallModel.js"
 import jwt from "jsonwebtoken"
 import appointmentModel from "../models/appointmentModel.js"
 import userModel from "../models/userModel.js"
+import { sendEmail, getBookingCancellationTemplate } from '../services/emailService.js'
 
 // API for adding halls and guest rooms
 const addHalls = async (req, res) => {
