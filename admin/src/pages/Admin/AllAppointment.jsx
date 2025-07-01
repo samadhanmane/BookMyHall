@@ -152,6 +152,6 @@ const AllAppointment = () => {
       </div>
     </div>
   )
-}
+}}
 
 export default AllAppointment
