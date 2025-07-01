@@ -149,6 +149,52 @@ const AllAppointment = () => {
             )}
           </div>
         ))}
+
+        <div className="block sm:hidden">
+          {appointments.slice().reverse().map((item, index) => (
+            <div key={index} className="bg-white border-b p-4 flex flex-col gap-2 shadow-sm rounded mb-2">
+              <div className="flex items-center gap-3">
+                <img className="w-10 h-10 object-cover rounded-full border" src={item.userData?.image || assets.patients_icon} alt={item.userData?.name || 'user'} />
+                <div>
+                  <p className="font-semibold text-base">{item.userData?.name || 'Unknown User'}</p>
+                  <p className="text-xs text-gray-500">{item.userData?.email || 'No Email'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 mt-1">
+                <img className="w-10 h-10 object-cover rounded border bg-gray-200" src={item.hallData?.image || assets.hall_icon} alt={item.hallData?.name || 'hall'} />
+                <div>
+                  <p className="font-medium text-sm">{item.hallData?.name || 'Unknown Hall'}</p>
+                  <p className="text-xs text-gray-500">{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs font-semibold">
+                  {item.cancelled ? (
+                    <span className="text-red-600">Cancelled</span>
+                  ) : item.isAccepted ? (
+                    <span className="text-green-600">Accepted</span>
+                  ) : (
+                    <span className="text-yellow-600">Pending</span>
+                  )}
+                </span>
+                {item.isAccepted && item.isCompleted && (
+                  <span className="text-green-600 text-xs font-semibold ml-2">Completed</span>
+                )}
+              </div>
+              <div className="flex gap-3 mt-2">
+                {!item.cancelled && !item.isAccepted && (
+                  <>
+                    <img onClick={() => cancelAppointment(item._id)} className="w-8 h-8 cursor-pointer" src={assets.cancel_icon} alt="cancel" />
+                    <img onClick={() => requestAcceptance(item._id)} className="w-8 h-8 cursor-pointer" src={assets.tick_icon} alt="accept" />
+                  </>
+                )}
+                {item.isAccepted && !item.cancelled && !item.isCompleted && (
+                  <img onClick={() => completeAppointment(item._id)} className="w-8 h-8 cursor-pointer" src={assets.tick_icon} alt="complete" />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

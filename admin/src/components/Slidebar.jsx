@@ -4,19 +4,29 @@ import { NavLink } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { HallContext } from '../context/HallContext'
 
-const Slidebar = () => {
+const Slidebar = ({ openSidebar, setOpenSidebar }) => {
   const { aToken } = useContext(AdminContext)
   const { dToken } = useContext(HallContext)
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer transition 
+    `flex items-center gap-3 py-3.5 px-3 md:px-9 cursor-pointer transition 
      ${isActive ? 'bg-[#F2F3FF] border-r-4 border-[#123458] shadow-sm' : 'hover:bg-gray-100'} 
      text-[#030303]`
 
-  const navTextClass = 'hidden md:block text-sm font-medium'
+  const navTextClass = 'text-sm font-medium'
+
+  // Sidebar classes for responsiveness
+  const sidebarClass = `bg-white border-r border-gray-200 shadow-sm font-poppins z-40
+    min-h-screen fixed md:static top-0 left-0 transition-transform duration-300
+    ${openSidebar ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 w-64 md:w-auto`
 
   return (
-    <div className='min-h-screen bg-white border-r border-gray-200 shadow-sm font-poppins'>
+    <div className={sidebarClass}>
+      {/* Close button for mobile */}
+      <button
+        className="md:hidden absolute top-4 right-4 text-2xl font-bold"
+        onClick={() => setOpenSidebar(false)}
+      >×</button>
       {aToken && (
         <ul className='mt-5'>
           <NavLink to='/admin-dashboard' className={linkClass}>

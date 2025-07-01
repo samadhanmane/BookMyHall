@@ -4,7 +4,6 @@ import Calendar from "react-calendar"; // Import the calendar component
 import "react-calendar/dist/Calendar.css"; // Calendar CSS
 import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
-import RelatedHalls from "../components/RelatedHalls";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -368,8 +367,6 @@ const Appointment = () => {
             {isBooking ? "Booking..." : "Book an Appointment"}
           </button>
         </div>
-
-        <RelatedHalls HallId={hallId} />
       </div>
     )
   );

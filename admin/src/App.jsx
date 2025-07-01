@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import Login from './pages/Login'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -18,13 +18,16 @@ import HallProfile from './pages/Hall/HallProfile'
 const App = () => {
   const { aToken } = useContext(AdminContext)
   const { dToken } = useContext(HallContext)
+  const [openSidebar, setOpenSidebar] = useState(false)
 
   return aToken || dToken ? (
     <div className='min-h-screen bg-white font-poppins text-[#030303]'>
       <ToastContainer />
-      <Navbar />
+      <Navbar setOpenSidebar={setOpenSidebar} />
       <div className='flex items-start'>
-        <Slidebar />
+        <Slidebar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
+        {/* Overlay for mobile when sidebar is open */}
+        {openSidebar && <div className="fixed inset-0 bg-black bg-opacity-30 z-30 md:hidden" onClick={() => setOpenSidebar(false)}></div>}
         <div className='flex-1 border-l border-gray-200 shadow-inner p-4'>
           <Routes>
             {/* Admin Routes */}

@@ -4,7 +4,7 @@ import { AdminContext } from '../context/AdminContext'
 import { useNavigate } from 'react-router-dom'
 import { HallContext } from '../context/HallContext'
 
-const Navbar = () => {
+const Navbar = ({ setOpenSidebar }) => {
   const { aToken, setAToken } = useContext(AdminContext)
   const { dToken, setDToken } = useContext(HallContext)
   const navigate = useNavigate()
@@ -19,6 +19,10 @@ const Navbar = () => {
 
   return (
     <div className='flex justify-between items-center px-4 sm:px-10 py-3 border-b border-gray-300 bg-white shadow-sm font-poppins'>
+      {/* Hamburger for mobile */}
+      <button className="md:hidden mr-2 text-2xl" onClick={() => setOpenSidebar(true)}>
+        &#9776;
+      </button>
       {/* Left Section */}
       <div className='flex items-center gap-3'>
         <img
