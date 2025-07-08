@@ -9,19 +9,19 @@ const Header = () => {
       
       {/* Left Section */}
       <div className="md:w-1/2 flex flex-col gap-6 text-[#030303] border-b md:border-b-0 md:border-r border-[#e0e0e0] pr-0 md:pr-10 pb-6 md:pb-0">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold leading-snug">
+        <h1 className="text-4xl font-bold leading-tight">
           MITAOE |<br />
           Facility Reservation Platform
         </h1>
-        <p className="text-sm text-[#030303]/80 leading-relaxed">
+        <p className="text-base text-[#030303]/80 leading-relaxed">
           Discover and reserve institutional facilities with ease.<br className="hidden sm:block" />
           Ideal for meetings, stays, transportation, and official college events.
         </p>
         <button
           onClick={() => navigate('/halls')}
-          className="inline-flex items-center gap-2 bg-[#123458] text-white font-medium text-sm px-6 py-3 rounded-full w-fit hover:scale-105 transition duration-300 shadow-sm"
+          className="inline-flex items-center gap-2 bg-[#123458] text-white font-medium text-base px-6 py-2 rounded-full w-fit hover:scale-105 transition duration-300 shadow-sm"
         >
-          Reserve a Facility <img className="w-3" src={assets.arrow_icon} alt="arrow" />
+          Reserve a Facility <img className="w-4" src={assets.arrow_icon} alt="arrow" />
         </button>
       </div>
 
@@ -30,7 +30,7 @@ const Header = () => {
         <img
           src={assets.header_hall}
           alt="MITAOE Facility"
-          className="w-full max-w-lg rounded-lg shadow-sm border border-[#e0e0e0] object-cover"
+          className="w-full max-w-3xl md:max-w-2xl lg:max-w-3xl shadow-2xl border-4 border-[#123458] object-cover rounded-2xl"
         />
       </div>
     </header>

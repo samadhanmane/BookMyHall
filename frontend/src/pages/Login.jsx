@@ -2,11 +2,12 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Login = () => {
-  const { backendUrl, token, setToken } = useContext(AppContext);
+  const { backendUrl, token, setToken, loadUserProfileData } = useContext(AppContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [authMode, setAuthMode] = useState('Login');
   const [email, setEmail] = useState('');
@@ -53,6 +54,7 @@ const Login = () => {
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         setToken(response.data.token);
+        await loadUserProfileData();
         clearForm();
       } else {
         toast.error(response.data.message);
@@ -123,6 +125,12 @@ const Login = () => {
       navigate('/');
     }
   }, [token]);
+
+  useEffect(() => {
+    if (location.state && location.state.authMode === 'Sign Up') {
+      setAuthMode('Sign Up');
+    }
+  }, [location.state]);
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center font-poppins bg-white text-[#030303]">

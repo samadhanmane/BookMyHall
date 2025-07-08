@@ -8,7 +8,6 @@ const Footer = () => {
         
         {/* Left Section */}
         <div className="border-b md:border-b-0 md:border-r border-[#e0e0e0] pr-0 md:pr-8 pb-6 md:pb-0">
-          <img className="mb-5 w-40" src={assets.headerlogo} alt="MITAOE Logo" />
           <p className="text-[#030303]/80 leading-6 max-w-sm">
             The Facility Booking Portal is designed to simplify and digitize the reservation and management of campus facilities—including halls, guest rooms, and vehicles—for academic, residential, and institutional needs.
           </p>

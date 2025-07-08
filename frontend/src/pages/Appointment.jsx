@@ -20,6 +20,7 @@ const Appointment = () => {
   const [slotTime, setSlotTime] = useState("");
   const [isBooking, setIsBooking] = useState(false); // Add loading state
   const [hallRating, setHallRating] = useState(null);
+  const [reason, setReason] = useState("");
   
   const navigate = useNavigate();
 
@@ -94,6 +95,11 @@ const Appointment = () => {
       return navigate("/login");
     }
 
+    if (!reason.trim()) {
+      toast.error("Please provide a reason for booking.");
+      return;
+    }
+
     try {
       setIsBooking(true); // Start loading
       const date = selectedDate;
@@ -105,7 +111,7 @@ const Appointment = () => {
 
       const { data } = await axios.post(
         backendUrl + "/api/user/book-appointment",
-        { hallId, slotDate, slotTime },
+        { hallId, slotDate, slotTime, reason },
         { headers: { token } }
       );
 
@@ -206,6 +212,16 @@ const Appointment = () => {
                   <span className="flex items-center gap-1 text-2xl align-middle">{renderStars(hallRating ? hallRating.averageRating : 0)}</span>
                 </p>
               </div>
+            </div>
+            <div className="mt-6">
+              <label className="block text-sm font-medium mb-1">Reason for Booking <span className="text-red-500">*</span></label>
+              <textarea
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458] min-h-[80px]"
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                placeholder="Please specify the purpose or reason for booking this facility."
+                required
+              />
             </div>
           </div>
         </div>
@@ -360,9 +376,9 @@ const Appointment = () => {
                 onClick={() =>
                   setSlotTime(slotTime === item.time ? "" : item.time)
                 }
-                className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer shadow-md shadow-black ${item.time === slotTime
+                className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-md cursor-pointer border-2 border-black-300 ${item.time === slotTime
                   ? "bg-primary text-white"
-                  : "text-black-400 border border-gray-300"
+                  : "text-black-400 border border-black-300"
                   }`}
                 key={index}
               >
@@ -373,7 +389,7 @@ const Appointment = () => {
           <button
             onClick={bookAppointment}
             disabled={!slotTime || isBooking}
-            className="bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6 shadow-lg shadow-black disabled:bg-gray-400"
+            className="bg-primary text-white text-sm font-light px-14 py-3 rounded-md my-6 disabled:bg-gray-400"
           >
             {isBooking ? "Booking..." : "Book an Appointment"}
           </button>

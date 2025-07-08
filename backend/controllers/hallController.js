@@ -173,13 +173,17 @@ const hallList = async (req, res) => {
     try {
         // Get all halls
         const halls = await hallModel.find({}).select(['-password', '-email']);
-
+        if (!halls) {
+            return res.status(500).json({ success: false, message: 'No halls found in the database.' });
+        }
         // Get all active appointments
         const appointments = await appointmentModel.find({
             cancelled: false,
             isCompleted: false
         });
-
+        if (!appointments) {
+            return res.status(500).json({ success: false, message: 'No appointments found in the database.' });
+        }
         // Create a map of hall bookings
         const hallBookings = {};
         appointments.forEach(appointment => {
@@ -195,18 +199,16 @@ const hallList = async (req, res) => {
                 cancelled: appointment.cancelled
             });
         });
-
         // Add bookings to each hall
         const hallsWithBookings = halls.map(hall => {
             const hallObj = hall.toObject();
             hallObj.bookings = hallBookings[hall._id] || [];
             return hallObj;
         });
-
         res.json({ success: true, halls: hallsWithBookings });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message });
+        console.error('Error in hallList:', error);
+        res.status(500).json({ success: false, message: error.message || 'Internal server error in hallList.' });
     }
 }
 

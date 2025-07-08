@@ -33,22 +33,25 @@ const Navbar = () => {
     }
   }, [])
 
+  // Always use the default icon
+  const getProfileImage = () => assets.upload_icon;
+
   return (
-    <div className='flex items-center justify-between text-base font-bold py-6 mb-5 border-b border-gray-300 font-poppins bg-white px-6' style={{ minHeight: '72px' }}>
+    <div className='relative flex items-center justify-between text-lg font-bold py-8 mb-7 border-b-2 border-gray-300 font-poppins bg-white px-10' style={{ minHeight: '96px' }}>
       <img
         onClick={() => navigate('/')}
-        className='w-44 cursor-pointer mr-10'
+        className='w-56 cursor-pointer mr-14 drop-shadow-lg'
         src={assets.mitaoe_logo}
         alt="MITAOE Logo"
       />
 
       {/* ----------- Desktop Menu ----------- */}
-      <div className='flex items-center w-full'>
-        <ul className='hidden md:flex items-center gap-8 font-bold text-[#030303] w-full'>
-          <NavLink to='/'><li className='hover:text-[#123458]'>Home</li></NavLink>
-          <NavLink to='/halls'><li className='hover:text-[#123458]'>Facilities</li></NavLink>
-          <NavLink to='/about'><li className='hover:text-[#123458]'>About</li></NavLink>
-          <NavLink to='/contact'><li className='hover:text-[#123458]'>Contact</li></NavLink>
+      <div className='hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2'>
+        <ul className='flex items-center gap-12 text-[#030303] text-xl'>
+          <NavLink to='/'><li className='font-bold hover:text-[#123458]'>Home</li></NavLink>
+          <NavLink to='/halls'><li className='font-bold hover:text-[#123458]'>Facilities</li></NavLink>
+          <NavLink to='/about'><li className='font-bold hover:text-[#123458]'>About</li></NavLink>
+          <NavLink to='/contact'><li className='font-bold hover:text-[#123458]'>Contact</li></NavLink>
           <li>
             <button
               onClick={handleAdminLogin}
@@ -58,38 +61,63 @@ const Navbar = () => {
             </button>
           </li>
         </ul>
-        <NavLink to='/login' className='ml-auto'>
-          <li className='bg-[#123458] text-white px-4 py-2 rounded-full font-bold border border-[#123458] transition hidden md:block list-none text-xs whitespace-nowrap min-w-[64px] text-center'>Log In</li>
-        </NavLink>
       </div>
+
+      {/* ----------- Log In Button (right corner) ----------- */}
+      {!token && (
+        <div className='hidden md:flex items-center ml-auto'>
+          <button
+            onClick={() => navigate('/login')}
+            className='bg-[#123458] text-white px-4 py-2 rounded-full font-bold border border-[#123458] transition text-xs whitespace-nowrap min-w-[64px] text-center cursor-pointer'
+          >
+            Log In
+          </button>
+        </div>
+      )}
 
       {/* ----------- Right Section ----------- */}
       <div className='flex items-center gap-4'>
-        {token && userData ? (
-          <div className='relative' ref={dropdownRef}>
+        {/* Profile Icon and Dropdown for logged in users (mobile) */}
+        {token && (
+          <div className='relative md:hidden ml-2' ref={dropdownRef}>
             <div
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className='flex items-center gap-2 cursor-pointer'
+              className='flex items-center gap-2 cursor-pointer select-none'
             >
-              <img className='w-8 h-8 rounded-md object-cover border border-gray-200' src={userData.image} alt="User" />
-              <img className='w-2.5' src={assets.dropdown_icon} alt="Dropdown" />
+              <img
+                className='w-12 h-12 rounded-full object-cover border-2 border-gray-300 shadow-md'
+                src={getProfileImage()}
+                alt='Profile'
+              />
+              <img className='w-4' src={assets.dropdown_icon} alt='Dropdown' />
             </div>
-
             {dropdownOpen && (
-              <div className='absolute top-12 right-0 z-20 bg-white border border-gray-200 rounded-md flex flex-col gap-2 p-3 text-[#030303] min-w-48'>
-                <p onClick={() => { navigate('my-profile'); setDropdownOpen(false); }} className='cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded'>
+              <div className='absolute top-12 right-0 z-20 bg-white border border-gray-200 rounded-md flex flex-col gap-2 p-3 text-[#030303] min-w-48 shadow-lg'>
+                <button
+                  type="button"
+                  onMouseDown={e => { e.preventDefault(); setDropdownOpen(false); setShowMenu(false); navigate('/my-profile'); }}
+                  className='text-left cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded w-full'
+                >
                   My Profile
-                </p>
-                <p onClick={() => { navigate('my-appointments'); setDropdownOpen(false); }} className='cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded'>
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={e => { e.preventDefault(); setDropdownOpen(false); setShowMenu(false); navigate('/my-appointments'); }}
+                  className='text-left cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded w-full'
+                >
                   My Appointments
-                </p>
-                <p onClick={() => { handleLogout(); setDropdownOpen(false); }} className='cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded'>
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={e => { e.preventDefault(); setDropdownOpen(false); setShowMenu(false); handleLogout(); }}
+                  className='text-left cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded w-full'
+                >
                   Log Out
-                </p>
+                </button>
               </div>
             )}
           </div>
-        ) : null}
+        )}
 
         {/* ----------- Hamburger Menu Icon ----------- */}
         <img
@@ -121,15 +149,60 @@ const Navbar = () => {
             >
               Admin Login
             </li>
-            <li
-              onClick={() => { navigate('/login'); setShowMenu(false); }}
-              className='w-full text-center py-2 rounded hover:bg-gray-100 cursor-pointer'
-            >
-              Log In
-            </li>
+            {/* Show only login button when not logged in (mobile) */}
+            {!token && (
+              <li
+                onClick={() => { navigate('/login'); setShowMenu(false); }}
+                className='w-full text-center py-2 rounded hover:bg-gray-100 cursor-pointer'
+              >
+                Log In
+              </li>
+            )}
           </ul>
         </div>
       </div>
+
+      {/* ----------- Profile Icon and Dropdown for logged in users (desktop) ----------- */}
+      {token && (
+        <div className='relative ml-8 hidden md:block' ref={dropdownRef}>
+          <div
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className='flex items-center gap-2 cursor-pointer select-none'
+          >
+            <img
+              className='w-14 h-14 rounded-full object-cover border-2 border-gray-300 shadow-md'
+              src={getProfileImage()}
+              alt='Profile'
+            />
+            <img className='w-4' src={assets.dropdown_icon} alt='Dropdown' />
+          </div>
+          {dropdownOpen && (
+            <div className='absolute top-12 right-0 z-20 bg-white border border-gray-200 rounded-md flex flex-col gap-2 p-3 text-[#030303] min-w-48 shadow-lg'>
+              <button
+                type="button"
+                onMouseDown={e => { e.preventDefault(); setDropdownOpen(false); navigate('/my-profile'); }}
+                className='text-left cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded w-full'
+              >
+                My Profile
+              </button>
+              <button
+                type="button"
+                onMouseDown={e => { e.preventDefault(); setDropdownOpen(false); navigate('/my-appointments'); }}
+                className='text-left cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded w-full'
+              >
+                My Appointments
+              </button>
+              <button
+                type="button"
+                onMouseDown={e => { e.preventDefault(); setDropdownOpen(false); handleLogout(); }}
+                className='text-left cursor-pointer hover:bg-[#f4f4f4] px-3 py-1 rounded w-full'
+              >
+                Log Out
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

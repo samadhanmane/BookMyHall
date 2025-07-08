@@ -3,15 +3,22 @@ import { AppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 const MyProfile = () => {
   const { userData, setUserData, token, backendUrl, loadUserProfileData } = useContext(AppContext)
   const [isEdit, setIsEdit] = useState(false)
-  const [image, setImage] = useState(false)
   const [guestRooms, setGuestRooms] = useState([])
   const [loading, setLoading] = useState(false)
   const [feedbacks, setFeedbacks] = useState([]);
   const [feedbacksLoading, setFeedbacksLoading] = useState(false);
+  const [position, setPosition] = useState('')
+  const [changePassword, setChangePassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const navigate = useNavigate();
 
   const updateUserProfileData = async () => {
     try {
@@ -21,14 +28,12 @@ const MyProfile = () => {
       formData.append('address', JSON.stringify(userData.address))
       formData.append('gender', userData.gender)
       formData.append('dob', userData.dob)
-      image && formData.append('image', image)
 
       const { data } = await axios.post(backendUrl + '/api/user/update-profile', formData, { headers: { token } })
       if (data.success) {
         toast.success(data.message)
-        await loadUserProfileData()
+        await loadUserProfileData();
         setIsEdit(false)
-        setImage(false)
       } else {
         toast.error(data.message)
       }
@@ -38,12 +43,21 @@ const MyProfile = () => {
     }
   }
 
+  // Always use the default icon
+  const getProfileImage = () => assets.upload_icon;
+
   useEffect(() => {
-    if (userData && userData.email) {
-      console.log('User data available:', userData)
-      fetchUserFeedbacks()
+    if (!userData) {
+      loadUserProfileData().catch(err => {
+        // Do nothing for 404, suppress toast
+      });
+      return;
     }
-  }, [userData])
+    if (userData.email) {
+      fetchUserFeedbacks();
+    }
+    setPosition(userData.position || '');
+  }, [userData]);
 
   const fetchUserFeedbacks = async () => {
     setFeedbacksLoading(true);
@@ -59,86 +73,182 @@ const MyProfile = () => {
     }
   };
 
-  if (!userData) {
-    return <div className="min-h-screen px-6 sm:px-10 py-10 bg-white font-poppins text-[#030303]">
-      <p>Loading profile data...</p>
-      </div>
+  const handleUpdateProfile = async () => {
+    setLoading(true)
+    try {
+      const update = {
+        name: userData.name,
+        phone: userData.phone,
+        email: userData.email,
+        position
+      }
+      const { data } = await axios.post(backendUrl + '/api/user/update-profile', update, { headers: { token } })
+      if (data.success) {
+        toast.success('Profile updated successfully')
+        await loadUserProfileData()
+        setIsEdit(false)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  return userData && (
-    <div className='min-h-screen flex flex-col items-center justify-start bg-white font-[Poppins] text-[#030303] px-4 py-10'>
-      <div className='max-w-lg w-full bg-white border border-gray-200 rounded-lg p-8'>
-        <div className='flex justify-center mb-6'>
-          {
-            isEdit ? (
-              <label htmlFor='image' className='cursor-pointer relative'>
-                <img className='w-36 h-36 object-cover rounded-full opacity-50 border border-gray-300' src={image ? URL.createObjectURL(image) : userData.image} alt="Profile" />
-                <img className='w-8 absolute bottom-2 right-2' src={image ? '' : assets.upload_icon} alt="Upload" />
-                <input onChange={(e) => setImage(e.target.files[0])} type="file" id="image" hidden />
-              </label>
-            ) : (
-              <img className='w-36 h-36 object-cover rounded-full border border-gray-300' src={userData.image} alt="Profile" />
-            )
-          }
-        </div>
-        <div className='text-center'>
-          {
-            isEdit
-              ? <input className='text-2xl font-semibold border border-gray-300 px-2 py-1 rounded w-full text-center' type='text' value={userData.name} onChange={e => setUserData(prev => ({ ...prev, name: e.target.value }))} />
-              : <p className='text-2xl font-semibold'>{userData.name}</p>
-          }
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('Please fill all password fields')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match')
+      return
+    }
+    setPasswordLoading(true)
+    try {
+      const { data } = await axios.post(backendUrl + '/api/user/change-password', {
+        currentPassword,
+        newPassword
+      }, { headers: { token } })
+      if (data.success) {
+        toast.success('Password changed successfully')
+        setChangePassword(false)
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  if (userData === false) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white font-poppins text-[#030303]">
+        <div className="text-lg font-semibold mb-4">Profile not found or you are not logged in.</div>
+        <button
+          className="bg-[#123458] text-white px-6 py-2 rounded-full hover:bg-[#0e2740] transition-all"
+          onClick={() => navigate('/login')}
+        >
+          Go to Login
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className='min-h-screen flex flex-col items-center justify-start bg-white font-poppins text-[#030303] px-4 py-10'>
+      <div className='max-w-lg w-full bg-white border border-gray-200 rounded-lg p-8 shadow'>
+        <div className='flex flex-col items-center mb-6'>
+          <img className='w-32 h-32 object-cover rounded-full border border-gray-300 mb-2' src={getProfileImage()} alt="Profile" />
+          <div className='text-xl font-bold mt-2'>{userData?.name || ''}</div>
+          <div className='text-sm text-gray-500'>{position || <span className='text-gray-300'>No position set</span>}</div>
         </div>
         <hr className='my-6 border-gray-300' />
-        <div>
-          <p className='text-sm text-[#123458] font-medium mb-2'>Contact Information</p>
-          <div className='grid grid-cols-[1fr_2fr] gap-y-4 text-sm'>
-            <p>Email:</p>
-            <p className='text-[#123458] font-medium'>{userData.email}</p>
-            <p>Phone:</p>
-            {
-              isEdit
-                ? <input className='border border-gray-300 px-2 py-1 rounded' type='text' value={userData.phone} onChange={e => setUserData(prev => ({ ...prev, phone: e.target.value }))} />
-                : <p>{userData.phone}</p>
-            }
-            <p>Address:</p>
-            {
-              isEdit
-                ? <div className='flex flex-col gap-2'>
-                    <input className='border border-gray-300 px-2 py-1 rounded' value={userData.address.line1} onChange={e => setUserData(prev => ({ ...prev, address: { ...prev.address, line1: e.target.value } }))} />
-                    <input className='border border-gray-300 px-2 py-1 rounded' value={userData.address.line2} onChange={e => setUserData(prev => ({ ...prev, address: { ...prev.address, line2: e.target.value } }))} />
-                  </div>
-                : <p>{userData.address.line1}<br />{userData.address.line2}</p>
-            }
+        <form className='flex flex-col gap-4'>
+          <div>
+            <label className='block text-sm mb-1 font-medium'>Full Name</label>
+            <input
+              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+              type='text'
+              value={userData?.name || ''}
+              disabled={!isEdit}
+              onChange={e => setUserData(prev => ({ ...prev, name: e.target.value }))}
+            />
           </div>
-        </div>
-        <hr className='my-6 border-gray-300' />
-        <div>
-          <p className='text-sm text-[#123458] font-medium mb-2'>Basic Information</p>
-          <div className='grid grid-cols-[1fr_2fr] gap-y-4 text-sm'>
-            <p>Gender:</p>
-            {
-              isEdit
-                ? <select className='border border-gray-300 px-2 py-1 rounded' value={userData.gender} onChange={(e) => setUserData(prev => ({ ...prev, gender: e.target.value }))}>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                : <p>{userData.gender}</p>
-            }
-            <p>Date of Birth:</p>
-            {
-              isEdit
-                ? <input className='border border-gray-300 px-2 py-1 rounded' type="date" value={userData.dob} onChange={(e) => setUserData(prev => ({ ...prev, dob: e.target.value }))} />
-                : <p>{userData.dob}</p>
-            }
+          <div>
+            <label className='block text-sm mb-1 font-medium'>Email</label>
+            <input
+              className='w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500'
+              type='email'
+              value={userData?.email || ''}
+              disabled
+            />
           </div>
-        </div>
-        <div className='mt-8 text-center'>
-          {
-            isEdit
-              ? <button className='bg-[#123458] text-white px-6 py-2 rounded-full hover:bg-[#0e2740] transition-all' onClick={updateUserProfileData}>Save Information</button>
-              : <button className='border border-[#123458] text-[#123458] px-6 py-2 rounded-full hover:bg-[#123458] hover:text-white transition-all' onClick={() => setIsEdit(true)}>Edit</button>
-          }
-        </div>
+          <div>
+            <label className='block text-sm mb-1 font-medium'>Phone Number</label>
+            <input
+              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+              type='text'
+              value={userData?.phone || ''}
+              disabled={!isEdit}
+              onChange={e => setUserData(prev => ({ ...prev, phone: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label className='block text-sm mb-1 font-medium'>Position</label>
+            <input
+              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+              type='text'
+              value={position}
+              disabled={!isEdit}
+              onChange={e => setPosition(e.target.value)}
+            />
+          </div>
+          <div className='flex flex-col gap-2 mt-4'>
+            <div className='flex flex-row gap-4'>
+              {isEdit ? (
+                <>
+                  <button type='button' className='bg-[#123458] text-white px-6 py-2 rounded-full hover:bg-[#0e2740] transition-all' onClick={handleUpdateProfile} disabled={loading}>
+                    {loading ? 'Saving...' : 'Save'}
+                  </button>
+                  <button type='button' className='border border-[#123458] text-[#123458] px-6 py-2 rounded-full hover:bg-[#123458] hover:text-white transition-all' onClick={() => setIsEdit(false)}>
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button type='button' className='border border-[#123458] text-[#123458] px-6 py-2 rounded-full hover:bg-[#123458] hover:text-white transition-all' onClick={() => setIsEdit(true)}>
+                  Edit Profile
+                </button>
+              )}
+            </div>
+            <button type='button' className='self-end text-[#123458] underline' onClick={() => setChangePassword(!changePassword)}>
+              {changePassword ? 'Hide Password Change' : 'Change Password'}
+            </button>
+          </div>
+        </form>
+        {changePassword && (
+          <div className='mt-8 border-t pt-6'>
+            <h3 className='text-lg font-semibold mb-4'>Change Password</h3>
+            <div className='flex flex-col gap-3'>
+              <input
+                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+                type='password'
+                placeholder='Current Password'
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+              />
+              <input
+                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+                type='password'
+                placeholder='New Password'
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+              />
+              <input
+                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+                type='password'
+                placeholder='Confirm New Password'
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+              />
+              <button
+                type='button'
+                className='bg-[#123458] text-white px-6 py-2 rounded-full hover:bg-[#0e2740] transition-all mt-2'
+                onClick={handleChangePassword}
+                disabled={passwordLoading}
+              >
+                {passwordLoading ? 'Changing...' : 'Change Password'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       {/* Feedback Section */}
       <div className='max-w-4xl w-full mt-10'>

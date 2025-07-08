@@ -5,7 +5,7 @@ const About = () => {
   return (
     <div className="font-[Poppins] bg-white text-[#030303] px-6 md:px-20">
       {/* Heading */}
-      <div className="text-center text-3xl font-semibold pt-12">
+      <div className="text-center text-3xl font-bold pt-12">
         <p>
           About <span className="text-[#123458]">US</span>
         </p>
@@ -18,65 +18,60 @@ const About = () => {
           src={assets.mitaoe}
           alt="MITAOE"
         />
-        <div className="flex flex-col justify-center gap-6 md:w-3/5 text-[15px] leading-relaxed">
-          <h1 className="text-3xl font-bold mb-4">About BookMyFacility</h1>
-          <p className="mb-4 text-gray-700">
-            BookMyFacility is a comprehensive platform designed to streamline the booking process for a variety of facilities, including halls, guest rooms, and vehicles. Our mission is to provide a seamless and efficient experience for users seeking to reserve facilities for events, stays, or transportation needs. With a user-friendly interface and robust features, BookMyFacility ensures that managing and booking facilities is simple, transparent, and accessible for everyone.
+        <div className="flex flex-col justify-center gap-6 md:w-3/5 text-base leading-relaxed">
+          <h1 className="text-2xl font-bold mb-4">About Facility Booking</h1>
+          <p className="mb-4 text-gray-700 text-base">
+            Facility Booking is MITAOE's internal platform for reserving campus resources such as seminar halls, guest rooms, and vehicles. The goal is to make the reservation process for events, stays, and transportation simple, transparent, and efficient for the entire MITAOE community.
           </p>
           <p>
-            Welcome to the official Seminar Hall Booking Portal of MIT Academy of Engineering.
-            This platform has been developed to simplify and digitize the booking process of
-            seminar halls for various academic, departmental, and student-led activities within
-            the campus.
+            This portal is developed to digitize and streamline the facility booking process for academic, departmental, and student-led activities within MITAOE. By providing real-time availability and a user-friendly interface, it helps faculty, staff, and students coordinate and reserve resources with ease.
           </p>
           <p>
-            Designed to be user-friendly and efficient, the portal allows faculty, staff, and
-            students to view hall availability and make reservations with ease. With a commitment
-            to streamlining internal operations, this system ensures optimal utilization of
-            institutional resources.
+            Facility Booking ensures optimal utilization of institutional resources, reduces manual work, and promotes better coordination for events across departments and clubs. Our commitment is to make campus facility management accessible and hassle-free for everyone at MITAOE.
           </p>
           <div>
-            <h3 className="text-lg font-semibold text-[#123458] mb-1">Our Purpose</h3>
+            <h3 className="text-xl font-semibold text-[#123458] mb-1">Our Purpose</h3>
             <p>
-              Our aim is to enable a seamless booking experience for the MITAOE community by
-              providing transparent scheduling, reducing manual work, and promoting better
-              coordination for events across departments and clubs.
+              To empower the MITAOE community with a seamless, transparent, and efficient facility booking experience—enabling better event planning, resource management, and collaboration across the campus.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Why Choose Us Section */}
-      <div className="text-2xl font-semibold mb-6 text-center">
-        <p>
-          WHY <span className="text-[#123458]">CHOOSE US</span>
+      {/* About the Team Section */}
+      <div className="bg-[#f5f7fa] rounded-xl shadow-md px-6 py-10 md:px-16 md:py-12 mb-16">
+        <h2 className="text-2xl font-bold text-center mb-6 text-[#123458]">About the Team</h2>
+        <p className="text-center text-gray-700 max-w-3xl mx-auto mb-8 text-base">
+          Facility Booking is a student-driven project developed as part of the Computer Engineering program at MIT Academy of Engineering. Our team is dedicated to building practical solutions that enhance campus life and streamline institutional processes. This project was completed under the guidance of our esteemed project coordinator.
         </p>
+        <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-16 items-center mb-8">
+          <div className="flex flex-col items-center">
+            <span className="font-semibold text-base">Chaitanya Retawade</span>
+            <span className="text-sm text-gray-500">Backend Developer</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="font-semibold text-base">Samadhan Mane</span>
+            <span className="text-sm text-gray-500">Fullstack Developer</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="font-semibold text-base">Krishna Gadhave</span>
+            <span className="text-sm text-gray-500">Backend Developer</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="font-semibold text-base">Vivek Borade</span>
+            <span className="text-sm text-gray-500">Frontend Developer</span>
+          </div>
+        </div>
+        <div className="text-center mt-4">
+          <span className="font-semibold text-base text-[#123458]">Project Coordinator:</span>
+          <span className="ml-2 text-base">Pranav Shriram Sir</span>
+        </div>
+        <div className="mt-8 text-center text-gray-600 text-sm max-w-2xl mx-auto">
+          We are proud to contribute to MITAOE's digital transformation journey. Our collaborative effort reflects our passion for technology, teamwork, and delivering real value to our academic community.
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between gap-6 pb-20">
-        {[
-          {
-            title: 'EFFICIENCY:',
-            desc: 'Digitized scheduling that saves time and avoids booking conflicts.',
-          },
-          {
-            title: 'TRANSPARENCY:',
-            desc: 'Real-time availability of halls and accessible reservation history.',
-          },
-          {
-            title: 'SIMPLICITY:',
-            desc: 'A clean interface for quick and easy booking, even for first-time users.',
-          },
-        ].map((item, index) => (
-          <div
-            key={index}
-            className="border border-[#123458] rounded-lg px-8 py-10 flex flex-col gap-4 hover:bg-[#123458] hover:text-white transition-all duration-300 text-[#030303]"
-          >
-            <b className="text-base">{item.title}</b>
-            <p className="text-sm">{item.desc}</p>
-          </div>
-        ))}
-      </div>
+      {/* Why Choose Us Section - Removed as requested */}
     </div>
   );
 };

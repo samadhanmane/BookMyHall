@@ -22,6 +22,6 @@ const hallSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 }, { minimize: false });
 
-const hallModel = mongoose.models.hall || mongoose.model('hall', hallSchema);
+const hallModel = mongoose.models.Hall || mongoose.model('Hall', hallSchema);
 
 export default hallModel;

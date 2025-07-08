@@ -5,6 +5,7 @@ const appointmentSchema = new mongoose.Schema({
     hallId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hall', required: true },
     slotDate: { type: String, required: true },
     slotTime: { type: String, required: true },
+    reason: { type: String, required: false },
     bookingDuration: { type: Number, default: 1 }, // Duration in days (1, 3, or 7) for guest rooms
     isAccepted: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },

@@ -9,7 +9,7 @@ const AppContextProvider = (props) => {
     const currencySymbol = '$'  
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [halls,setHalls] = useState([])
-    const [token,setToken] = useState(localStorage.getItem('token')?localStorage.getItem('token'):false)
+    const [token,setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : "")
     const [userData,setUserData] = useState(false)
     const [appointment, setAppointment] = useState([]);
    
@@ -34,18 +34,22 @@ const AppContextProvider = (props) => {
    
 
     const loadUserProfileData = async () => {
-        try{
-
+        if (!token || token === "false") return;
+        try {
             const {data} = await axios.get(backendUrl+ '/api/user/get-profile',{headers:{token}})
             if(data.success){
                 setUserData(data.userData)
             }else{
                 toast.error(data.message)
             }
-
         }catch(error){
             console.log(error)
-            toast.error(error.message)
+            if (error?.response?.status === 404) {
+                setUserData(false);
+            } else {
+                toast.error(error.message)
+            }
+            return error;
         }
     }
 
@@ -94,15 +98,15 @@ const AppContextProvider = (props) => {
         getHallsData()
     },[])
 
-    useEffect (()=>{
-        if(token){
-        loadUserProfileData()
-        getAppointments()
-        } else{
-            setUserData(false)
-            setAppointment([])
+    useEffect(() => {
+        if (token && token !== "false") {
+            loadUserProfileData();
+            getAppointments();
+        } else {
+            setUserData(false);
+            setAppointment([]);
         }
-    },[token])
+    }, [token]);
 
     return(
         <AppContext.Provider value={value}>

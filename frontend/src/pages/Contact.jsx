@@ -4,7 +4,7 @@ import { assets } from '../assets/assets';
 const Contact = () => {
   return (
     <div className="px-4 md:px-20 font-[Poppins] bg-white text-[#030303]">
-      <div className="text-center pt-12 text-3xl font-medium">
+      <div className="text-center pt-12 text-3xl font-bold">
         <p>
           CONTACT <span className="text-[#123458] font-semibold">US</span>
         </p>
@@ -17,9 +17,9 @@ const Contact = () => {
           alt="Office"
         />
 
-        <div className="flex flex-col justify-center gap-6 text-sm">
+        <div className="flex flex-col justify-center gap-6 text-base">
           <div>
-            <p className="text-lg font-semibold text-[#123458] mb-2">OUR OFFICE</p>
+            <p className="text-xl font-semibold text-[#123458] mb-2">OUR OFFICE</p>
             <p className="text-[#030303]">
               Student Section, Design Building <br />
               MITAOE, Alandi, Pune 412105, Maharashtra, India
@@ -34,20 +34,18 @@ const Contact = () => {
           </div>
 
           <div>
-            <p className="text-lg font-semibold text-[#123458] mb-2">Have any doubt?</p>
+            <p className="text-xl font-semibold text-[#123458] mb-2">Have any doubt?</p>
             <p className="text-[#030303]">To learn more about our team</p>
           </div>
 
-          <button className="mt-2 w-fit px-6 py-2 bg-[#123458] text-white border border-[#123458] hover:bg-white hover:text-[#123458] transition-all duration-300 rounded-md shadow">
+          <button
+            className="mt-2 w-fit px-6 py-2 bg-[#123458] text-white border border-[#123458] hover:bg-white hover:text-[#123458] transition-all duration-300 rounded-md shadow text-base"
+            onClick={() => window.location.href = 'mailto:admissions@mitaoe.ac.in'}
+          >
             Contact Office
           </button>
         </div>
       </div>
-
-      <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
-      <p className="mb-4 text-gray-700">
-        Have questions or need assistance with booking a facility? Our support team is here to help you with any inquiries regarding halls, guest rooms, vehicles, or other facilities. Please fill out the form below, and we will get back to you as soon as possible.
-      </p>
     </div>
   );
 };

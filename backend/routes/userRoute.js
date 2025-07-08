@@ -1,5 +1,5 @@
 import express from 'express'
-import { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, sendOtp, verifyOtp, getAllUsers } from '../controllers/userController.js'
+import { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, sendOtp, verifyOtp, getAllUsers, changePassword, getUserFeedbacks } from '../controllers/userController.js'
 import authUser from '../middlewares/authUser.js'
 import upload from '../middlewares/multer.js'
 
@@ -15,10 +15,13 @@ router.post('/reset-password', verifyOtp)
 
 // Protected routes
 router.get('/profile', authUser, getProfile)
+router.get('/get-profile', authUser, getProfile)
 router.post('/update-profile', upload.single('image'), authUser, updateProfile)
 router.post('/book-appointment', authUser, bookAppointment)
 router.get('/appointments', authUser, listAppointment)
 router.post('/cancel-appointment', authUser, cancelAppointment)
 router.get('/all', getAllUsers)
+router.post('/change-password', authUser, changePassword)
+router.get('/feedbacks', authUser, getUserFeedbacks)
 
 export default router

@@ -77,17 +77,8 @@ If your frontend or admin needs to connect to a remote backend, create a `.env` 
 VITE_API_URL=https://your-backend-url.com
 ```
 
-## Deployment
-- Build the frontend and admin apps using `npm run build`.
-- Serve the `dist` folders using a static file server or configure your backend to serve them.
-- Ensure all environment variables are set in your production environment.
-- Use HTTPS and secure your environment variables.
-
-## Contact & Support
-For questions, support, or contributions, please contact:
-- [Your Name/Team]
-- [Your Email Address]
-
+## Developed By
 ---
+Chaitanya Retawade
 
 **BookMyFacility** — Streamlining facility management for your institution. 

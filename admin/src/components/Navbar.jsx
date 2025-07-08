@@ -22,16 +22,16 @@ const Navbar = () => {
   }
 
   return (
-    <div className='flex justify-between items-center px-4 sm:px-10 py-3 border-b border-gray-300 bg-white font-poppins'>
+    <div className='flex justify-between items-center px-10 py-7 border-b-2 border-gray-300 bg-white' style={{ minHeight: '90px' }}>
       {/* Left Section */}
-      <div className='flex items-center gap-3'>
+      <div className='flex items-center gap-6'>
         <img
           onClick={() => navigate('/')}
-          className='w-36 sm:w-40 cursor-pointer rounded-md object-contain transition-transform duration-200 hover:scale-105'
+          className='w-52 sm:w-60 cursor-pointer rounded-md object-contain transition-transform duration-200 hover:scale-105 drop-shadow-lg'
           src={assets.MITAOE_logo}
           alt='College Logo'
         />
-        <span className='px-3 py-1 rounded-full text-xs font-medium text-[#030303] border border-[#030303]'>
+        <span className='px-4 py-1.5 rounded-full text-sm font-semibold text-[#030303] border border-[#030303] bg-gray-50'>
           {adminToken ? 'Admin' : 'Coordinator'}
         </span>
       </div>
@@ -39,7 +39,7 @@ const Navbar = () => {
       {/* Logout Button */}
       <button
         onClick={handleLogout}
-        className='bg-[#123458] text-white px-6 py-2 rounded-full text-sm font-medium hover:opacity-90 transition border border-[#123458]'
+        className='bg-[#123458] text-white px-6 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition border border-[#123458] shadow'
       >
         Log Out
       </button>

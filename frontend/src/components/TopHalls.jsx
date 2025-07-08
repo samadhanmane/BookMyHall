@@ -48,12 +48,22 @@ const TopFacilities = () => {
 
     return (
         <div className="flex flex-col items-center gap-4 my-16 text-[#030303] md:mx-10 font-poppins bg-white">
-            {/* Top Facilities Section */}
+            {/* Top Facilities Section (no halls) */}
             <div className="w-full">
                 <h1 className="text-3xl font-semibold text-center mb-2">Top Facilities</h1>
                 <p className="sm:w-1/3 text-center text-sm text-[#030303] mx-auto mb-6">
                     Browse some of the most commonly reserved facilities for events, stays, and transportation.
                 </p>
+                <div className="w-full grid sm:grid-cols-2 md:grid-cols-4 gap-6 pt-6 px-3 sm:px-0">
+                    {/* Only show non-hall facilities here, e.g., vehicles or guest rooms if needed */}
+                    {vehicles.length === 0 && guestRooms.length === 0 && (
+                        <p className="col-span-4 text-center text-gray-400">No facilities to display.</p>
+                    )}
+                </div>
+            </div>
+            {/* Top Halls Section */}
+            <div className="w-full mt-12">
+                <h1 className="text-2xl font-semibold text-center mb-2">Top Halls</h1>
                 <div className="w-full grid sm:grid-cols-2 md:grid-cols-4 gap-6 pt-6 px-3 sm:px-0">
                     {regularHalls.map((item) => (
                         <FacilityCard key={item._id} item={item} />

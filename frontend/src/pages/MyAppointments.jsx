@@ -155,7 +155,26 @@ const MyAppointments = () => {
               <div className="text-sm text-gray-700">
                 <span className="font-medium">Time:</span> {appointment.time}
               </div>
+              {/* Vehicle-specific details */}
+              {appointment.facilityId?.isVehicle && (
+                <>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Vehicle Type:</span> {appointment.facilityId?.speciality}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Seating:</span> {appointment.facilityId?.experience}
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Description:</span> {appointment.facilityId?.about}
+                  </div>
+                </>
+              )}
               {/* Add more facility-specific details here if needed */}
+              {appointment.reason && (
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium">Reason:</span> {appointment.reason}
+                </div>
+              )}
             </div>
           ))
         )}

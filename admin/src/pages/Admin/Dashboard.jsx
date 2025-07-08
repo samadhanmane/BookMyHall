@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
-import { assets } from '../../assets/assets'
+import { assets } from '../../assets/assets.js'
 
 const Dashboard = () => {
   const {
@@ -29,13 +29,13 @@ const Dashboard = () => {
         {[
           { icon: assets.hall_icon, label: 'Halls', value: dashData.halls },
           { icon: assets.appointments_icon, label: 'Appointments', value: dashData.appointments },
-          { icon: assets.patients_icon, label: 'Users', value: dashData.users },
+          { icon: assets.people_icon, label: 'Users', value: dashData.users },
         ].map((card, index) => (
           <div
             key={index}
             className='flex items-center gap-3 bg-white p-4 min-w-52 rounded border border-gray-200 shadow-sm shadow-black hover:shadow-md transition-all duration-200'
           >
-            <img className='w-12 h-12 object-contain rounded-md shadow-sm' src={card.icon} alt={card.label} />
+            <img className={`w-12 h-12 object-contain rounded-md shadow-sm ${card.label === 'Users' ? 'p-2' : ''}`} src={card.icon} alt={card.label} />
             <div>
               <p className='text-xl font-semibold'>{card.value}</p>
               <p className='text-[#123458] font-medium'>{card.label}</p>
