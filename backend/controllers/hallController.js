@@ -164,7 +164,7 @@ const changeAvailability = async (req, res) => {
         await hallModel.findByIdAndUpdate(hallId, { available: !hallData.available });
         res.json({ success: true, message: "Availability changed successfully" });
     } catch (error) {
-        console.log(error);
+        console.error('Error in changeAvailability:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -228,7 +228,7 @@ const loginHall = async (req, res) => {
             return res.json({ success: false, message: "Invalid email or password" });
         }
     } catch (error) {
-        console.log(error);
+        console.error('Error in loginHall:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -241,6 +241,7 @@ const appointmentsHall = async (req, res) => {
         const filteredAppointments = appointments.filter(app => app.hallId.toString() === hallId);
         res.json({ success: true, appointments: filteredAppointments });
     } catch (error) {
+        console.error('Error in appointmentsHall:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -250,10 +251,8 @@ const appointmentRequest = async (req, res) => {
     try {
         const { appointmentId } = req.body;
         const hallId = req.hall._id.toString(); // Convert to string
-        console.log('Accepting appointment:', { appointmentId, hallId });
 
         const appointmentData = await appointmentModel.findById(appointmentId);
-        console.log('Found appointment:', appointmentData);
 
         if (!appointmentData) {
             return res.json({
@@ -264,10 +263,6 @@ const appointmentRequest = async (req, res) => {
 
         // Convert appointment's hallId to string for comparison
         if (appointmentData.hallId.toString() !== hallId) {
-            console.log('Hall ID mismatch:', {
-                appointmentHallId: appointmentData.hallId.toString(),
-                authenticatedHallId: hallId
-            });
             return res.json({
                 success: false,
                 message: "This appointment does not belong to your hall"
@@ -323,10 +318,8 @@ const appointmentComplete = async (req, res) => {
     try {
         const { appointmentId } = req.body;
         const hallId = req.hall._id.toString(); // Convert to string
-        console.log('Completing appointment:', { appointmentId, hallId });
 
         const appointmentData = await appointmentModel.findById(appointmentId);
-        console.log('Found appointment:', appointmentData);
 
         if (!appointmentData) {
             return res.json({
@@ -336,10 +329,6 @@ const appointmentComplete = async (req, res) => {
         }
 
         if (appointmentData.hallId.toString() !== hallId) {
-            console.log('Hall ID mismatch:', {
-                appointmentHallId: appointmentData.hallId.toString(),
-                authenticatedHallId: hallId
-            });
             return res.json({
                 success: false,
                 message: "This appointment does not belong to your hall"
@@ -395,7 +384,7 @@ const appointmentComplete = async (req, res) => {
 
         res.json({ success: true, message: "Appointment completed successfully" });
     } catch (error) {
-        console.log(error);
+        console.error('Error in appointmentComplete:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -405,10 +394,8 @@ const appointmentCancel = async (req, res) => {
     try {
         const { appointmentId } = req.body;
         const hallId = req.hall._id.toString(); // Convert to string
-        console.log('Cancelling appointment:', { appointmentId, hallId });
 
         const appointmentData = await appointmentModel.findById(appointmentId);
-        console.log('Found appointment:', appointmentData);
 
         if (!appointmentData) {
             return res.json({
@@ -418,10 +405,6 @@ const appointmentCancel = async (req, res) => {
         }
 
         if (appointmentData.hallId.toString() !== hallId) {
-            console.log('Hall ID mismatch:', {
-                appointmentHallId: appointmentData.hallId.toString(),
-                authenticatedHallId: hallId
-            });
             return res.json({
                 success: false,
                 message: "This appointment does not belong to your hall"
@@ -459,7 +442,7 @@ const appointmentCancel = async (req, res) => {
 
         res.json({ success: true, message: "Appointment cancelled successfully" });
     } catch (error) {
-        console.log(error);
+        console.error('Error in appointmentCancel:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -482,6 +465,7 @@ const hallDashboard = async (req, res) => {
         };
         res.json({ success: true, dashData });
     } catch (error) {
+        console.error('Error in hallDashboard:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -490,12 +474,10 @@ const hallDashboard = async (req, res) => {
 const hallProfile = async (req, res) => {
     try {
         const hallId = req.hall._id; // Get ID from authenticated hall
-        console.log('Getting profile for hall ID:', hallId);
         const profileData = await hallModel.findById(hallId).select(['-password']);
-        console.log('Found profile data:', profileData);
         res.json({ success: true, profileData });
     } catch (error) {
-        console.log(error);
+        console.error('Error in hallProfile:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -507,7 +489,7 @@ const updateHallProfile = async (req, res) => {
         await hallModel.findByIdAndUpdate(hallId, { address, available, about, speciality, name, experience });
         res.json({ success: true, message: "Profile updated successfully" });
     } catch (error) {
-        console.log(error);
+        console.error('Error in updateHallProfile:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -538,6 +520,7 @@ const checkSlotAvailability = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Error in checkSlotAvailability:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -546,7 +529,6 @@ const checkSlotAvailability = async (req, res) => {
 const cancelAppointment = async (req, res) => {
     try {
         const { appointmentId } = req.body;
-        console.log("Cancelling appointment:", appointmentId);
 
         const appointmentData = await appointmentModel.findById(appointmentId);
         if (!appointmentData) {
@@ -583,10 +565,9 @@ const cancelAppointment = async (req, res) => {
             )
         });
 
-        console.log("Appointment cancelled successfully");
         res.json({ success: true, message: "Appointment cancelled successfully" });
     } catch (error) {
-        console.log("Error in cancelAppointment:", error);
+        console.error('Error in cancelAppointment:', error);
         res.json({ success: false, message: error.message });
     }
 }
@@ -619,18 +600,15 @@ const updateHallEmail = async (req, res) => {
 
         let updateResult;
         if (currentHall.isGuestRoom) {
-            // DEBUG: Update all documents with the old email, regardless of isGuestRoom
+            // Update all documents with the old email, regardless of isGuestRoom
             const trimmedOldEmail = oldEmail.trim();
             const trimmedNewEmail = newEmail.trim();
-            console.log('DEBUG: Updating all docs with email:', trimmedOldEmail, 'to new email:', trimmedNewEmail);
             updateResult = await hallModel.updateMany(
                 { email: trimmedOldEmail },
                 { email: trimmedNewEmail }
             );
-            console.log('DEBUG: Update result:', updateResult);
             // Fetch and log all docs with the new email to verify
             const updatedRooms = await hallModel.find({ email: trimmedNewEmail });
-            console.log('DEBUG: Docs with new email:', updatedRooms.map(r => ({ id: r._id, email: r.email, isGuestRoom: r.isGuestRoom })));
         } else {
             // Update only this hall
             updateResult = await hallModel.findByIdAndUpdate(
@@ -721,6 +699,7 @@ const getCoordinatorGuestRooms = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Error in getCoordinatorGuestRooms:', error);
         res.json({
             success: false,
             message: error.message || "Failed to fetch guest rooms"
@@ -847,6 +826,7 @@ const getHalls = async (req, res) => {
             halls: halls
         });
     } catch (error) {
+        console.error('Error in getHalls:', error);
         res.json({
             success: false,
             message: error.message || 'Failed to fetch halls'
@@ -941,7 +921,6 @@ const reviewFeedback = async (req, res) => {
 // API to get average rating and count for each hall
 const getHallRatings = async (req, res) => {
     try {
-        console.log('GET /api/hall/ratings called');
         const ratings = await feedbackModel.aggregate([
             {
                 $group: {
@@ -951,7 +930,6 @@ const getHallRatings = async (req, res) => {
                 }
             }
         ]);
-        console.log('Aggregated ratings:', ratings);
         res.json({ success: true, ratings });
     } catch (error) {
         console.error('Error in getHallRatings:', error);
@@ -976,6 +954,7 @@ const getCoordinatorVehicles = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Error in getCoordinatorVehicles:', error);
         res.json({
             success: false,
             message: error.message || "Failed to fetch vehicles"

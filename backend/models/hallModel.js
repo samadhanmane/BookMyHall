@@ -2,7 +2,13 @@ import mongoose from "mongoose";
 
 const hallSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true, sparse: true, partialFilterExpression: { isGuestRoom: false, isVehicle: false } },
+    email: {
+        type: String,
+        required: function () { return !this.isGuestRoom && !this.isVehicle; },
+        unique: true,
+        sparse: true,
+        partialFilterExpression: { isGuestRoom: false, isVehicle: false }
+    },
     password: { type: String, required: true },
     image: { type: String, required: true },
     speciality: { type: String, required: true },

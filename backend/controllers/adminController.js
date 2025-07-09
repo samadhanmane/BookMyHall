@@ -10,212 +10,199 @@ import Coordinator from '../models/coordinatorModel.js'
 // API for adding halls, guest rooms, and vehicles
 const addHalls = async (req, res) => {
     try {
-        const { name, email, password, speciality, experience, about, address, isGuestRoom, isVehicle } = req.body;
+        const { name, email, password, speciality, experience, about, address, isGuestRoom, isVehicle, coordinatorId } = req.body;
         const imageFile = req.file;
 
         // Convert to booleans
         const isVehicleBool = isVehicle === 'true' || isVehicle === true;
         const isGuestRoomBool = isGuestRoom === 'true' || isGuestRoom === true;
 
-        // Checking for all data to add halls/guest rooms/vehicles
-        if (!name || !email || !speciality || !experience || !about || (!isVehicle && !address)) {
-            return res.json({ success: false, message: "Please fill all the fields." });
-        }
-
-        // Validating email format 
-        if (!validator.isEmail(email)) {
-            return res.json({ success: false, message: "Please enter a valid email" });
-        }
-
         // For guest rooms
         if (isGuestRoomBool) {
-            const existingCoordinator = await Coordinator.findOne({ email });
-            if (existingCoordinator && !password) {
-                // Use the existing coordinator's password
-                const hallData = {
-                    name,
-                    email,
-                    password: existingCoordinator.password, // Use coordinator password
-                    speciality,
-                    experience,
-                    about,
-                    isGuestRoom: true,
-                    address: JSON.parse(address),
-                    date: Date.now()
-                };
-
-                // Optimize image upload to Cloudinary
-                let imageUrl;
-                try {
-                    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-                        quality: "auto",
-                        fetch_format: "auto",
-                        transformation: [
-                            { width: 800, crop: "limit" },
-                            { quality: "auto" }
-                        ]
-                    });
-                    imageUrl = imageUpload.secure_url;
-                } catch (uploadError) {
-                    console.error('Image upload error:', uploadError);
-                    return res.json({ success: false, message: "Failed to upload image. Please try again." });
-                }
-
-                hallData.image = imageUrl;
-
-                // Create and save the new guest room
-                const newHall = new hallModel(hallData);
-                await newHall.save();
-
-                // Clean up the temporary file
-                try {
-                    const fs = require('fs');
-                    fs.unlinkSync(imageFile.path);
-                } catch (cleanupError) {
-                    console.error('File cleanup error:', cleanupError);
-                }
-
-                return res.json({
-                    success: true,
-                    message: "Guest Room added successfully",
-                    data: {
-                        id: newHall._id,
-                        name: newHall.name,
-                        email: newHall.email,
-                        isGuestRoom: newHall.isGuestRoom
-                    }
-                });
-            } else if (!password || password.length < 6) {
-                return res.json({ success: false, message: "Please enter a strong password for new coordinator" });
+            if (!name || !speciality || !experience || !about || !address || !coordinatorId) {
+                return res.json({ success: false, message: "Please fill all the fields and select a coordinator." });
             }
+            // Find coordinator
+            const coordinator = await Coordinator.findById(coordinatorId);
+            if (!coordinator) {
+                return res.json({ success: false, message: "Coordinator not found." });
+            }
+            // Use coordinator's password
+            const hallData = {
+                name,
+                password: coordinator.password, // Use coordinator password
+                speciality,
+                experience,
+                about,
+                isGuestRoom: true,
+                address: JSON.parse(address),
+                date: Date.now(),
+                coordinator: coordinator._id
+            };
+            // Optimize image upload to Cloudinary
+            let imageUrl;
+            try {
+                const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+                    quality: "auto",
+                    fetch_format: "auto",
+                    transformation: [
+                        { width: 800, crop: "limit" },
+                        { quality: "auto" }
+                    ]
+                });
+                imageUrl = imageUpload.secure_url;
+            } catch (uploadError) {
+                console.error('Image upload error:', uploadError);
+                return res.json({ success: false, message: "Failed to upload image. Please try again." });
+            }
+            hallData.image = imageUrl;
+            // Create and save the new guest room
+            const newHall = new hallModel(hallData);
+            await newHall.save();
+            // Clean up the temporary file
+            try {
+                const fs = require('fs');
+                fs.unlinkSync(imageFile.path);
+            } catch (cleanupError) {
+                console.error('File cleanup error:', cleanupError);
+            }
+            return res.json({
+                success: true,
+                message: "Guest Room added successfully",
+                data: {
+                    id: newHall._id,
+                    name: newHall.name,
+                    coordinator: coordinator._id,
+                    isGuestRoom: newHall.isGuestRoom
+                }
+            });
         }
         // For vehicles
         else if (isVehicleBool) {
-            const existingCoordinator = await Coordinator.findOne({ email });
-            if (existingCoordinator && !password) {
-                // Use the existing coordinator's password
-                let imageUrl;
-                try {
-                    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-                        quality: "auto",
-                        fetch_format: "auto",
-                        transformation: [
-                            { width: 800, crop: "limit" },
-                            { quality: "auto" }
-                        ]
-                    });
-                    imageUrl = imageUpload.secure_url;
-                } catch (uploadError) {
-                    console.error('Image upload error:', uploadError);
-                    return res.json({ success: false, message: "Failed to upload image. Please try again." });
-                }
-                const vehicleData = {
-                    name,
-                    email,
-                    image: imageUrl,
-                    password: existingCoordinator.password, // Use coordinator password
-                    speciality,
-                    experience,
-                    about,
-                    isVehicle: true,
-                    address: {}, // No address for vehicles
-                    date: Date.now()
-                };
-                const newVehicle = new hallModel(vehicleData);
-                await newVehicle.save();
-                try {
-                    const fs = require('fs');
-                    fs.unlinkSync(imageFile.path);
-                } catch (cleanupError) {
-                    console.error('File cleanup error:', cleanupError);
-                }
-                return res.json({
-                    success: true,
-                    message: "Vehicle added successfully",
-                    data: {
-                        id: newVehicle._id,
-                        name: newVehicle.name,
-                        email: newVehicle.email,
-                        isVehicle: newVehicle.isVehicle
-                    }
-                });
-            } else if (!password || password.length < 6) {
-                return res.json({ success: false, message: "Please enter a strong password for vehicle manager" });
+            if (!name || !speciality || !experience || !about || !coordinatorId) {
+                return res.json({ success: false, message: "Please fill all the fields and select a coordinator." });
             }
+            // Find coordinator
+            const coordinator = await Coordinator.findById(coordinatorId);
+            if (!coordinator) {
+                return res.json({ success: false, message: "Coordinator not found." });
+            }
+            let imageUrl;
+            try {
+                const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+                    quality: "auto",
+                    fetch_format: "auto",
+                    transformation: [
+                        { width: 800, crop: "limit" },
+                        { quality: "auto" }
+                    ]
+                });
+                imageUrl = imageUpload.secure_url;
+            } catch (uploadError) {
+                console.error('Image upload error:', uploadError);
+                return res.json({ success: false, message: "Failed to upload image. Please try again." });
+            }
+            const vehicleData = {
+                name,
+                image: imageUrl,
+                password: coordinator.password, // Use coordinator password
+                speciality,
+                experience,
+                about,
+                isVehicle: true,
+                address: {}, // No address for vehicles
+                date: Date.now(),
+                coordinator: coordinator._id
+            };
+            const newVehicle = new hallModel(vehicleData);
+            await newVehicle.save();
+            try {
+                const fs = require('fs');
+                fs.unlinkSync(imageFile.path);
+            } catch (cleanupError) {
+                console.error('File cleanup error:', cleanupError);
+            }
+            return res.json({
+                success: true,
+                message: "Vehicle added successfully",
+                data: {
+                    id: newVehicle._id,
+                    name: newVehicle.name,
+                    coordinator: coordinator._id,
+                    isVehicle: newVehicle.isVehicle
+                }
+            });
         }
         // For halls
         else {
+            if (!name || !email || !speciality || !experience || !about || !address) {
+                return res.json({ success: false, message: "Please fill all the fields." });
+            }
             // For halls, always require password
             if (!password || password.length < 6) {
                 return res.json({ success: false, message: "Please enter a strong password" });
             }
-
+            // Validating email format 
+            if (!validator.isEmail(email)) {
+                return res.json({ success: false, message: "Please enter a valid email" });
+            }
             // Check if email already exists for halls
             const existingHall = await hallModel.findOne({ email, isGuestRoom: false });
             if (existingHall) {
                 return res.json({ success: false, message: "This email is already registered for a hall" });
             }
-        }
-
-        // Hashing password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt)
-
-        // Optimize image upload to Cloudinary
-        let imageUrl;
-        try {
-            const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-                quality: "auto",
-                fetch_format: "auto",
-                transformation: [
-                    { width: 800, crop: "limit" },
-                    { quality: "auto" }
-                ]
-            });
-            imageUrl = imageUpload.secure_url;
-        } catch (uploadError) {
-            console.error('Image upload error:', uploadError);
-            return res.json({ success: false, message: "Failed to upload image. Please try again." });
-        }
-
-        const hallData = {
-            name,
-            email,
-            image: imageUrl,
-            password: hashedPassword,
-            speciality,
-            experience,
-            about,
-            isGuestRoom: isGuestRoomBool,
-            isVehicle: isVehicleBool,
-            address: JSON.parse(address),
-            date: Date.now()
-        };
-
-        // Create and save the new hall/guest room/vehicle
-        const newHall = new hallModel(hallData);
-        await newHall.save();
-
-        // Clean up the temporary file
-        try {
-            const fs = require('fs');
-            fs.unlinkSync(imageFile.path);
-        } catch (cleanupError) {
-            console.error('File cleanup error:', cleanupError);
-        }
-
-        res.json({
-            success: true,
-            message: isGuestRoomBool ? "Guest Room added successfully" : isVehicleBool ? "Vehicle added successfully" : "Hall added successfully",
-            data: {
-                id: newHall._id,
-                name: newHall.name,
-                email: newHall.email,
-                isGuestRoom: newHall.isGuestRoom,
-                isVehicle: newHall.isVehicle
+            // Hashing password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt)
+            // Optimize image upload to Cloudinary
+            let imageUrl;
+            try {
+                const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+                    quality: "auto",
+                    fetch_format: "auto",
+                    transformation: [
+                        { width: 800, crop: "limit" },
+                        { quality: "auto" }
+                    ]
+                });
+                imageUrl = imageUpload.secure_url;
+            } catch (uploadError) {
+                console.error('Image upload error:', uploadError);
+                return res.json({ success: false, message: "Failed to upload image. Please try again." });
             }
-        });
-
+            const hallData = {
+                name,
+                email,
+                image: imageUrl,
+                password: hashedPassword,
+                speciality,
+                experience,
+                about,
+                isGuestRoom: false,
+                isVehicle: false,
+                address: JSON.parse(address),
+                date: Date.now()
+            };
+            const newHall = new hallModel(hallData);
+            await newHall.save();
+            try {
+                const fs = require('fs');
+                fs.unlinkSync(imageFile.path);
+            } catch (cleanupError) {
+                console.error('File cleanup error:', cleanupError);
+            }
+            return res.json({
+                success: true,
+                message: "Hall added successfully",
+                data: {
+                    id: newHall._id,
+                    name: newHall.name,
+                    email: newHall.email,
+                    isGuestRoom: newHall.isGuestRoom,
+                    isVehicle: newHall.isVehicle
+                }
+            });
+        }
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
@@ -244,33 +231,32 @@ const loginAdmin = async (req, res) => {
 const allHalls = async (req, res) => {
     try {
         const halls = await hallModel.find({}).select('-password');
-
         // Separate halls, guest rooms, and vehicles
         const hallsList = halls.filter(hall => !hall.isGuestRoom && !hall.isVehicle);
         const guestRoomsList = halls.filter(hall => hall.isGuestRoom);
         const vehiclesList = halls.filter(hall => hall.isVehicle);
-
-        // Group guest rooms and vehicles by email
-        const guestRoomsByEmail = guestRoomsList.reduce((acc, room) => {
-            if (!acc[room.email]) {
-                acc[room.email] = [];
+        // Group guest rooms and vehicles by coordinator
+        const guestRoomsByCoordinator = guestRoomsList.reduce((acc, room) => {
+            const coordId = room.coordinator ? room.coordinator.toString() : 'unassigned';
+            if (!acc[coordId]) {
+                acc[coordId] = [];
             }
-            acc[room.email].push(room);
+            acc[coordId].push(room);
             return acc;
         }, {});
-        const vehiclesByEmail = vehiclesList.reduce((acc, vehicle) => {
-            if (!acc[vehicle.email]) {
-                acc[vehicle.email] = [];
+        const vehiclesByCoordinator = vehiclesList.reduce((acc, vehicle) => {
+            const coordId = vehicle.coordinator ? vehicle.coordinator.toString() : 'unassigned';
+            if (!acc[coordId]) {
+                acc[coordId] = [];
             }
-            acc[vehicle.email].push(vehicle);
+            acc[coordId].push(vehicle);
             return acc;
         }, {});
-
         res.json({
             success: true,
             halls: hallsList,
-            guestRooms: guestRoomsByEmail,
-            vehicles: vehiclesByEmail
+            guestRooms: guestRoomsByCoordinator,
+            vehicles: vehiclesByCoordinator
         });
     } catch (error) {
         console.log(error);
@@ -392,11 +378,9 @@ const adminDashboard = async (req, res) => {
 const getCoordinatorGuestRooms = async (req, res) => {
     try {
         const { email } = req.body;
-        console.log('Received request for email:', email);
 
         // Validate email format
         if (!validator.isEmail(email)) {
-            console.log('Invalid email format:', email);
             return res.json({ success: false, message: "Please enter a valid email" });
         }
 
@@ -405,8 +389,6 @@ const getCoordinatorGuestRooms = async (req, res) => {
             email: email,
             isGuestRoom: true
         }).select('-password'); // Exclude password from response
-
-        console.log('Found guest rooms:', guestRooms);
 
         // Return success even if no rooms found, just with empty array
         res.json({
@@ -501,7 +483,6 @@ const getAllHallsAndRooms = async (req, res) => {
 const deleteHallOrRoom = async (req, res) => {
     try {
         const { hallId } = req.body;
-        console.log('Deleting hall/room:', hallId);
 
         // Find the hall/room
         const hall = await hallModel.findById(hallId);

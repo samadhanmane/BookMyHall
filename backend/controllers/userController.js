@@ -16,17 +16,13 @@ const sendOtp = async (req, res) => {
     try {
         const { email, type } = req.body; // type can be 'user' or 'hall'
 
-        console.log('Sending OTP request:', { email, type });
-
         // Validate required fields
         if (!email || !type) {
-            console.error('Missing required fields:', { email, type });
             return res.json({ success: false, message: 'Email and type are required' });
         }
 
         // Validate type
         if (type !== 'user' && type !== 'hall') {
-            console.error('Invalid type specified:', type);
             return res.json({ success: false, message: 'Invalid type specified. Must be "user" or "hall"' });
         }
 
@@ -38,20 +34,15 @@ const sendOtp = async (req, res) => {
             entity = await hallModel.findOne({ email });
         }
 
-        console.log('Entity found:', entity ? 'Yes' : 'No');
-
         if (!entity) {
-            console.error(`${type} does not exist:`, email);
             return res.json({ success: false, message: `${type} does not exist` });
         }
 
         // First, delete any existing OTP for this email
-        console.log('Deleting existing OTP for:', email);
         await OTPModel.deleteMany({ email, type });
 
         // Generate new OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('Generated OTP:', otp);
 
         // Save new OTP
         const otpDoc = await OTPModel.create({
@@ -61,14 +52,6 @@ const sendOtp = async (req, res) => {
             expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes expiry
         });
 
-        console.log('New OTP Created:', {
-            email,
-            type,
-            otp,
-            storedOtp: otpDoc.otp,
-            expiresAt: otpDoc.expiresAt
-        });
-
         // Send email using the email service
         const emailSent = await sendEmail({
             to: email,
@@ -76,18 +59,14 @@ const sendOtp = async (req, res) => {
             html: getOtpTemplate(otp)
         });
 
-        console.log('Email sent:', emailSent);
-
         if (!emailSent) {
-            console.error('Failed to send OTP email to:', email);
             return res.json({ success: false, message: 'Failed to send OTP email. Please try again.' });
         }
 
         res.json({ success: true, message: 'OTP sent successfully to your email' });
 
     } catch (error) {
-        console.error('Error in sendOtp:', error);
-        res.json({ success: false, message: 'Failed to send OTP. Please try again.' });
+        return res.json({ success: false, message: 'Failed to send OTP. Please try again.' });
     }
 };
 
@@ -95,36 +74,28 @@ const verifyOtp = async (req, res) => {
     try {
         const { email, otp, newPassword, type } = req.body;
 
-        console.log('Verifying OTP:', { email, type, otp });
-
         // Validate required fields
         if (!email || !otp || !newPassword || !type) {
-            console.error('Missing required fields:', { email, otp, newPassword, type });
             return res.json({ success: false, message: 'Missing required fields. Please provide email, OTP, new password, and type.' });
         }
 
         // Find the stored OTP
         const otpRecord = await OTPModel.findOne({ email, type });
-        console.log('OTP Record found:', otpRecord ? 'Yes' : 'No');
 
         if (!otpRecord) {
-            console.error('OTP not found for:', { email, type });
             return res.json({ success: false, message: 'OTP has expired or not found. Please request a new OTP.' });
         }
 
         // Check expiration
         const isExpired = otpRecord.isExpired();
-        console.log('OTP Expired:', isExpired);
 
         if (isExpired) {
             await OTPModel.deleteOne({ email, type });
-            console.log('Deleted expired OTP for:', { email, type });
             return res.json({ success: false, message: 'OTP has expired. Please request a new one.' });
         }
 
         // Verify OTP
         const isOtpValid = otpRecord.otp === otp;
-        console.log('OTP Valid:', isOtpValid);
 
         if (!isOtpValid) {
             return res.json({ success: false, message: 'Invalid OTP. Please try again.' });
@@ -148,22 +119,17 @@ const verifyOtp = async (req, res) => {
             );
         }
 
-        console.log('Password update result:', updateResult);
-
         if (updateResult.modifiedCount === 0) {
-            console.error('Failed to update password for:', { email, type });
             return res.json({ success: false, message: 'Failed to update password. Please try again.' });
         }
 
         // Delete used OTP after successful password reset
         await OTPModel.deleteOne({ email, type });
-        console.log('Deleted used OTP for:', { email, type });
 
         res.json({ success: true, message: 'Password reset successful. You can now login with your new password.' });
 
     } catch (error) {
-        console.error('Error in verifyOtp:', error);
-        res.json({ success: false, message: 'Failed to reset password. Please try again.' });
+        return res.json({ success: false, message: 'Failed to reset password. Please try again.' });
     }
 };
 
@@ -203,8 +169,7 @@ const registerUser = async (req, res) => {
 
         res.json({ success: true, token });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 };
 
@@ -226,8 +191,7 @@ const loginUser = async (req, res) => {
             res.json({ success: false, message: 'Invalid credential ' });
         }
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 };
 
@@ -254,8 +218,7 @@ const getProfile = async (req, res) => {
         if (!userData.role) userData.role = 'College Faculty';
         res.json({ success: true, userData });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 };
 
@@ -291,8 +254,7 @@ const updateProfile = async (req, res) => {
         }
         res.json({ success: true, message: "Profile Updated", userData: updated });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -393,8 +355,7 @@ const bookAppointment = async (req, res) => {
         }
         res.json({ success: true, message: 'Booking successful' });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -417,8 +378,7 @@ const listAppointment = async (req, res) => {
         }));
         res.json({ success: true, appointments: formatted });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -462,8 +422,7 @@ const cancelAppointment = async (req, res) => {
         await hallModel.findByIdAndUpdate(hallId, { slots_booked });
         res.json({ success: true, message: 'Appointment cancelled successfully' });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 }
 
@@ -513,8 +472,7 @@ const approveBooking = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error in approveBooking:', error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 };
 
@@ -523,8 +481,7 @@ const getAllUsers = async (req, res) => {
         const users = await userModel.find();
         res.json({ success: true, users });
     } catch (error) {
-        console.error('Error getting all users:', error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 };
 
@@ -553,8 +510,7 @@ const changePassword = async (req, res) => {
         await user.save();
         res.json({ success: true, message: 'Password changed successfully' });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 }
 
@@ -565,8 +521,7 @@ const getUserFeedbacks = async (req, res) => {
         const feedbacks = await feedbackModel.find({ userId }).populate('appointmentId hallId');
         res.json({ success: true, feedbacks });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 }
 

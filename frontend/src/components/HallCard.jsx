@@ -4,10 +4,21 @@ const HallCard = ({ hall }) => {
             <img src={hall.image} alt={hall.name} className="w-full h-48 object-cover" />
             <div className="p-4">
                 <h3 className="text-xl font-semibold mb-2">{hall.name}</h3>
-                <p className="text-gray-600 mb-2">{hall.speciality}</p>
+                {/* Only show capacity (speciality + experience) for halls */}
+                {(!hall.isGuestRoom && !hall.isVehicle) && (
+                  <p className="text-gray-600 mb-2">Capacity: {hall.speciality} ({hall.experience})</p>
+                )}
+                {/* For vehicles, show type and seating */}
+                {hall.isVehicle && (
+                  <p className="text-gray-600 mb-2">{hall.speciality} ({hall.experience})</p>
+                )}
+                {/* For guest rooms, show only beds */}
+                {hall.isGuestRoom && (
+                  <p className="text-gray-600 mb-2">Beds: {hall.experience}</p>
+                )}
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">
-                        {hall.isGuestRoom ? 'Beds' : hall.isVehicle ? 'Capacity' : 'Seats'}: {hall.experience}
+                        {hall.available ? '' : ''}
                     </span>
                     <span className={`px-2 py-1 rounded text-sm ${
                         hall.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

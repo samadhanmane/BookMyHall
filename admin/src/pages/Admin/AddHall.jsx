@@ -45,6 +45,7 @@ const AddHall = () => {
     }
   }, [isVehicle]);
 
+  // Coordinator selection now uses _id
   const handleCoordinatorChange = (e) => {
     const value = e.target.value
     setSelectedCoordinator(value)
@@ -52,10 +53,13 @@ const AddHall = () => {
       setIsNewCoordinator(true)
       setEmail('')
       setPassword('')
+      setNewCoordName('')
+      setNewCoordEmail('')
+      setNewCoordPassword('')
     } else {
       setIsNewCoordinator(false)
-      setEmail(value) // Set the email to the selected coordinator's email
-      setPassword('') // Clear password as we don't store it
+      setEmail('') // No email for guest room/vehicle
+      setPassword('')
     }
   }
 
@@ -76,15 +80,36 @@ const AddHall = () => {
     }
 
     if (isGuestRoom || isVehicle) {
-      if (!selectedCoordinator) {
+      if (!selectedCoordinator && !isNewCoordinator) {
         toast.error('Please select a coordinator or create a new one')
         setLoading(false)
         return
       }
-      if (isNewCoordinator && (!email || !password)) {
-        toast.error('Please fill in coordinator details')
-        setLoading(false)
-        return
+      if (isNewCoordinator) {
+        if (!newCoordName || !newCoordEmail || !newCoordPassword) {
+          toast.error('Please fill in all new coordinator details')
+          setLoading(false)
+          return
+        }
+        // Create new coordinator first
+        try {
+          const { data } = await axios.post(
+            backendUrl + '/api/admin/add-coordinator',
+            { name: newCoordName, email: newCoordEmail, password: newCoordPassword },
+            { headers: { aToken } }
+          )
+          if (data.success && data.coordinator) {
+            setSelectedCoordinator(data.coordinator._id)
+          } else {
+            toast.error(data.message || 'Failed to add coordinator')
+            setLoading(false)
+            return
+          }
+        } catch (error) {
+          toast.error(error.response?.data?.message || 'Failed to add coordinator')
+          setLoading(false)
+          return
+        }
       }
     } else {
       if (!email || !password) {
@@ -97,10 +122,8 @@ const AddHall = () => {
     const formData = new FormData()
     formData.append('image', hallImg)
     formData.append('name', name)
-    formData.append('email', email)
     if (!isGuestRoom && !isVehicle) {
-      formData.append('password', password)
-    } else if (isNewCoordinator) {
+      formData.append('email', email)
       formData.append('password', password)
     }
     formData.append('speciality', speciality)
@@ -113,6 +136,12 @@ const AddHall = () => {
     ))
     formData.append('isGuestRoom', isGuestRoom.toString())
     formData.append('isVehicle', isVehicle.toString())
+    if ((isGuestRoom || isVehicle) && !isNewCoordinator) {
+      formData.append('coordinatorId', selectedCoordinator)
+    } else if ((isGuestRoom || isVehicle) && isNewCoordinator) {
+      // Use the _id from the newly created coordinator
+      formData.append('coordinatorId', selectedCoordinator)
+    }
 
     try {
       const { data } = await axios.post(backendUrl + '/api/admin/add-hall', formData, {
@@ -135,6 +164,9 @@ const AddHall = () => {
         setAddress2('')
         setSelectedCoordinator('')
         setIsNewCoordinator(false)
+        setNewCoordName('')
+        setNewCoordEmail('')
+        setNewCoordPassword('')
         navigate('/hall-list')
       } else {
         toast.error(data.message)
@@ -228,7 +260,7 @@ const AddHall = () => {
             >
               <option value="">Select a coordinator</option>
               {coordinators.map((coord) => (
-                <option key={coord.email} value={coord.email}>
+                <option key={coord._id} value={coord._id}>
                   {coord.name} ({coord.email})
                 </option>
               ))}
@@ -237,11 +269,21 @@ const AddHall = () => {
             {isNewCoordinator && (
               <div className="mt-4 space-y-4">
                 <div>
+                  <p className="mb-1 text-sm text-[#030303]">New Coordinator Name *</p>
+                  <input
+                    type="text"
+                    value={newCoordName}
+                    onChange={(e) => setNewCoordName(e.target.value)}
+                    className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
+                    placeholder="Enter coordinator name"
+                  />
+                </div>
+                <div>
                   <p className="mb-1 text-sm text-[#030303]">New Coordinator Email *</p>
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={newCoordEmail}
+                    onChange={(e) => setNewCoordEmail(e.target.value)}
                     className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
                     placeholder="Enter coordinator email"
                   />
@@ -250,8 +292,8 @@ const AddHall = () => {
                   <p className="mb-1 text-sm text-[#030303]">New Coordinator Password *</p>
                   <input
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={newCoordPassword}
+                    onChange={(e) => setNewCoordPassword(e.target.value)}
                     className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
                     placeholder="Enter coordinator password"
                   />
