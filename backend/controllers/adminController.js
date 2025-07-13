@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken"
 import appointmentModel from "../models/appointmentModel.js"
 import userModel from "../models/userModel.js"
 import Coordinator from '../models/coordinatorModel.js'
+import { sendEmail, getBookingCancellationTemplate, getCoordinatorWelcomeTemplate } from '../services/emailService.js';
 
 // API for adding halls, guest rooms, and vehicles
 const addHalls = async (req, res) => {
@@ -598,6 +599,14 @@ const addCoordinator = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const coordinator = new Coordinator({ name, email, password: hashedPassword });
         await coordinator.save();
+
+        // Send welcome email to coordinator
+        await sendEmail({
+            to: email,
+            subject: 'Welcome to BookMyHall as a Coordinator!',
+            html: getCoordinatorWelcomeTemplate(name)
+        });
+
         res.json({ success: true, message: 'Coordinator added successfully.', coordinator });
     } catch (error) {
         res.json({ success: false, message: error.message });

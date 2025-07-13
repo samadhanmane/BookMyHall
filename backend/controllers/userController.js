@@ -8,7 +8,7 @@ import appointmentModel from '../models/appointmentModel.js';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import OTPModel from '../models/otpModel.js';
-import { sendEmail, getOtpTemplate, getBookingConfirmationTemplate, getBookingCancellationTemplate, getBookingApprovalTemplate, getHallBookingConfirmationTemplate, getHallBookingCancellationTemplate } from '../services/emailService.js';
+import { sendEmail, getOtpTemplate, getBookingConfirmationTemplate, getBookingCancellationTemplate, getBookingApprovalTemplate, getHallBookingConfirmationTemplate, getHallBookingCancellationTemplate, getUserWelcomeTemplate, getUserPasswordChangeTemplate } from '../services/emailService.js';
 import feedbackModel from '../models/feedbackModel.js';
 import connectCloudinary from '../config/cloudinary.js';
 
@@ -166,6 +166,13 @@ const registerUser = async (req, res) => {
         const user = await newUser.save();
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+        // Send welcome email
+        await sendEmail({
+            to: user.email,
+            subject: 'Welcome to BookMyHall!',
+            html: getUserWelcomeTemplate(user.name)
+        });
 
         res.json({ success: true, token });
     } catch (error) {
@@ -521,11 +528,19 @@ const changePassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword;
         await user.save();
+
+        // Send password change notification email
+        await sendEmail({
+            to: user.email,
+            subject: 'Your BookMyHall Password Has Been Changed',
+            html: getUserPasswordChangeTemplate(user.name)
+        });
+
         res.json({ success: true, message: 'Password changed successfully' });
     } catch (error) {
         return res.json({ success: false, message: error.message });
     }
-}
+};
 
 // Get all feedbacks for the logged-in user
 const getUserFeedbacks = async (req, res) => {
