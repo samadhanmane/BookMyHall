@@ -39,7 +39,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
         <label className="block font-medium mb-1">Audio/Visual Equipment</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full border border-gray-400 rounded px-3 py-2"
           value={audioVisual}
           onChange={e => setAudioVisual(e.target.value)}
           placeholder="Was the AV equipment satisfactory?"
@@ -50,7 +50,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
         <label className="block font-medium mb-1">Seating Comfort</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full border border-gray-400 rounded px-3 py-2"
           value={seatingComfort}
           onChange={e => setSeatingComfort(e.target.value)}
           placeholder="Was the seating comfortable?"
@@ -64,7 +64,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
         <label className="block font-medium mb-1">Bed Comfort</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full border border-gray-400 rounded px-3 py-2"
           value={bedComfort}
           onChange={e => setBedComfort(e.target.value)}
           placeholder="Was the bed comfortable?"
@@ -75,7 +75,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
         <label className="block font-medium mb-1">Amenities</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full border border-gray-400 rounded px-3 py-2"
           value={amenities}
           onChange={e => setAmenities(e.target.value)}
           placeholder="Were the amenities satisfactory?"
@@ -89,7 +89,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
         <label className="block font-medium mb-1">Vehicle Condition</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full border border-gray-400 rounded px-3 py-2"
           value={vehicleCondition}
           onChange={e => setVehicleCondition(e.target.value)}
           placeholder="Was the vehicle in good condition?"
@@ -100,7 +100,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
         <label className="block font-medium mb-1">Timeliness</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full border border-gray-400 rounded px-3 py-2"
           value={timeliness}
           onChange={e => setTimeliness(e.target.value)}
           placeholder="Was the vehicle on time?"
@@ -148,7 +148,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
             <label className="block font-medium mb-1">Cleanliness</label>
             <input
               type="text"
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-400 rounded px-3 py-2"
               value={cleanliness}
               onChange={e => setCleanliness(e.target.value)}
               placeholder="Was the facility clean?"
@@ -159,7 +159,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
             <label className="block font-medium mb-1">Was the staff/coordinator helpful?</label>
             <input
               type="text"
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-400 rounded px-3 py-2"
               value={helpful}
               onChange={e => setHelpful(e.target.value)}
               placeholder="Yes/No or describe briefly"
@@ -170,7 +170,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
           <div>
             <label className="block font-medium mb-1">Suggestions for Improvement</label>
             <textarea
-              className="w-full border rounded px-3 py-2"
+              className="w-full border border-gray-400 rounded px-3 py-2"
               value={improvement}
               onChange={e => setImprovement(e.target.value)}
               placeholder="Any suggestions for improvement?"
@@ -181,7 +181,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
           <div className="flex justify-end gap-2 mt-4">
             <button
               type="button"
-              className="px-4 py-2 rounded border bg-gray-200 text-gray-700"
+              className="px-4 py-2 rounded border border-gray-400 bg-gray-200 text-gray-700"
               onClick={onClose}
               disabled={loading}
             >
@@ -189,7 +189,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded border bg-[#123458] text-white font-semibold"
+              className="px-4 py-2 rounded border border-gray-400 bg-[#123458] text-white font-semibold"
               disabled={loading || rating === 0}
             >
               {loading ? 'Submitting...' : 'Submit'}

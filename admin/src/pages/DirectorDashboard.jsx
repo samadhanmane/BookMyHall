@@ -123,15 +123,11 @@ const DirectorDashboard = () => {
               bookings.map((b) => (
                 <div
                   key={b._id}
-                  className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-all"
+                  className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-all border-b border-gray-400"
                 >
-                  <img
-                    className="rounded-md w-12 h-12 object-cover shadow-sm shadow-black"
-                    src={b.hallId?.image || assets.hall_icon}
-                    alt="facility"
-                  />
+                  {/* Remove facility image, show only name */}
                   <div className="flex-1 text-sm">
-                    <p className="font-medium">{b.hallId?.name || 'Facility'}</p>
+                    <p className="font-bold text-lg text-[#123458]">{b.hallId?.name || 'Facility'}</p>
                     <p className="text-xs text-gray-600 mb-1">Type: {b.hallId?.isGuestRoom ? 'Guest Room' : b.hallId?.isVehicle ? 'Vehicle' : 'Facility'}</p>
                     <p className="text-xs text-gray-600">User: {b.userId?.name} ({b.userId?.email})</p>
                     <p className="text-xs text-gray-600">Date: {b.slotDate} | Time: {b.slotTime}</p>
@@ -139,7 +135,7 @@ const DirectorDashboard = () => {
                   </div>
                   <div className="flex flex-col gap-2 min-w-[220px]">
                     <textarea
-                      className="border rounded px-2 py-1 text-sm"
+                      className="border border-gray-400 rounded px-2 py-1 text-sm"
                       placeholder="Comment (optional)"
                       value={selectedId === b._id ? comment : ''}
                       onChange={e => setComment(e.target.value)}

@@ -137,13 +137,8 @@ const AllAppointment = () => {
                 <span className="text-base">{slotDateFormat(item.slotDate)}</span>
                 <span className="text-xs text-black">{item.slotTime}</span>
               </div>
-              <div className="flex items-center gap-3 min-w-0 border-r border-gray-300 px-6">
-                <img
-                  className="w-14 h-10 object-cover border shadow-sm bg-gray-200 rounded"
-                  src={facilityImage}
-                  alt="facility"
-                />
-                <span className="truncate font-medium text-base" title={facilityName}>{facilityName}</span>
+              <div className="flex items-center gap-3 min-w-0 border-r border-gray-400 px-6">
+                <span className="truncate font-bold text-base text-[#123458]" title={facilityName}>{facilityName}</span>
               </div>
               <div className="flex items-center justify-center border-r border-gray-300 px-6">
                 {item.cancelled ? (

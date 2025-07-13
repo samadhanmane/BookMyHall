@@ -261,7 +261,7 @@ const MyProfile = () => {
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {feedbacks.map((fb) => (
-                <div key={fb._id} className='border border-[#123458] rounded-xl overflow-hidden bg-white'>
+                <div key={fb._id} className='border border-gray-400 rounded-xl overflow-hidden bg-white'>
                   <div className='p-4'>
                     <div className='flex items-center gap-2 mb-2'>
                       <span className='font-semibold text-[#123458]'>{fb.facilityId?.name || 'Facility/Room'}</span>
@@ -272,9 +272,15 @@ const MyProfile = () => {
                       </span>
                     </div>
                     <div className='text-sm text-gray-700 mb-1'><b>Cleanliness:</b> {fb.cleanliness}</div>
-                    <div className='text-sm text-gray-700 mb-1'><b>Description Match:</b> {fb.descriptionMatch}</div>
-                    <div className='text-sm text-gray-700 mb-1'><b>Electricity:</b> {fb.electricity}</div>
-                    <div className='text-sm text-gray-700 mb-1'><b>Other Comments:</b> {fb.otherComments}</div>
+                    <div className='text-sm text-gray-700 mb-1'><b>Helpfulness:</b> {fb.helpful}</div>
+                    {/* Facility-specific fields */}
+                    {fb.audioVisual && <div className='text-sm text-gray-700 mb-1'><b>Audio/Visual:</b> {fb.audioVisual}</div>}
+                    {fb.seatingComfort && <div className='text-sm text-gray-700 mb-1'><b>Seating Comfort:</b> {fb.seatingComfort}</div>}
+                    {fb.bedComfort && <div className='text-sm text-gray-700 mb-1'><b>Bed Comfort:</b> {fb.bedComfort}</div>}
+                    {fb.amenities && <div className='text-sm text-gray-700 mb-1'><b>Amenities:</b> {fb.amenities}</div>}
+                    {fb.vehicleCondition && <div className='text-sm text-gray-700 mb-1'><b>Vehicle Condition:</b> {fb.vehicleCondition}</div>}
+                    {fb.timeliness && <div className='text-sm text-gray-700 mb-1'><b>Timeliness:</b> {fb.timeliness}</div>}
+                    <div className='text-sm text-gray-700 mb-1'><b>Suggestions for Improvement:</b> {fb.improvement}</div>
                     <div className='text-xs text-gray-400 mt-2'>Submitted on {new Date(fb.createdAt).toLocaleString()}</div>
                     {fb.adminMessage || fb.adminRating ? (
                       <div className='mt-4 p-3 rounded bg-gray-50 border border-gray-200'>

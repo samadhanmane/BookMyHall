@@ -14,6 +14,7 @@ import headerlogo from './headerlogo.svg'
 import mitaoe_logo from './MITAOE-logo.png'
 import Low_Capacity from './Low_Capacity.svg'
 import High_Capacity from './High_Capacity.svg'
+import FacilityBooking from './FacilityBooking.png'
 
 
 
@@ -31,9 +32,8 @@ export const assets = {
     High_Capacity_img,
     mitaoe,
     headerlogo,
-    mitaoe_logo
-
-
+    mitaoe_logo,
+    FacilityBooking
 }
 
 export const specialityData = [

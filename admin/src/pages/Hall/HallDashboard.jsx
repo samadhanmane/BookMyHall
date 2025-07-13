@@ -85,16 +85,12 @@ const HallDashboard = () => {
           {dashData.latestAppointments.map((item) => (
             <div
               key={item._id}
-              className="flex items-center gap-4 px-5 py-3 border-b border-gray-100 hover:shadow-sm"
+              className="flex items-center gap-4 px-5 py-3 border-b border-gray-400 hover:shadow-sm"
             >
-              <img
-                className="w-10 h-10 rounded-md object-cover shadow-sm"
-                src={item.userData && item.userData.image ? item.userData.image : assets.userIcon}
-                alt={item.userData && item.userData.name ? item.userData.name : 'User'}
-              />
               <div className="flex-1 text-sm">
-                <p className="text-[#030303] font-medium">{item.userData && item.userData.name ? item.userData.name : 'User'}</p>
+                <p className="font-bold text-lg text-[#123458]">{item.userData && item.userData.name ? item.userData.name : 'User'}</p>
                 <p className="text-gray-500">{slotDateFormat(item.slotDate)}</p>
+                <p className="font-bold text-base text-[#123458]">{item.hallData?.name || item.facilityName || 'Facility'}</p>
               </div>
 
               {/* Status */}

@@ -14,7 +14,7 @@ const About = () => {
       {/* About Section */}
       <div className="my-12 flex flex-col md:flex-row gap-12 items-center">
         <img
-          className="w-full md:max-w-[400px] rounded-lg object-cover transition-transform duration-300 hover:scale-105"
+          className="w-full md:max-w-[400px] rounded-lg object-cover"
           src={assets.mitaoe}
           alt="MITAOE"
         />

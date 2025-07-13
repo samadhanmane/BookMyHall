@@ -212,7 +212,7 @@ const MyAppointments = () => {
       />
       {viewFeedbackModalOpen && viewFeedback && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-8 relative">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-8 relative border border-gray-400">
             <button
               className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl"
               onClick={() => { setViewFeedbackModalOpen(false); setViewFeedback(null); }}
@@ -220,9 +220,9 @@ const MyAppointments = () => {
               &times;
             </button>
             <h2 className="text-2xl font-semibold mb-6 text-center">Your Feedback</h2>
-            <div className="mb-6 border-b pb-4">
+            <div className="mb-6 border-b border-gray-400 pb-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-semibold text-[#123458]">{viewFeedback.hallId?.name || 'Hall/Room'}</span>
+                <span className="font-semibold text-[#123458]">{viewFeedback.facilityId?.name || viewFeedback.hallId?.name || 'Facility'}</span>
                 <span className="flex gap-1 ml-2">
                   {[1,2,3,4,5].map(star => (
                     <span key={star} className={`text-lg ${star <= viewFeedback.rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
@@ -231,9 +231,15 @@ const MyAppointments = () => {
               </div>
               <div className="text-xs text-gray-400 mb-1">{new Date(viewFeedback.createdAt).toLocaleString()}</div>
               <div className="text-sm text-gray-700 mb-1"><b>Cleanliness:</b> {viewFeedback.cleanliness}</div>
-              <div className="text-sm text-gray-700 mb-1"><b>Description Match:</b> {viewFeedback.descriptionMatch}</div>
-              <div className="text-sm text-gray-700 mb-1"><b>Electricity:</b> {viewFeedback.electricity}</div>
-              <div className="text-sm text-gray-700 mb-1"><b>Other Comments:</b> {viewFeedback.otherComments}</div>
+              <div className="text-sm text-gray-700 mb-1"><b>Helpfulness:</b> {viewFeedback.helpful}</div>
+              {/* Facility-specific fields */}
+              {viewFeedback.audioVisual && <div className="text-sm text-gray-700 mb-1"><b>Audio/Visual:</b> {viewFeedback.audioVisual}</div>}
+              {viewFeedback.seatingComfort && <div className="text-sm text-gray-700 mb-1"><b>Seating Comfort:</b> {viewFeedback.seatingComfort}</div>}
+              {viewFeedback.bedComfort && <div className="text-sm text-gray-700 mb-1"><b>Bed Comfort:</b> {viewFeedback.bedComfort}</div>}
+              {viewFeedback.amenities && <div className="text-sm text-gray-700 mb-1"><b>Amenities:</b> {viewFeedback.amenities}</div>}
+              {viewFeedback.vehicleCondition && <div className="text-sm text-gray-700 mb-1"><b>Vehicle Condition:</b> {viewFeedback.vehicleCondition}</div>}
+              {viewFeedback.timeliness && <div className="text-sm text-gray-700 mb-1"><b>Timeliness:</b> {viewFeedback.timeliness}</div>}
+              <div className="text-sm text-gray-700 mb-1"><b>Suggestions for Improvement:</b> {viewFeedback.improvement}</div>
             </div>
             {viewFeedback.adminMessage || viewFeedback.adminRating ? (
               <div className="mt-4 p-4 rounded bg-gray-50 border border-gray-200">

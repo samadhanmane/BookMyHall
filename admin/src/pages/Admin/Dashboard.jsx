@@ -56,15 +56,10 @@ const Dashboard = () => {
             item.hallData ? (
               <div
                 key={index}
-                className='flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-all'
+                className='flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-all border-b border-gray-400'
               >
-                <img
-                  className='rounded-md w-12 h-12 object-cover shadow-sm shadow-black'
-                  src={item.hallData.image}
-                  alt="hall"
-                />
                 <div className='flex-1 text-sm'>
-                  <p className='font-medium'>{item.hallData.name}</p>
+                  <p className='font-bold text-lg text-[#123458]'>{item.hallData.name}</p>
                   <p className='text-sm text-gray-600'>{slotDateFormat(item.slotDate)}</p>
                 </div>
 
