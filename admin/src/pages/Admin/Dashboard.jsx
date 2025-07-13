@@ -27,8 +27,8 @@ const Dashboard = () => {
       <div className='flex flex-wrap gap-4'>
         {/* Cards */}
         {[
-          { icon: assets.hall_icon, label: 'Halls', value: dashData.halls },
-          { icon: assets.appointments_icon, label: 'Appointments', value: dashData.appointments },
+          { icon: assets.hall_icon, label: 'Facilities', value: dashData.halls },
+          { icon: assets.appointments_icon, label: 'Bookings', value: dashData.appointments },
           { icon: assets.people_icon, label: 'Users', value: dashData.users },
         ].map((card, index) => (
           <div
@@ -53,56 +53,58 @@ const Dashboard = () => {
 
         <div className='divide-y max-h-[70vh] overflow-y-auto'>
           {dashData.latestAppointments.map((item, index) => (
-            <div
-              key={index}
-              className='flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-all'
-            >
-              <img
-                className='rounded-md w-12 h-12 object-cover shadow-sm shadow-black'
-                src={item.hallData.image}
-                alt="hall"
-              />
-              <div className='flex-1 text-sm'>
-                <p className='font-medium'>{item.hallData.name}</p>
-                <p className='text-sm text-gray-600'>{slotDateFormat(item.slotDate)}</p>
+            item.hallData ? (
+              <div
+                key={index}
+                className='flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-all'
+              >
+                <img
+                  className='rounded-md w-12 h-12 object-cover shadow-sm shadow-black'
+                  src={item.hallData.image}
+                  alt="hall"
+                />
+                <div className='flex-1 text-sm'>
+                  <p className='font-medium'>{item.hallData.name}</p>
+                  <p className='text-sm text-gray-600'>{slotDateFormat(item.slotDate)}</p>
+                </div>
+
+                {item.cancelled ? (
+                  <p className='text-red-600 text-xs font-medium'>Cancelled</p>
+                ) : item.isAccepted ? (
+                  <p className='text-green-600 text-xs font-medium'>Confirmed</p>
+                ) : (
+                  <div className='flex items-center gap-2'>
+                    <img
+                      onClick={() => cancelAppointment(item._id)}
+                      className='w-6 cursor-pointer'
+                      src={assets.cancel_icon}
+                      alt="cancel"
+                    />
+                    <img
+                      onClick={() => requestAcceptance(item._id)}
+                      className='w-6 cursor-pointer'
+                      src={assets.tick_icon}
+                      alt="accept"
+                    />
+                  </div>
+                )}
+
+                {item.isAccepted && !item.isCompleted && (
+                  <div className='ml-2'>
+                    <img
+                      onClick={() => completeAppointment(item._id)}
+                      className='w-6 cursor-pointer'
+                      src={assets.tick_icon}
+                      alt="complete"
+                    />
+                  </div>
+                )}
+
+                {item.isAccepted && item.isCompleted && (
+                  <p className='text-green-600 text-xs font-medium'>Completed</p>
+                )}
               </div>
-
-              {item.cancelled ? (
-                <p className='text-red-600 text-xs font-medium'>Cancelled</p>
-              ) : item.isAccepted ? (
-                <p className='text-green-600 text-xs font-medium'>Confirmed</p>
-              ) : (
-                <div className='flex items-center gap-2'>
-                  <img
-                    onClick={() => cancelAppointment(item._id)}
-                    className='w-6 cursor-pointer'
-                    src={assets.cancel_icon}
-                    alt="cancel"
-                  />
-                  <img
-                    onClick={() => requestAcceptance(item._id)}
-                    className='w-6 cursor-pointer'
-                    src={assets.tick_icon}
-                    alt="accept"
-                  />
-                </div>
-              )}
-
-              {item.isAccepted && !item.isCompleted && (
-                <div className='ml-2'>
-                  <img
-                    onClick={() => completeAppointment(item._id)}
-                    className='w-6 cursor-pointer'
-                    src={assets.tick_icon}
-                    alt="complete"
-                  />
-                </div>
-              )}
-
-              {item.isAccepted && item.isCompleted && (
-                <p className='text-green-600 text-xs font-medium'>Completed</p>
-              )}
-            </div>
+            ) : null
           ))}
         </div>
       </div>

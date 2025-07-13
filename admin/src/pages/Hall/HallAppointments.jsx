@@ -118,11 +118,11 @@ const HallAppointments = () => {
         : 'Pending'
       return [
         index + 1,
-        appointment.userData.name,
-        appointment.userData.email,
+        appointment.userData && appointment.userData.name ? appointment.userData.name : 'User',
+        appointment.userData && appointment.userData.email ? appointment.userData.email : '-',
         slotDateFormat(appointment.slotDate),
         appointment.slotTime,
-        appointment.hallData.name,
+        appointment.hallData && appointment.hallData.name ? appointment.hallData.name : '-',
         status,
       ].join(',')
     })
@@ -172,19 +172,29 @@ const HallAppointments = () => {
               <div className="flex items-center gap-2 justify-center text-center">
                 <img
                   className="w-8 h-8 rounded-full object-cover shadow-sm border"
-                  src={item.userData.image}
+                  src={item.userData && item.userData.image ? item.userData.image : assets.userIcon}
                   alt="User"
                 />
-                <p>{item.userData.name}</p>
+                <p>{item.userData && item.userData.name ? item.userData.name : 'User'}</p>
               </div>
 
-              <p className="sm:block hidden text-center">{item.userData.email}</p>
+              <p className="sm:block hidden text-center">{item.userData && item.userData.email ? item.userData.email : '-'}</p>
 
               <p className="text-center">{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
 
               <p className="text-center">
                 {item.cancelled ? (
                   <span className="text-red-600 font-semibold text-sm">Cancelled</span>
+                ) : item.coordinatorDecision === 'pending' ? (
+                  <span className="text-orange-500 font-semibold text-sm">Pending Coordinator Approval</span>
+                ) : item.coordinatorDecision === 'rejected' ? (
+                  <span className="text-red-500 font-semibold text-sm">Rejected by Coordinator{item.coordinatorComment ? `: ${item.coordinatorComment}` : ''}</span>
+                ) : item.directorDecision === 'pending' ? (
+                  <span className="text-orange-500 font-semibold text-sm">Pending Director Approval</span>
+                ) : item.directorDecision === 'rejected' ? (
+                  <span className="text-red-500 font-semibold text-sm">Rejected by Director{item.directorComment ? `: ${item.directorComment}` : ''}</span>
+                ) : item.directorDecision === 'approved' ? (
+                  <span className="text-green-600 font-semibold text-sm">Approved</span>
                 ) : item.isAccepted ? (
                   <span className="text-green-600 font-semibold text-sm">Confirmed</span>
                 ) : (

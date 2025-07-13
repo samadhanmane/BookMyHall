@@ -4,12 +4,12 @@ import mongoose from 'mongoose';
 const feedbackSchema = new mongoose.Schema({
   appointmentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'appointment',
+    ref: 'Appointment',
     required: true,
   },
   hallId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'hall',
+    ref: 'Hall',
     required: true,
   },
   userId: {
@@ -18,6 +18,22 @@ const feedbackSchema = new mongoose.Schema({
     required: true,
   },
   cleanliness: {
+    type: String,
+    required: false,
+  },
+  helpful: {
+    type: String,
+    required: false,
+  },
+  bookingProcess: {
+    type: String,
+    required: false,
+  },
+  facilityCondition: {
+    type: String,
+    required: false,
+  },
+  improvement: {
     type: String,
     required: false,
   },

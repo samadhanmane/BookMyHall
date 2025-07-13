@@ -43,7 +43,7 @@ const HallContextProvider = (props) => {
         try{
             console.log('Fetching appointments with token:', dToken);
             const {data} = await axios.get(
-                backendUrl + '/api/hall/appointments',
+                backendUrl + '/api/hall/all-appointments',
                 {
                     headers: {
                         'Content-Type': 'application/json',

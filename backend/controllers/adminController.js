@@ -10,7 +10,7 @@ import Coordinator from '../models/coordinatorModel.js'
 // API for adding halls, guest rooms, and vehicles
 const addHalls = async (req, res) => {
     try {
-        const { name, email, password, speciality, experience, about, address, isGuestRoom, isVehicle, coordinatorId } = req.body;
+        const { name, email, password, speciality, experience, about, address, isGuestRoom, isVehicle } = req.body;
         const imageFile = req.file;
 
         // Convert to booleans
@@ -19,17 +19,18 @@ const addHalls = async (req, res) => {
 
         // For guest rooms
         if (isGuestRoomBool) {
-            if (!name || !speciality || !experience || !about || !address || !coordinatorId) {
-                return res.json({ success: false, message: "Please fill all the fields and select a coordinator." });
+            if (!name || !speciality || !experience || !about || !address || !email) {
+                return res.json({ success: false, message: "Please fill all the fields and select a coordinator email." });
             }
-            // Find coordinator
-            const coordinator = await Coordinator.findById(coordinatorId);
+            // Find coordinator by email
+            const coordinator = await Coordinator.findOne({ email });
             if (!coordinator) {
                 return res.json({ success: false, message: "Coordinator not found." });
             }
             // Use coordinator's password
             const hallData = {
                 name,
+                email,
                 password: coordinator.password, // Use coordinator password
                 speciality,
                 experience,
@@ -37,7 +38,6 @@ const addHalls = async (req, res) => {
                 isGuestRoom: true,
                 address: JSON.parse(address),
                 date: Date.now(),
-                coordinator: coordinator._id
             };
             // Optimize image upload to Cloudinary
             let imageUrl;
@@ -72,18 +72,18 @@ const addHalls = async (req, res) => {
                 data: {
                     id: newHall._id,
                     name: newHall.name,
-                    coordinator: coordinator._id,
+                    coordinatorEmail: coordinator.email,
                     isGuestRoom: newHall.isGuestRoom
                 }
             });
         }
         // For vehicles
         else if (isVehicleBool) {
-            if (!name || !speciality || !experience || !about || !coordinatorId) {
-                return res.json({ success: false, message: "Please fill all the fields and select a coordinator." });
+            if (!name || !speciality || !experience || !about || !email) {
+                return res.json({ success: false, message: "Please fill all the fields and select a coordinator email." });
             }
-            // Find coordinator
-            const coordinator = await Coordinator.findById(coordinatorId);
+            // Find coordinator by email
+            const coordinator = await Coordinator.findOne({ email });
             if (!coordinator) {
                 return res.json({ success: false, message: "Coordinator not found." });
             }
@@ -104,6 +104,7 @@ const addHalls = async (req, res) => {
             }
             const vehicleData = {
                 name,
+                email,
                 image: imageUrl,
                 password: coordinator.password, // Use coordinator password
                 speciality,
@@ -112,7 +113,6 @@ const addHalls = async (req, res) => {
                 isVehicle: true,
                 address: {}, // No address for vehicles
                 date: Date.now(),
-                coordinator: coordinator._id
             };
             const newVehicle = new hallModel(vehicleData);
             await newVehicle.save();
@@ -128,7 +128,7 @@ const addHalls = async (req, res) => {
                 data: {
                     id: newVehicle._id,
                     name: newVehicle.name,
-                    coordinator: coordinator._id,
+                    coordinatorEmail: coordinator.email,
                     isVehicle: newVehicle.isVehicle
                 }
             });
@@ -216,7 +216,7 @@ const loginAdmin = async (req, res) => {
         const { email, password } = req.body
 
         if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-            const token = jwt.sign(email + password, process.env.JWT_SECRET)
+            const token = jwt.sign({ role: 'admin', email }, process.env.JWT_SECRET)
             res.json({ success: true, token })
         } else {
             res.json({ success: false, message: "Invalid email or password" })
@@ -235,28 +235,28 @@ const allHalls = async (req, res) => {
         const hallsList = halls.filter(hall => !hall.isGuestRoom && !hall.isVehicle);
         const guestRoomsList = halls.filter(hall => hall.isGuestRoom);
         const vehiclesList = halls.filter(hall => hall.isVehicle);
-        // Group guest rooms and vehicles by coordinator
-        const guestRoomsByCoordinator = guestRoomsList.reduce((acc, room) => {
-            const coordId = room.coordinator ? room.coordinator.toString() : 'unassigned';
-            if (!acc[coordId]) {
-                acc[coordId] = [];
+        // Group guest rooms and vehicles by coordinator email
+        const guestRoomsByEmail = guestRoomsList.reduce((acc, room) => {
+            const email = room.email || 'unassigned';
+            if (!acc[email]) {
+                acc[email] = [];
             }
-            acc[coordId].push(room);
+            acc[email].push(room);
             return acc;
         }, {});
-        const vehiclesByCoordinator = vehiclesList.reduce((acc, vehicle) => {
-            const coordId = vehicle.coordinator ? vehicle.coordinator.toString() : 'unassigned';
-            if (!acc[coordId]) {
-                acc[coordId] = [];
+        const vehiclesByEmail = vehiclesList.reduce((acc, vehicle) => {
+            const email = vehicle.email || 'unassigned';
+            if (!acc[email]) {
+                acc[email] = [];
             }
-            acc[coordId].push(vehicle);
+            acc[email].push(vehicle);
             return acc;
         }, {});
         res.json({
             success: true,
             halls: hallsList,
-            guestRooms: guestRoomsByCoordinator,
-            vehicles: vehiclesByCoordinator
+            guestRooms: guestRoomsByEmail,
+            vehicles: vehiclesByEmail
         });
     } catch (error) {
         console.log(error);
@@ -267,11 +267,34 @@ const allHalls = async (req, res) => {
 // Api to get all appointments list
 
 const appointmentsAdmin = async (req, res) => {
-
     try {
-        const appointments = await appointmentModel.find({})
-        res.json({ success: true, appointments })
-
+        const { role, email } = req.user || {};
+        let appointments = [];
+        if (role === 'admin') {
+            appointments = await appointmentModel.find({}).lean();
+        } else if (role === 'coordinator') {
+            // Only show appointments for facilities managed by this coordinator
+            const facilities = await hallModel.find({ email: email });
+            const facilityIds = facilities.map(f => f._id);
+            appointments = await appointmentModel.find({ hallId: { $in: facilityIds } }).lean();
+        } else {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+        const hallIds = appointments.map(a => a.hallId).filter(Boolean);
+        const userIds = appointments.map(a => a.userId).filter(Boolean);
+        const halls = await hallModel.find({ _id: { $in: hallIds } }).lean();
+        const users = await userModel.find({ _id: { $in: userIds } }).lean();
+        const hallMap = {};
+        halls.forEach(h => { hallMap[h._id.toString()] = h; });
+        const userMap = {};
+        users.forEach(u => { userMap[u._id.toString()] = u; });
+        const appointmentsWithFacilityAndUser = appointments.map(a => ({
+            ...a,
+            facilityData: hallMap[a.hallId?.toString()] || null,
+            userData: userMap[a.userId?.toString()] || null,
+            facilityName: hallMap[a.hallId?.toString()]?.name || ''
+        }));
+        res.json({ success: true, appointments: appointmentsWithFacilityAndUser });
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
@@ -356,18 +379,37 @@ const requestAcceptance = async (req, res) => {
 // Api to get Dashboard data of admin pannel
 const adminDashboard = async (req, res) => {
     try {
-        const halls = await hallModel.find({})
-        const users = await userModel.find({})
-        const appointments = await appointmentModel.find({})
-
+        const { role, email } = req.user || {};
+        let halls = [];
+        let appointments = [];
+        let users = [];
+        if (role === 'admin') {
+            halls = await hallModel.find({});
+            users = await userModel.find({});
+            appointments = await appointmentModel.find({}).lean();
+        } else if (role === 'coordinator') {
+            halls = await hallModel.find({ email: email });
+            users = await userModel.find({});
+            const facilityIds = halls.map(h => h._id);
+            appointments = await appointmentModel.find({ hallId: { $in: facilityIds } }).lean();
+        } else {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+        const hallIds = appointments.map(a => a.hallId).filter(Boolean);
+        const hallsMap = {};
+        (await hallModel.find({ _id: { $in: hallIds } }).lean()).forEach(h => { hallsMap[h._id.toString()] = h; });
+        const latestAppointments = appointments.reverse().slice(0, 5).map(a => ({
+            ...a,
+            hallData: hallsMap[a.hallId?.toString()] || null,
+            facilityName: hallsMap[a.hallId?.toString()]?.name || ''
+        }));
         const dashData = {
             halls: halls.length,
             appointments: appointments.length,
             users: users.length,
-            latestAppointments: appointments.reverse().slice(0, 5)
+            latestAppointments
         }
         res.json({ success: true, dashData })
-
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })

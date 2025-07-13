@@ -24,7 +24,6 @@ const hallSchema = new mongoose.Schema({
     date: { type: Number, required: true },
     slots_booked: { type: Object, default: {} },
     user_booked_slots: { type: Object, default: {} },
-    coordinator: { type: mongoose.Schema.Types.ObjectId, ref: 'Coordinator' },
     createdAt: { type: Date, default: Date.now },
 }, { minimize: false });
 

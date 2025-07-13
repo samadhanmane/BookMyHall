@@ -15,6 +15,7 @@ import HallDashboard from './pages/Hall/HallDashboard'
 import HallAppointments from './pages/Hall/HallAppointments'
 import HallProfile from './pages/Hall/HallProfile'
 import CoordinatorManagement from './pages/Admin/CoordinatorManagement'
+import DirectorDashboard from './pages/DirectorDashboard.jsx'
 
 const App = () => {
   const { aToken: adminToken } = useContext(AdminContext)
@@ -28,8 +29,9 @@ const App = () => {
         <Slidebar />
         <div className='flex-1 border-l border-gray-200 p-4'>
           <Routes>
+            {/* Default Route: Redirect based on role */}
+            <Route path='/' element={<Navigate to={adminToken ? '/admin-dashboard' : '/hall-dashboard'} replace />} />
             {/* Admin Routes */}
-            <Route path='/' element={<Navigate to='/admin-dashboard' replace />} />
             <Route path='/admin-dashboard' element={<Dashboard />} />
             <Route path='/all-appointments' element={<AllAppointment />} />
             <Route path='/add-hall' element={<AddHall />} />
@@ -37,6 +39,7 @@ const App = () => {
             <Route path='/coordinator-management' element={<CoordinatorManagement />} />
 
             {/* Hall Routes */}
+            <Route path='/hall' element={<Navigate to='/hall-dashboard' replace />} />
             <Route path='/hall-dashboard' element={<HallDashboard />} />
             <Route path='/hall-appointments' element={<HallAppointments />} />
             <Route path='/hall-profile' element={<HallProfile />} />
@@ -46,7 +49,11 @@ const App = () => {
     </div>
   ) : (
     <>
-      <Login />
+      <Routes>
+        <Route path="/director/login" element={<Login />} />
+        <Route path="/director-dashboard" element={<DirectorDashboard />} />
+        <Route path="*" element={<Login />} />
+      </Routes>
       <ToastContainer />
     </>
   )

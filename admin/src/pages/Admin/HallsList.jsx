@@ -72,9 +72,9 @@ const HallsList = () => {
       {/* Guest Rooms Section */}
       <div>
         <h1 className="text-xl font-semibold text-[#030303] mb-4 border-b border-[#123458] pb-2">All Guest Rooms</h1>
-        {Object.entries(guestRooms || {}).map(([coordinatorId, rooms]) => (
-          <div key={coordinatorId} className="mb-6">
-            <h2 className="text-lg font-medium text-gray-700 mb-3">Managed by: {getCoordinatorEmail(coordinatorId)}</h2>
+        {Object.entries(guestRooms || {}).map(([email, rooms]) => (
+          <div key={email} className="mb-6">
+            <h2 className="text-lg font-medium text-gray-700 mb-3">Managed by: {email}</h2>
             <div className="w-full flex flex-wrap gap-6">
               {rooms.map((room, index) => renderVenueCard(room, index))}
             </div>
@@ -85,9 +85,9 @@ const HallsList = () => {
       {/* Vehicles Section */}
       <div>
         <h1 className="text-xl font-semibold text-[#030303] mb-4 border-b border-[#123458] pb-2">All Vehicles</h1>
-        {Object.entries(vehicles || {}).map(([coordinatorId, vehicleList]) => (
-          <div key={coordinatorId} className="mb-6">
-            <h2 className="text-lg font-medium text-gray-700 mb-3">Managed by: {getCoordinatorEmail(coordinatorId)}</h2>
+        {Object.entries(vehicles || {}).map(([email, vehicleList]) => (
+          <div key={email} className="mb-6">
+            <h2 className="text-lg font-medium text-gray-700 mb-3">Managed by: {email}</h2>
             <div className="w-full flex flex-wrap gap-6">
               {vehicleList.map((vehicle, index) => renderVenueCard(vehicle, index))}
             </div>

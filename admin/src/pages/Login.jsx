@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AdminContext } from '../context/AdminContext'
 import { HallContext } from '../context/HallContext'
+import { DirectorContext } from '../context/DirectorContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
@@ -18,6 +19,7 @@ const Login = () => {
 
     const { setAToken, backendUrl } = useContext(AdminContext)
     const { setDToken, dToken } = useContext(HallContext)
+    const { loginDirector, setDToken: setDirectorToken } = useContext(DirectorContext)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -39,19 +41,32 @@ const Login = () => {
         if (forgotPassword || !validateForm()) return
         setLoading(true)
         try {
-            const url = `${backendUrl}/api/${state === 'Admin' ? 'admin' : 'hall'}/login`
-            console.log('Login URL:', url);
-            const { data } = await axios.post(url, { email, password })
-            console.log('Login response:', data);
-            if (data.success) {
-                const tokenKey = state === 'Admin' ? 'aToken' : 'dToken';
-                console.log('Storing token with key:', tokenKey);
-                localStorage.setItem(tokenKey, data.token)
-                state === 'Admin' ? setAToken(data.token) : setDToken(data.token)
-                console.log('Token stored in localStorage:', localStorage.getItem(tokenKey));
-            } else toast.error(data.message)
+            if (state === 'Admin') {
+                const url = `${backendUrl}/api/admin/login`
+                const { data } = await axios.post(url, { email, password })
+                if (data.success) {
+                    localStorage.setItem('aToken', data.token)
+                    setAToken(data.token)
+                    navigate('/admin-dashboard')
+                } else toast.error(data.message)
+            } else if (state === 'Co-ordinator') {
+                const url = `${backendUrl}/api/hall/login`
+                const { data } = await axios.post(url, { email, password })
+                if (data.success) {
+                    localStorage.setItem('dToken', data.token)
+                    setDToken(data.token)
+                    navigate('/hall-dashboard')
+                } else toast.error(data.message)
+            } else if (state === 'Director') {
+                const res = await loginDirector(email, password)
+                if (res.success) {
+                    // loginDirector already sets localStorage and context
+                    navigate('/director-dashboard')
+                } else {
+                    toast.error(res.message || 'Login failed')
+                }
+            }
         } catch (error) {
-            console.error('Login error:', error);
             toast.error(error.response?.data?.message || 'Login failed')
         } finally {
             setLoading(false)
@@ -99,6 +114,29 @@ const Login = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-white font-poppins px-4">
             <div className="w-full max-w-md border border-zinc-200 shadow-md rounded-xl p-6">
+                <div className="flex justify-center gap-4 mb-6">
+                    <button
+                        type="button"
+                        className={`text-base font-semibold px-3 py-1 rounded ${state === 'Admin' ? 'bg-primary text-white' : 'text-primary underline'}`}
+                        onClick={() => setState('Admin')}
+                    >
+                        Admin
+                    </button>
+                    <button
+                        type="button"
+                        className={`text-base font-semibold px-3 py-1 rounded ${state === 'Co-ordinator' ? 'bg-primary text-white' : 'text-primary underline'}`}
+                        onClick={() => setState('Co-ordinator')}
+                    >
+                        Co-ordinator
+                    </button>
+                    <button
+                        type="button"
+                        className={`text-base font-semibold px-3 py-1 rounded ${state === 'Director' ? 'bg-primary text-white' : 'text-primary underline'}`}
+                        onClick={() => setState('Director')}
+                    >
+                        Director
+                    </button>
+                </div>
                 {forgotPassword ? (
                     <form onSubmit={handleResetPassword} className="flex flex-col gap-4 text-sm text-blackText">
                         <h2 className="text-2xl font-semibold text-blackText">Reset Password</h2>
@@ -135,8 +173,8 @@ const Login = () => {
                     </form>
                 ) : (
                     <form onSubmit={onSubmitHandler} className="flex flex-col gap-4 text-sm text-blackText">
-                        <h2 className="text-3xl font-semibold text-center">
-                            <span className="text-primary">{state}</span> Login
+                        <h2 className="text-2xl font-semibold text-center text-primary-dark">
+                            {state} Login
                         </h2>
                         <div>
                             <label className="block mb-1">Email</label>
@@ -161,23 +199,8 @@ const Login = () => {
                         <button type="submit" className="bg-primary text-white py-2 rounded-md">
                             {loading ? 'Logging in...' : 'Login'}
                         </button>
-                        <div className="flex justify-between items-center text-sm">
-                            {state === 'Admin' ? (
-                                <span>
-                                    Co-ordinator?{' '}
-                                    <button type="button" className="text-primary underline" onClick={() => setState('Co-ordinator')}>
-                                        Click here
-                                    </button>
-                                </span>
-                            ) : (
-                                <span>
-                                    Admin?{' '}
-                                    <button type="button" className="text-primary underline" onClick={() => setState('Admin')}>
-                                        Click here
-                                    </button>
-                                </span>
-                            )}
-                            {state !== 'Admin' && (
+                        {state === 'Co-ordinator' && (
+                            <div className="flex justify-end items-center text-sm">
                                 <button
                                     type="button"
                                     onClick={handleForgotPassword}
@@ -186,8 +209,8 @@ const Login = () => {
                                 >
                                     {isLoading ? 'Sending OTP...' : 'Forgot Password?'}
                                 </button>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </form>
                 )}
             </div>

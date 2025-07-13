@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import FeedbackModal from '../components/FeedbackModal';
 
 const MyAppointments = () => {
-  const { backendUrl, token, getHallsData, getAppointments } = useContext(AppContext);
+  const { backendUrl, token, getHallsData, getAppointments, userRole } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
   const [cancellingIds, setCancellingIds] = useState([]);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -146,8 +146,28 @@ const MyAppointments = () => {
           appointments.map((appointment) => (
             <div key={appointment._id} className="border-2 border-gray-400 rounded-lg p-6 bg-white flex flex-col gap-2">
               <div className="flex items-center gap-3 mb-2">
-                <span className="font-semibold text-lg">{appointment.facilityId?.name || 'Facility'}</span>
+                <span className="font-semibold text-lg">{appointment.facilityName || appointment.facilityId?.name || 'Facility'}</span>
                 <span className="text-sm text-gray-500">{appointment.facilityId?.type}</span>
+              </div>
+              {/* Approval Status */}
+              <div className="text-sm font-medium mb-1">
+                {appointment.cancelled ? (
+                  <span className="text-red-500">Status: Cancelled</span>
+                ) : appointment.isCompleted ? (
+                  <span className="text-green-600">Status: Completed</span>
+                ) : appointment.coordinatorDecision === 'pending' ? (
+                  <span className="text-orange-500">Status: Pending Coordinator Approval</span>
+                ) : appointment.coordinatorDecision === 'rejected' ? (
+                  <span className="text-red-500">Status: Rejected by Coordinator{appointment.coordinatorComment ? `: ${appointment.coordinatorComment}` : ''}</span>
+                ) : appointment.directorDecision === 'pending' ? (
+                  <span className="text-orange-500">Status: Pending Director Approval</span>
+                ) : appointment.directorDecision === 'rejected' ? (
+                  <span className="text-red-500">Status: Rejected by Director{appointment.directorComment ? `: ${appointment.directorComment}` : ''}</span>
+                ) : appointment.directorDecision === 'approved' ? (
+                  <span className="text-green-600">Status: Approved</span>
+                ) : (
+                  <span className="text-orange-500">Status: Pending Approval</span>
+                )}
               </div>
               <div className="text-sm text-gray-700">
                 <span className="font-medium">Date:</span> {appointment.date}
@@ -155,25 +175,29 @@ const MyAppointments = () => {
               <div className="text-sm text-gray-700">
                 <span className="font-medium">Time:</span> {appointment.time}
               </div>
-              {/* Vehicle-specific details */}
-              {appointment.facilityId?.isVehicle && (
-                <>
-                  <div className="text-sm text-gray-700">
-                    <span className="font-medium">Vehicle Type:</span> {appointment.facilityId?.speciality}
-                  </div>
-                  <div className="text-sm text-gray-700">
-                    <span className="font-medium">Seating:</span> {appointment.facilityId?.experience}
-                  </div>
-                  <div className="text-sm text-gray-700">
-                    <span className="font-medium">Description:</span> {appointment.facilityId?.about}
-                  </div>
-                </>
-              )}
-              {/* Add more facility-specific details here if needed */}
+              {/* Only show reason for all, and for vehicles, skip vehicle-specific details */}
               {appointment.reason && (
                 <div className="text-sm text-gray-700">
                   <span className="font-medium">Reason:</span> {appointment.reason}
                 </div>
+              )}
+              {/* Feedback button for completed appointments */}
+              {appointment.isCompleted && !hasFeedback(appointment._id) && (
+                <button
+                  className="mt-2 px-4 py-1 rounded bg-[#123458] text-white text-sm w-max hover:bg-[#0e2e47] transition"
+                  onClick={() => handleOpenFeedback(appointment)}
+                >
+                  Give Feedback
+                </button>
+              )}
+              {/* View feedback button if feedback exists */}
+              {appointment.isCompleted && hasFeedback(appointment._id) && (
+                <button
+                  className="mt-2 px-4 py-1 rounded bg-gray-200 text-[#123458] text-sm w-max hover:bg-gray-300 transition"
+                  onClick={() => handleViewFeedback(appointment._id)}
+                >
+                  View Feedback
+                </button>
               )}
             </div>
           ))
@@ -184,6 +208,7 @@ const MyAppointments = () => {
         onClose={() => { setFeedbackModalOpen(false); setSelectedAppointment(null); }}
         onSubmit={handleSubmitFeedback}
         loading={feedbackLoading}
+        facilityType={selectedAppointment?.facilityId?.type}
       />
       {viewFeedbackModalOpen && viewFeedback && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">

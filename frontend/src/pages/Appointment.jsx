@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 const Appointment = () => {
   
   const { hallId } = useParams();
-  const { halls, getHallsData,  backendUrl, token } = useContext(AppContext);
+  const { halls, getHallsData,  backendUrl, token, userRole } = useContext(AppContext);
  
   const [HallInfo, setHallInfo] = useState(null);
   const [HallSlots, setHallSlots] = useState([]);
@@ -116,11 +116,12 @@ const Appointment = () => {
       );
 
       if (data.success) {
-        toast.success("Appointment booked successfully");
+        toast.success(data.message || "Appointment booked successfully");
         getHallsData();
         navigate("/my-appointments");
       } else {
         toast.error(data.message || "Failed to book appointment");
+        // Do not navigate if booking failed
       }
     } catch (error) {
       console.error(error);

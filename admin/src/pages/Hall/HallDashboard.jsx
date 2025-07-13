@@ -66,7 +66,7 @@ const HallDashboard = () => {
         </div>
 
         <div className="flex items-center gap-3 bg-white p-5 min-w-52 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <img className="w-12 h-12" src={assets.patients_icon} alt="users" />
+          <img className="w-8 h-8" src={assets.people_icon} alt="users" />
           <div>
             <p className="text-xl font-semibold text-[#030303]">{dashData.users}</p>
             <p className="text-sm text-gray-500">Users</p>
@@ -89,11 +89,11 @@ const HallDashboard = () => {
             >
               <img
                 className="w-10 h-10 rounded-md object-cover shadow-sm"
-                src={item.userData.image}
-                alt={item.userData.name}
+                src={item.userData && item.userData.image ? item.userData.image : assets.userIcon}
+                alt={item.userData && item.userData.name ? item.userData.name : 'User'}
               />
               <div className="flex-1 text-sm">
-                <p className="text-[#030303] font-medium">{item.userData.name}</p>
+                <p className="text-[#030303] font-medium">{item.userData && item.userData.name ? item.userData.name : 'User'}</p>
                 <p className="text-gray-500">{slotDateFormat(item.slotDate)}</p>
               </div>
 

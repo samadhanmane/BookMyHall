@@ -263,18 +263,22 @@ const bookAppointment = async (req, res) => {
     try {
         const userId = req.userId;
         const { hallId, slotDate, slotTime, reason } = req.body;
+        console.log('[bookAppointment] userId:', userId, 'hallId:', hallId, 'slotDate:', slotDate, 'slotTime:', slotTime, 'reason:', reason);
         if (!hallId || !slotDate || !slotTime || !reason) {
+            console.log('[bookAppointment] Missing booking details or reason');
             return res.status(400).json({ success: false, message: "Missing booking details or reason" });
         }
         // Get hall data without password
         const hallData = await hallModel.findById(hallId).select('-password');
         if (!hallData || !hallData.available) {
+            console.log('[bookAppointment] Hall not available for booking');
             return res.status(404).json({ success: false, message: 'Hall is not available for booking' });
         }
         let slots_booked = hallData.slots_booked;
         // Handle guest room bookings
         if (hallData.isGuestRoom) {
             if (slots_booked[slotDate] && slots_booked[slotDate].includes('full-day')) {
+                console.log('[bookAppointment] Room is not available for', slotDate);
                 return res.status(400).json({ success: false, message: `Room is not available for ${slotDate}` });
             }
         } else {
@@ -283,6 +287,7 @@ const bookAppointment = async (req, res) => {
             if (slots_booked[slotDate]) {
                 for (const slot of timeSlots) {
                     if (slots_booked[slotDate].includes(slot)) {
+                        console.log('[bookAppointment] Slot', slot, 'is not available for booking');
                         return res.status(400).json({ success: false, message: `${slot} slot is not available for booking` });
                     }
                 }
@@ -293,11 +298,13 @@ const bookAppointment = async (req, res) => {
         // Get user data without password
         const userData = await userModel.findById(userId).select('-password');
         if (!userData) {
+            console.log('[bookAppointment] User not found');
             return res.status(404).json({ success: false, message: 'User not found' });
         }
         // Get hall data for appointment
         const hall = await hallModel.findById(hallId);
         if (!hall) {
+            console.log('[bookAppointment] Hall not found');
             return res.status(404).json({ success: false, message: 'Hall not found' });
         }
         const dateTimestamp = new Date(slotDate).getTime();
@@ -353,11 +360,12 @@ const bookAppointment = async (req, res) => {
         } catch (emailError) {
             console.error('Error sending email notifications:', emailError);
         }
-        res.json({ success: true, message: 'Booking successful' });
+        res.json({ success: true, message: 'Appointment booked successfully' });
     } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+        console.error('[bookAppointment] Error:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
-};
+}
 
 // List appointments for user
 const listAppointment = async (req, res) => {
@@ -369,12 +377,17 @@ const listAppointment = async (req, res) => {
         // Map to frontend-friendly format
         const formatted = appointments.map(app => ({
             _id: app._id,
-            facilityId: app.hallId, // populated hall/facility
+            facilityId: app.hallId || { name: 'Unknown' },
             date: app.slotDate,
             time: app.slotTime,
             cancelled: app.cancelled,
+            isAccepted: app.isAccepted,
+            isCompleted: app.isCompleted,
             createdAt: app.createdAt,
             reason: app.reason,
+            coordinatorDecision: app.coordinatorDecision,
+            directorDecision: app.directorDecision,
+            status: app.status,
         }));
         res.json({ success: true, appointments: formatted });
     } catch (error) {
@@ -525,4 +538,35 @@ const getUserFeedbacks = async (req, res) => {
     }
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, sendOtp, verifyOtp, approveBooking, getAllUsers, changePassword, getUserFeedbacks };
+// Submit feedback for an appointment
+const submitFeedback = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { appointmentId, rating, cleanliness, helpful, bookingProcess, facilityCondition, improvement } = req.body;
+        if (!appointmentId || !rating) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+        // Fetch the appointment to get hallId
+        const appointment = await appointmentModel.findById(appointmentId);
+        if (!appointment) {
+            return res.status(404).json({ success: false, message: 'Appointment not found' });
+        }
+        const feedback = new feedbackModel({
+            userId,
+            appointmentId,
+            hallId: appointment.hallId,
+            rating,
+            cleanliness,
+            helpful,
+            bookingProcess,
+            facilityCondition,
+            improvement,
+        });
+        await feedback.save();
+        res.json({ success: true, message: 'Feedback submitted successfully' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, sendOtp, verifyOtp, approveBooking, getAllUsers, changePassword, getUserFeedbacks, submitFeedback };

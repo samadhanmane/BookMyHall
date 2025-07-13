@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import axios from "axios"
 import {toast} from 'react-toastify'
+import { jwtDecode } from 'jwt-decode';
 
 export const AppContext =createContext()
 
@@ -12,6 +13,8 @@ const AppContextProvider = (props) => {
     const [token,setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : "")
     const [userData,setUserData] = useState(false)
     const [appointment, setAppointment] = useState([]);
+    const [userRole, setUserRole] = useState('');
+    const [userEmail, setUserEmail] = useState('');
    
 
     const getHallsData = async () => {
@@ -91,7 +94,9 @@ const AppContextProvider = (props) => {
         loadUserProfileData,
         appointment,setAppointment,
         getAppointments,
-        updateAppointmentStatus
+        updateAppointmentStatus,
+        userRole,
+        userEmail
     }
 
     useEffect(()=>{
@@ -100,6 +105,14 @@ const AppContextProvider = (props) => {
 
     useEffect(() => {
         if (token && token !== "false") {
+            try {
+                const decoded = jwtDecode(token);
+                setUserRole(decoded.role || '');
+                setUserEmail(decoded.email || '');
+            } catch (e) {
+                setUserRole('');
+                setUserEmail('');
+            }
             loadUserProfileData();
             getAppointments();
         } else {

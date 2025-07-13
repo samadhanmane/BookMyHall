@@ -6,14 +6,14 @@ const authHall = async (req, res, next) => {
     try {
         // Get token from headers, case-insensitive
         const token = req.headers.token || req.headers.dtoken || req.headers.dToken;
-        
+
         if (!token) {
             return res.json({ success: false, message: 'Not Authorized Login Again' })
         }
-        
+
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        
+
         // Find hall
         const hall = await hallModel.findById(decoded.id)
 
@@ -23,6 +23,14 @@ const authHall = async (req, res, next) => {
 
         // Attach hall to request
         req.hall = hall
+        // Attach user role for approval logic
+        req.user = {
+            id: hall._id.toString(),
+            email: hall.email,
+            role: (hall.isGuestRoom || hall.isVehicle) ? 'coordinator' : 'hall',
+            isGuestRoom: hall.isGuestRoom,
+            isVehicle: hall.isVehicle
+        };
         next()
 
     } catch (error) {

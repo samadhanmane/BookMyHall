@@ -6,6 +6,7 @@ import connectCloudinary from './config/cloudinary.js'
 import adminRouter from './routes/adminRoute.js'
 import hallRouter from './routes/hallRoute.js'
 import userRouter from './routes/userRoute.js'
+import directorRouter from './routes/directorRoute.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -29,6 +30,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use('/api/admin', adminRouter)
 app.use('/api/hall', hallRouter)
 app.use('/api/user', userRouter)
+app.use('/api/director', directorRouter)
 
 app.get('/', (req, res) => {
     res.send('BookMyHall API is running.')

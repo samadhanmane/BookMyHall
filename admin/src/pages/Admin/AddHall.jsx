@@ -107,8 +107,8 @@ const AddHall = () => {
           }
         } catch (error) {
           toast.error(error.response?.data?.message || 'Failed to add coordinator')
-          setLoading(false)
-          return
+        setLoading(false)
+        return
         }
       }
     } else {
@@ -137,17 +137,17 @@ const AddHall = () => {
     formData.append('isGuestRoom', isGuestRoom.toString())
     formData.append('isVehicle', isVehicle.toString())
     if ((isGuestRoom || isVehicle) && !isNewCoordinator) {
-      formData.append('coordinatorId', selectedCoordinator)
+      formData.append('email', selectedCoordinator)
     } else if ((isGuestRoom || isVehicle) && isNewCoordinator) {
-      // Use the _id from the newly created coordinator
-      formData.append('coordinatorId', selectedCoordinator)
+      // Use the email from the newly created coordinator
+      formData.append('email', newCoordEmail)
     }
 
     try {
       const { data } = await axios.post(backendUrl + '/api/admin/add-hall', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          aToken
+          token: aToken
         }
       })
       if (data.success) {
@@ -260,7 +260,7 @@ const AddHall = () => {
             >
               <option value="">Select a coordinator</option>
               {coordinators.map((coord) => (
-                <option key={coord._id} value={coord._id}>
+                <option key={coord.email} value={coord.email}>
                   {coord.name} ({coord.email})
                 </option>
               ))}

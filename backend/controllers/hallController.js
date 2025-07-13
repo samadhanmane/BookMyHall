@@ -237,9 +237,15 @@ const loginHall = async (req, res) => {
 const appointmentsHall = async (req, res) => {
     try {
         const hallId = req.hall._id.toString();
-        const appointments = await appointmentModel.find({});
-        const filteredAppointments = appointments.filter(app => app.hallId.toString() === hallId);
-        res.json({ success: true, appointments: filteredAppointments });
+        // Populate userId and hallId to get user profile and facility name
+        const appointments = await appointmentModel.find({ hallId }).populate('userId hallId');
+        // Attach userData and facility name for frontend compatibility
+        const appointmentsWithUserData = appointments.map(app => ({
+            ...app.toObject(),
+            userData: app.userId,
+            facilityName: app.hallId?.name || ''
+        }));
+        res.json({ success: true, appointments: appointmentsWithUserData });
     } catch (error) {
         console.error('Error in appointmentsHall:', error);
         res.json({ success: false, message: error.message });
@@ -250,9 +256,13 @@ const appointmentsHall = async (req, res) => {
 const appointmentRequest = async (req, res) => {
     try {
         const { appointmentId } = req.body;
-        const hallId = req.hall._id.toString(); // Convert to string
+        const { id, email, role } = req.user;
+        const appointmentData = await appointmentModel.findById(appointmentId).populate('hallId userId');
 
-        const appointmentData = await appointmentModel.findById(appointmentId);
+        // Debug logging
+        console.log('[appointmentRequest] user:', req.user);
+        console.log('[appointmentRequest] appointmentId:', appointmentId);
+        console.log('[appointmentRequest] appointmentData.hallId:', appointmentData ? appointmentData.hallId : 'N/A');
 
         if (!appointmentData) {
             return res.json({
@@ -261,12 +271,27 @@ const appointmentRequest = async (req, res) => {
             });
         }
 
-        // Convert appointment's hallId to string for comparison
-        if (appointmentData.hallId.toString() !== hallId) {
-            return res.json({
-                success: false,
-                message: "This appointment does not belong to your hall"
-            });
+        const facility = appointmentData.hallId;
+        if (!facility || !facility.email) {
+            return res.json({ success: false, message: "Facility or coordinator email not found for this booking. Please check the facility data." });
+        }
+
+        // Coordinator: can approve if they manage this facility
+        if (role === 'coordinator') {
+            if (facility.email !== email) {
+                return res.json({ success: false, message: "You do not manage this facility" });
+            }
+        }
+        // Hall: can approve if it's their own
+        else if (role === 'hall') {
+            if (facility._id.toString() !== id) {
+                return res.json({
+                    success: false,
+                    message: "This appointment does not belong to your hall"
+                });
+            }
+        } else {
+            return res.json({ success: false, message: "Unauthorized role for approval" });
         }
 
         if (appointmentData.isAccepted) {
@@ -276,37 +301,40 @@ const appointmentRequest = async (req, res) => {
             });
         }
 
-        // Update the appointment to accepted
-        await appointmentModel.findByIdAndUpdate(appointmentId, { isAccepted: true });
-
+        // Ensure userId is populated
+        const user = appointmentData.userId || { name: 'Unknown', email: '-' };
+        // Update the appointment to accepted and set all status fields for halls
+        await appointmentModel.findByIdAndUpdate(appointmentId, {
+            isAccepted: true,
+            status: 'Approved',
+            coordinatorDecision: 'approved',
+            directorDecision: 'approved'
+        });
         // Send acceptance emails
-        const hallData = await hallModel.findById(hallId);
-
+        const hallData = await hallModel.findById(facility._id);
         // Email to user
         await sendEmail({
-            to: appointmentData.userData.email,
+            to: user.email,
             subject: "Booking Confirmed - BookMyHall",
             html: getBookingApprovalTemplate(
-                appointmentData.userData,
+                user,
                 hallData,
                 appointmentData.slotDate,
                 appointmentData.slotTime
             )
         });
-
         // Email to hall coordinator
         await sendEmail({
             to: hallData.email,
             subject: "New Booking Confirmed - BookMyHall",
             html: getHallBookingConfirmationTemplate(
-                appointmentData.userData,
+                user,
                 hallData,
                 appointmentData.slotDate,
                 appointmentData.slotTime
             )
         });
-
-        res.json({ success: true, message: "Appointment accepted successfully" });
+        res.json({ success: true, message: "Appointment accepted successfully", facilityName: hallData.name });
     } catch (error) {
         console.error('Error in appointmentRequest:', error);
         res.json({ success: false, message: error.message });
@@ -320,6 +348,11 @@ const appointmentComplete = async (req, res) => {
         const hallId = req.hall._id.toString(); // Convert to string
 
         const appointmentData = await appointmentModel.findById(appointmentId);
+
+        // Debug logging
+        console.log('[appointmentComplete] hallId from token:', hallId);
+        console.log('[appointmentComplete] appointmentId:', appointmentId);
+        console.log('[appointmentComplete] appointmentData.hallId:', appointmentData ? appointmentData.hallId : 'N/A');
 
         if (!appointmentData) {
             return res.json({
@@ -382,7 +415,7 @@ const appointmentComplete = async (req, res) => {
                 `
         });
 
-        res.json({ success: true, message: "Appointment completed successfully" });
+        res.json({ success: true, message: "Appointment completed successfully", facilityName: hallData.name });
     } catch (error) {
         console.error('Error in appointmentComplete:', error);
         res.json({ success: false, message: error.message });
@@ -396,6 +429,11 @@ const appointmentCancel = async (req, res) => {
         const hallId = req.hall._id.toString(); // Convert to string
 
         const appointmentData = await appointmentModel.findById(appointmentId);
+
+        // Debug logging
+        console.log('[appointmentCancel] hallId from token:', hallId);
+        console.log('[appointmentCancel] appointmentId:', appointmentId);
+        console.log('[appointmentCancel] appointmentData.hallId:', appointmentData ? appointmentData.hallId : 'N/A');
 
         if (!appointmentData) {
             return res.json({
@@ -440,7 +478,7 @@ const appointmentCancel = async (req, res) => {
             )
         });
 
-        res.json({ success: true, message: "Appointment cancelled successfully" });
+        res.json({ success: true, message: "Appointment cancelled successfully", facilityName: hallData.name });
     } catch (error) {
         console.error('Error in appointmentCancel:', error);
         res.json({ success: false, message: error.message });
@@ -450,18 +488,37 @@ const appointmentCancel = async (req, res) => {
 // Api to get dashboard data for doctor panel
 const hallDashboard = async (req, res) => {
     try {
-        const hallId = req.hall._id;
-        const appointments = await appointmentModel.find({ hallId });
+        const { role, email, id } = req.user;
+        let appointments = [];
+        if (role === 'coordinator') {
+            // Find all guest rooms and vehicles managed by this coordinator
+            const facilities = await hallModel.find({
+                email: email,
+                $or: [{ isGuestRoom: true }, { isVehicle: true }]
+            });
+            const facilityIds = facilities.map(f => f._id);
+            appointments = await appointmentModel.find({ hallId: { $in: facilityIds } }).populate('userId hallId');
+        } else if (role === 'hall') {
+            appointments = await appointmentModel.find({ hallId: id }).populate('userId hallId');
+        } else {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
         let users = [];
         appointments.map((item) => {
             if (!users.includes(item.userId)) {
                 users.push(item.userId);
             }
         });
+        // Attach userData and facility name for frontend compatibility in latestAppointments
+        const latestAppointments = appointments.reverse().slice(0, 5).map(app => ({
+            ...app.toObject(),
+            userData: app.userId,
+            facilityName: app.hallId?.name || ''
+        }));
         const dashData = {
             appointments: appointments.length,
             users: users.length,
-            latestAppointments: appointments.reverse().slice(0, 5)
+            latestAppointments
         };
         res.json({ success: true, dashData });
     } catch (error) {
@@ -565,7 +622,7 @@ const cancelAppointment = async (req, res) => {
             )
         });
 
-        res.json({ success: true, message: "Appointment cancelled successfully" });
+        res.json({ success: true, message: "Appointment cancelled successfully", facilityName: hallData.name });
     } catch (error) {
         console.error('Error in cancelAppointment:', error);
         res.json({ success: false, message: error.message });
@@ -1006,6 +1063,83 @@ const updateVehicle = async (req, res) => {
     }
 };
 
+// Coordinator approval/rejection for guestroom/vehicle bookings
+export const bookingDecision = async (req, res) => {
+    try {
+        const { appointmentId, decision, comment } = req.body;
+        if (!appointmentId || !['approved', 'rejected'].includes(decision)) {
+            return res.status(400).json({ success: false, message: 'Invalid request.' });
+        }
+        const appointment = await appointmentModel.findById(appointmentId);
+        if (!appointment) {
+            return res.status(404).json({ success: false, message: 'Appointment not found.' });
+        }
+        // Only allow for guestroom or vehicle
+        const hall = await hallModel.findById(appointment.hallId);
+        if (!hall || (!hall.isGuestRoom && !hall.isVehicle)) {
+            return res.status(400).json({ success: false, message: 'Only guestroom and vehicle bookings require director approval.' });
+        }
+        // Update appointment
+        appointment.coordinatorDecision = decision;
+        appointment.coordinatorComment = comment || '';
+        appointment.statusHistory = appointment.statusHistory || [];
+        appointment.statusHistory.push({
+            status: `coordinator_${decision}`,
+            by: 'coordinator',
+            comment: comment || '',
+            date: new Date()
+        });
+        if (decision === 'approved') {
+            appointment.directorDecision = 'pending';
+            appointment.status = 'Pending Director Approval';
+        } else {
+            appointment.directorDecision = 'pending'; // stays pending, but will be ignored in UI
+            appointment.status = 'Pending Director Approval';
+        }
+        await appointment.save();
+        // Re-populate userId and hallId for response
+        await appointment.populate('userId hallId');
+        res.json({ success: true, message: `Booking ${decision} by coordinator.`, appointment });
+    } catch (error) {
+        console.error('Error in bookingDecision:', error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+// Get all appointments for all facilities managed by the coordinator (by email)
+const allCoordinatorAppointments = async (req, res) => {
+    try {
+        const { role, email, id } = req.user;
+        let appointments = [];
+        if (role === 'coordinator') {
+            // Find all guest rooms and vehicles managed by this coordinator
+            const facilities = await hallModel.find({
+                email: email,
+                $or: [{ isGuestRoom: true }, { isVehicle: true }]
+            });
+            const facilityIds = facilities.map(f => f._id);
+            appointments = await appointmentModel.find({ hallId: { $in: facilityIds } })
+                .populate('userId hallId');
+        } else if (role === 'hall') {
+            appointments = await appointmentModel.find({ hallId: id })
+                .populate('userId hallId');
+        } else {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+        // Attach userData, hallData, and facility name for frontend compatibility
+        const formatted = appointments.map(app => ({
+            ...app.toObject(),
+            userData: app.userId ? app.userId : { name: 'Unknown', email: '-' },
+            hallData: app.hallId ? app.hallId : { name: 'Unknown', email: '-' },
+            facilityName: app.hallId?.name || ''
+        }));
+        res.json({ success: true, appointments: formatted });
+    } catch (error) {
+        console.error('Error in allCoordinatorAppointments:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 export {
     changeAvailability,
     hallList,
@@ -1032,4 +1166,5 @@ export {
     getHallRatings,
     getCoordinatorVehicles,
     updateVehicle,
+    allCoordinatorAppointments
 }

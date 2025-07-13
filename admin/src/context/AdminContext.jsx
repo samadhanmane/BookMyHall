@@ -18,7 +18,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
     const getAllHalls = async () =>{
         try{
-            const {data} = await axios.post(backendUrl + '/api/admin/all-halls',{},{headers:{aToken}})
+            const {data} = await axios.post(backendUrl + '/api/admin/all-halls',{}, {headers:{token: aToken}})
             if(data.success){
                 setHalls(data.halls)
                 setGuestRooms(data.guestRooms)
@@ -38,7 +38,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
     const changeAvailability = async(hallId) => {
         try{
-            const {data} = await axios.post(backendUrl + '/api/admin/change-availability',{hallId},{headers:{aToken}})
+            const {data} = await axios.post(backendUrl + '/api/admin/change-availability',{hallId},{headers:{token: aToken}})
             if(data.success){
                 toast.success(data.message)
                 getAllHalls()
@@ -53,7 +53,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
        const getAllAppointments = async ()=>{
         try{
-            const {data} = await axios.get(backendUrl+'/api/admin/appointments',{headers:{aToken}})
+            const {data} = await axios.get(backendUrl+'/api/admin/appointments',{headers:{token: aToken}})
             if (data.success){
                 setAppointments(data.appointments)
             }else{
@@ -66,7 +66,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
        const completeAppointment = async (appointmentId) => {
         try{
-            const {data} = await axios.post(backendUrl + '/api/admin/complete-appointment',{appointmentId},{headers:{aToken}})
+            const {data} = await axios.post(backendUrl + '/api/admin/complete-appointment',{appointmentId},{headers:{token: aToken}})
             if(data.success){
                 toast.success(data.message)
                 getAllAppointments()
@@ -80,7 +80,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
        const cancelAppointment = async (appointmentId) => {
         try{
-            const {data} = await axios.post(backendUrl + '/api/admin/appointment-cancel',{appointmentId},{headers:{aToken}})
+            const {data} = await axios.post(backendUrl + '/api/admin/appointment-cancel',{appointmentId},{headers:{token: aToken}})
             if(data.success){
                 toast.success(data.message)
                 getAllAppointments()
@@ -94,7 +94,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
        const requestAcceptance = async (appointmentId) => {
         try{
-            const {data} = await axios.post(backendUrl + '/api/admin/request-acceptance',{appointmentId},{headers:{aToken}})
+            const {data} = await axios.post(backendUrl + '/api/admin/request-acceptance',{appointmentId},{headers:{token: aToken}})
             if(data.success){
                 toast.success(data.message)
                 getAllAppointments()
@@ -110,7 +110,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
         const getDashData = async () => {
     
             try{
-                const {data} = await axios.get(backendUrl + '/api/admin/dashboard', {headers:{aToken}})
+                const {data} = await axios.get(backendUrl + '/api/admin/dashboard', {headers:{token: aToken}})
             if(data.success){
                 setDashData(data.dashData)
                 console.log(data.dashData)
@@ -127,7 +127,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
             const { data } = await axios.post(
                 backendUrl + '/api/admin/delete-hall-or-room',
                 { hallId },
-                { headers: { aToken } }
+                { headers: { token: aToken } }
             );
             if (data.success) {
                 toast.success(data.message);
@@ -142,7 +142,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
     const fetchCoordinators = async () => {
         try {
-            const { data } = await axios.get(backendUrl + '/api/admin/list-coordinators', { headers: { aToken } })
+            const { data } = await axios.get(backendUrl + '/api/admin/list-coordinators', { headers: { token: aToken } })
             if (data.success) {
                 setCoordinators(data.coordinators)
             } else {
@@ -155,7 +155,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
     const addCoordinator = async (name, email, password) => {
         try {
-            const { data } = await axios.post(backendUrl + '/api/admin/add-coordinator', { name, email, password }, { headers: { aToken } })
+            const { data } = await axios.post(backendUrl + '/api/admin/add-coordinator', { name, email, password }, { headers: { token: aToken } })
             if (data.success) {
                 toast.success(data.message)
                 fetchCoordinators()
@@ -169,7 +169,7 @@ const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStora
 
     const deleteCoordinator = async (email) => {
         try {
-            const { data } = await axios.post(backendUrl + '/api/admin/delete-coordinator', { email }, { headers: { aToken } })
+            const { data } = await axios.post(backendUrl + '/api/admin/delete-coordinator', { email }, { headers: { token: aToken } })
             if (data.success) {
                 toast.success(data.message)
                 fetchCoordinators()

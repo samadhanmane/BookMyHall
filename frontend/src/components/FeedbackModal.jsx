@@ -1,18 +1,119 @@
 import React, { useState } from 'react';
 
-const FeedbackModal = ({ open, onClose, onSubmit, loading }) => {
+const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
   const [rating, setRating] = useState(0);
   const [cleanliness, setCleanliness] = useState('');
-  const [descriptionMatch, setDescriptionMatch] = useState('');
-  const [electricity, setElectricity] = useState('');
-  const [otherComments, setOtherComments] = useState('');
+  const [helpful, setHelpful] = useState('');
+  const [improvement, setImprovement] = useState('');
+  // Hall-specific
+  const [audioVisual, setAudioVisual] = useState('');
+  const [seatingComfort, setSeatingComfort] = useState('');
+  // Guest room-specific
+  const [bedComfort, setBedComfort] = useState('');
+  const [amenities, setAmenities] = useState('');
+  // Vehicle-specific
+  const [vehicleCondition, setVehicleCondition] = useState('');
+  const [timeliness, setTimeliness] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ rating, cleanliness, descriptionMatch, electricity, otherComments });
+    // Prepare feedback data based on type
+    let feedbackData = { rating, cleanliness, helpful, improvement };
+    if (facilityType === 'hall') {
+      feedbackData = { ...feedbackData, audioVisual, seatingComfort };
+    } else if (facilityType === 'guest room') {
+      feedbackData = { ...feedbackData, bedComfort, amenities };
+    } else if (facilityType === 'vehicle') {
+      feedbackData = { ...feedbackData, vehicleCondition, timeliness };
+    }
+    onSubmit(feedbackData);
   };
 
   if (!open) return null;
+
+  // Render questions based on facility type
+  let extraQuestions = null;
+  if (facilityType === 'hall') {
+    extraQuestions = <>
+      <div>
+        <label className="block font-medium mb-1">Audio/Visual Equipment</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={audioVisual}
+          onChange={e => setAudioVisual(e.target.value)}
+          placeholder="Was the AV equipment satisfactory?"
+          disabled={loading}
+        />
+      </div>
+      <div>
+        <label className="block font-medium mb-1">Seating Comfort</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={seatingComfort}
+          onChange={e => setSeatingComfort(e.target.value)}
+          placeholder="Was the seating comfortable?"
+          disabled={loading}
+        />
+      </div>
+    </>;
+  } else if (facilityType === 'guest room') {
+    extraQuestions = <>
+      <div>
+        <label className="block font-medium mb-1">Bed Comfort</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={bedComfort}
+          onChange={e => setBedComfort(e.target.value)}
+          placeholder="Was the bed comfortable?"
+          disabled={loading}
+        />
+      </div>
+      <div>
+        <label className="block font-medium mb-1">Amenities</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={amenities}
+          onChange={e => setAmenities(e.target.value)}
+          placeholder="Were the amenities satisfactory?"
+          disabled={loading}
+        />
+      </div>
+    </>;
+  } else if (facilityType === 'vehicle') {
+    extraQuestions = <>
+      <div>
+        <label className="block font-medium mb-1">Vehicle Condition</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={vehicleCondition}
+          onChange={e => setVehicleCondition(e.target.value)}
+          placeholder="Was the vehicle in good condition?"
+          disabled={loading}
+        />
+      </div>
+      <div>
+        <label className="block font-medium mb-1">Timeliness</label>
+        <input
+          type="text"
+          className="w-full border rounded px-3 py-2"
+          value={timeliness}
+          onChange={e => setTimeliness(e.target.value)}
+          placeholder="Was the vehicle on time?"
+          disabled={loading}
+        />
+      </div>
+    </>;
+  }
+
+  // Default to generic if type is missing
+  if (!extraQuestions) {
+    extraQuestions = null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -27,7 +128,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading }) => {
         <h2 className="text-xl font-semibold mb-4">Share Your Feedback</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block font-medium mb-1">Rating</label>
+            <label className="block font-medium mb-1">Overall Experience</label>
             <div className="flex gap-1">
               {[1,2,3,4,5].map((star) => (
                 <button
@@ -55,34 +156,24 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading }) => {
             />
           </div>
           <div>
-            <label className="block font-medium mb-1">Description Match</label>
+            <label className="block font-medium mb-1">Was the staff/coordinator helpful?</label>
             <input
               type="text"
               className="w-full border rounded px-3 py-2"
-              value={descriptionMatch}
-              onChange={e => setDescriptionMatch(e.target.value)}
-              placeholder="Did the facility match the description?"
+              value={helpful}
+              onChange={e => setHelpful(e.target.value)}
+              placeholder="Yes/No or describe briefly"
               disabled={loading}
             />
           </div>
+          {extraQuestions}
           <div>
-            <label className="block font-medium mb-1">Electricity</label>
-            <input
-              type="text"
-              className="w-full border rounded px-3 py-2"
-              value={electricity}
-              onChange={e => setElectricity(e.target.value)}
-              placeholder="Any issues with electricity?"
-              disabled={loading}
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Other Comments</label>
+            <label className="block font-medium mb-1">Suggestions for Improvement</label>
             <textarea
               className="w-full border rounded px-3 py-2"
-              value={otherComments}
-              onChange={e => setOtherComments(e.target.value)}
-              placeholder="Share anything else..."
+              value={improvement}
+              onChange={e => setImprovement(e.target.value)}
+              placeholder="Any suggestions for improvement?"
               rows={3}
               disabled={loading}
             />

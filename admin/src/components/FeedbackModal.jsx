@@ -52,10 +52,16 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, adminMode = false, ad
               </span>
             </div>
             <div className="text-xs text-gray-400 mb-1">{new Date(feedback.createdAt).toLocaleString()}</div>
-            <div className="text-sm text-gray-700 mb-1"><b>Cleanliness:</b> {feedback.cleanliness}</div>
-            <div className="text-sm text-gray-700 mb-1"><b>Description Match:</b> {feedback.descriptionMatch}</div>
-            <div className="text-sm text-gray-700 mb-1"><b>Electricity:</b> {feedback.electricity}</div>
-            <div className="text-sm text-gray-700 mb-1"><b>Other Comments:</b> {feedback.otherComments}</div>
+            {/* Dynamic feedback fields */}
+            {feedback.cleanliness && <div className="text-sm text-gray-700 mb-1"><b>Cleanliness:</b> {feedback.cleanliness}</div>}
+            {feedback.audioVisual && <div className="text-sm text-gray-700 mb-1"><b>Audio/Visual Equipment:</b> {feedback.audioVisual}</div>}
+            {feedback.seatingComfort && <div className="text-sm text-gray-700 mb-1"><b>Seating Comfort:</b> {feedback.seatingComfort}</div>}
+            {feedback.bedComfort && <div className="text-sm text-gray-700 mb-1"><b>Bed Comfort:</b> {feedback.bedComfort}</div>}
+            {feedback.amenities && <div className="text-sm text-gray-700 mb-1"><b>Amenities:</b> {feedback.amenities}</div>}
+            {feedback.vehicleCondition && <div className="text-sm text-gray-700 mb-1"><b>Vehicle Condition:</b> {feedback.vehicleCondition}</div>}
+            {feedback.timeliness && <div className="text-sm text-gray-700 mb-1"><b>Timeliness:</b> {feedback.timeliness}</div>}
+            {feedback.helpful && <div className="text-sm text-gray-700 mb-1"><b>Staff/Coordinator Helpfulness:</b> {feedback.helpful}</div>}
+            {feedback.improvement && <div className="text-sm text-gray-700 mb-1"><b>Suggestions for Improvement:</b> {feedback.improvement}</div>}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">

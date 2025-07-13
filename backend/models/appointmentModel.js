@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const appointmentSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
     hallId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hall', required: true },
     slotDate: { type: String, required: true },
     slotTime: { type: String, required: true },
@@ -10,6 +10,18 @@ const appointmentSchema = new mongoose.Schema({
     isAccepted: { type: Boolean, default: false },
     isCompleted: { type: Boolean, default: false },
     cancelled: { type: Boolean, default: false },
+    // Approval workflow fields
+    coordinatorDecision: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    coordinatorComment: { type: String },
+    directorDecision: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    directorComment: { type: String },
+    // Optionally, a status history for audit trail
+    statusHistory: [{
+        status: String,
+        by: String, // 'user', 'coordinator', 'director'
+        comment: String,
+        date: { type: Date, default: Date.now }
+    }],
     createdAt: { type: Date, default: Date.now },
 })
 
