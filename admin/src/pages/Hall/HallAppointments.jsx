@@ -38,8 +38,8 @@ const HallAppointments = () => {
     getAppointments()
   }
 
-  const handleRequestAppointment = async (appointmentId) => {
-    await requestAppointment(appointmentId)
+  const handleRequestAppointment = async (appointmentId, facilityType) => {
+    await requestAppointment(appointmentId, facilityType)
     getAppointments()
   }
 
@@ -197,6 +197,8 @@ const HallAppointments = () => {
                   <span className="text-green-600 font-semibold text-sm">Approved</span>
                 ) : item.isAccepted ? (
                   <span className="text-green-600 font-semibold text-sm">Confirmed</span>
+                ) : (item.isAccepted || item.directorDecision === 'approved') ? (
+                  <span className="text-green-600 font-semibold text-sm">Confirmed</span>
                 ) : (
                   <span className="text-yellow-600 font-semibold text-sm">Pending</span>
                 )}
@@ -219,26 +221,28 @@ const HallAppointments = () => {
               </div>
 
               <div className="flex gap-3 justify-center text-center">
-                {!item.cancelled && !item.isAccepted && (
-                  <>
-                    <img
-                      onClick={() => handleCancelAppointment(item._id)}
-                      className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                      src={assets.cancel_icon}
-                      alt="Cancel"
-                    />
-                    <img
-                      onClick={() => handleRequestAppointment(item._id)}
-                      className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                      src={assets.tick_icon}
-                      alt="Confirm"
-                    />
-                  </>
-                )}
+                {!item.cancelled &&
+                  item.coordinatorDecision === 'pending' &&
+                  (!item.directorDecision || item.directorDecision === 'pending') && (
+                    <>
+                      <img
+                        onClick={() => handleCancelAppointment(item._id)}
+                        className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
+                        src={assets.cancel_icon}
+                        alt="Cancel"
+                      />
+                      <img
+                        onClick={() => handleRequestAppointment(item._id, item.hallData?.isGuestRoom ? 'guestroom' : item.hallData?.isVehicle ? 'vehicle' : 'hall')}
+                        className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
+                        src={assets.tick_icon}
+                        alt="Confirm"
+                      />
+                    </>
+                  )}
               </div>
 
               <div className="flex justify-center text-center">
-                {item.isAccepted && !item.isCompleted && (
+                {(item.isAccepted || item.directorDecision === 'approved') && !item.isCompleted && (
                   <img
                     onClick={() => handleCompleteAppointment(item._id)}
                     className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"

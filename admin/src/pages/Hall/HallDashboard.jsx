@@ -100,27 +100,29 @@ const HallDashboard = () => {
               {/* Status */}
               {item.cancelled ? (
                 <p className="text-red-600 text-xs font-semibold">Cancelled</p>
-              ) : item.isAccepted ? (
+              ) : (item.isAccepted || item.directorDecision === 'approved') ? (
                 <p className="text-green-600 text-xs font-semibold">Confirmed</p>
               ) : (
-                <div className="flex gap-2">
-                  <img
-                    onClick={() => handleCancelAppointment(item._id)}
-                    className="w-8 cursor-pointer"
-                    src={assets.cancel_icon}
-                    alt="cancel"
-                  />
-                  <img
-                    onClick={() => handleRequestAppointment(item._id)}
-                    className="w-8 cursor-pointer"
-                    src={assets.tick_icon}
-                    alt="accept"
-                  />
-                </div>
+                (item.coordinatorDecision === 'pending' && (!item.directorDecision || item.directorDecision === 'pending')) ? (
+                  <div className="flex gap-2">
+                    <img
+                      onClick={() => handleCancelAppointment(item._id)}
+                      className="w-8 cursor-pointer"
+                      src={assets.cancel_icon}
+                      alt="cancel"
+                    />
+                    <img
+                      onClick={() => handleRequestAppointment(item._id)}
+                      className="w-8 cursor-pointer"
+                      src={assets.tick_icon}
+                      alt="accept"
+                    />
+                  </div>
+                ) : null
               )}
 
               {/* Completion */}
-              {item.isAccepted && !item.isCompleted && (
+              {(item.isAccepted || item.directorDecision === 'approved') && !item.isCompleted && (
                 <div className="ml-2">
                   <img
                     onClick={() => handleCompleteAppointment(item._id)}

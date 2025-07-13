@@ -127,29 +127,40 @@ const HallContextProvider = (props) => {
         }
     }
 
-    const requestAppointment = async (appointmentId) => {
+    const requestAppointment = async (appointmentId, facilityType) => {
         try{
             console.log('Requesting appointment:', appointmentId);
-            const {data} = await axios.post(
-                backendUrl + '/api/hall/appointment-request',
-                { appointmentId },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'dToken': dToken
+            let data;
+            if (facilityType === 'guestroom' || facilityType === 'vehicle') {
+                // Use bookingDecision for guestroom/vehicle
+                const res = await axios.post(
+                    backendUrl + '/api/hall/booking-decision',
+                    { appointmentId, decision: 'approved' },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'dToken': dToken
+                        }
                     }
-                }
-            );
-            
+                );
+                data = res.data;
+            } else {
+                // Use appointment-request for halls
+                const res = await axios.post(
+                    backendUrl + '/api/hall/appointment-request',
+                    { appointmentId },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'dToken': dToken
+                        }
+                    }
+                );
+                data = res.data;
+            }
             if(data.success){
                 toast.success(data.message);
-                // Immediately update the appointments list
-                const updatedAppointments = appointments.map(appointment => 
-                    appointment._id === appointmentId 
-                        ? {...appointment, isAccepted: true}
-                        : appointment
-                );
-                setAppointments(updatedAppointments);
+                getAppointments();
                 getDashboardData(); // Refresh dashboard data
             }else{
                 toast.error(data.message);

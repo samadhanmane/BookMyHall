@@ -372,15 +372,16 @@ const appointmentComplete = async (req, res) => {
 
         // Send completion emails
         const hallData = await hallModel.findById(hallId);
+        const user = await userModel.findById(appointmentData.userId);
 
         // Email to user
         await sendEmail({
-            to: appointmentData.userData.email,
+            to: user.email,
             subject: "Booking Completed - BookMyHall",
             html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
                         <h2 style="color: #333; text-align: center;">BookMyHall - Thank You!</h2>
-                        <p>Dear ${appointmentData.userData.name},</p>
+                        <p>Dear ${user.name},</p>
                         <p>Your booking for <strong>${hallData.name}</strong> has been completed.</p>
                         <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
                         <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
@@ -405,9 +406,9 @@ const appointmentComplete = async (req, res) => {
                         <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
                         <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
                         <p><strong>User Details:</strong></p>
-                        <p>Name: ${appointmentData.userData.name}</p>
-                        <p>Email: ${appointmentData.userData.email}</p>
-                        <p>Phone: ${appointmentData.userData.phone}</p>
+                        <p>Name: ${user.name}</p>
+                        <p>Email: ${user.email}</p>
+                        <p>Phone: ${user.phone || ''}</p>
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
                             <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
                         </div>
