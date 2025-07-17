@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { StarIcon } from '@heroicons/react/24/solid';
 
 const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
   const [rating, setRating] = useState(0);
@@ -117,16 +118,16 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+      <div className="bg-gray-50 rounded-xl shadow-lg w-full max-w-md p-8 border border-[#123458]/30 relative">
         <button
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl"
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl"
           onClick={onClose}
           disabled={loading}
         >
           &times;
         </button>
-        <h2 className="text-xl font-semibold mb-4">Share Your Feedback</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <h2 className="text-2xl font-bold mb-6 text-[#123458]">Share Your Feedback</h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block font-medium mb-1">Overall Experience</label>
             <div className="flex gap-1">
@@ -139,7 +140,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
                   disabled={loading}
                   aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
                 >
-                  ★
+                  <StarIcon className={`w-6 h-6 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`} />
                 </button>
               ))}
             </div>
@@ -178,10 +179,10 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
               disabled={loading}
             />
           </div>
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="flex justify-end gap-3 mt-6">
             <button
               type="button"
-              className="px-4 py-2 rounded border border-gray-400 bg-gray-200 text-gray-700"
+              className="px-5 py-2 rounded-lg border border-[#123458]/20 bg-gray-200 text-gray-700 font-semibold shadow"
               onClick={onClose}
               disabled={loading}
             >
@@ -189,7 +190,7 @@ const FeedbackModal = ({ open, onClose, onSubmit, loading, facilityType }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded border border-gray-400 bg-[#123458] text-white font-semibold"
+              className="px-5 py-2 rounded-lg border-none bg-[#123458] text-white font-semibold shadow"
               disabled={loading || rating === 0}
             >
               {loading ? 'Submitting...' : 'Submit'}

@@ -5,10 +5,8 @@ const About = () => {
   return (
     <div className="font-[Poppins] bg-white text-[#030303] px-6 md:px-20">
       {/* Heading */}
-      <div className="text-center text-3xl font-bold pt-12">
-        <p>
-          About <span className="text-[#123458]">US</span>
-        </p>
+      <div className="text-center mt-20 mb-16 text-[#123458]">
+        <h1 className="text-5xl font-bold">About <span className="text-[#123458]">Us</span></h1>
       </div>
 
       {/* About Section */}

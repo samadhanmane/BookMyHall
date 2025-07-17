@@ -40,7 +40,7 @@ const AddHall = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-8 border border-[#e0e0e0] rounded-xl shadow-sm font-[Poppins]">
+    <div className="max-w-2xl mx-auto bg-gray-50 p-8 border border-[#123458]/30 rounded-xl shadow-lg font-[Poppins]">
       <h2 className="text-2xl font-semibold mb-6 text-[#123458]">Add a New Facility</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input className="border border-[#e0e0e0] px-4 py-2 rounded focus:outline-none" type="text" name="name" placeholder="Name" onChange={handleChange} required />

@@ -85,7 +85,7 @@ const sendOtp = async (req, res) => {
         // Send email using the email service
         const emailSent = await sendEmail({
             to: email,
-            subject: 'Password Reset OTP - BookMyHall',
+            subject: 'Password Reset OTP - Facility Booking',
             html: getOtpTemplate(otp)
         });
 
@@ -315,7 +315,7 @@ const appointmentRequest = async (req, res) => {
         // Email to user
         await sendEmail({
             to: user.email,
-            subject: "Booking Confirmed - BookMyHall",
+            subject: "Booking Confirmed - Facility Booking",
             html: getBookingApprovalTemplate(
                 user,
                 hallData,
@@ -326,7 +326,7 @@ const appointmentRequest = async (req, res) => {
         // Email to hall coordinator
         await sendEmail({
             to: hallData.email,
-            subject: "New Booking Confirmed - BookMyHall",
+            subject: "New Booking Confirmed - Facility Booking",
             html: getHallBookingConfirmationTemplate(
                 user,
                 hallData,
@@ -377,18 +377,18 @@ const appointmentComplete = async (req, res) => {
         // Email to user
         await sendEmail({
             to: user.email,
-            subject: "Booking Completed - BookMyHall",
+            subject: "Booking Completed - Facility Booking",
             html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                        <h2 style="color: #333; text-align: center;">BookMyHall - Thank You!</h2>
+                        <h2 style="color: #333; text-align: center;">Facility Booking - Thank You!</h2>
                         <p>Dear ${user.name},</p>
                         <p>Your booking for <strong>${hallData.name}</strong> has been completed.</p>
                         <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
                         <p><strong>Time:</strong> ${appointmentData.slotTime}</p>
                         <p>We hope you had a great experience. Please consider leaving a review!</p>
-                        <p>Thank you for choosing BookMyHall!</p>
+                        <p>Thank you for choosing Facility Booking!</p>
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                            <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+                            <p style="color: #999; font-size: 12px;">This is an automated message from Facility Booking, please do not reply to this email.</p>
                         </div>
                     </div>
                 `
@@ -397,10 +397,10 @@ const appointmentComplete = async (req, res) => {
         // Email to hall coordinator
         await sendEmail({
             to: hallData.email,
-            subject: "Booking Completed - BookMyHall",
+            subject: "Booking Completed - Facility Booking",
             html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                        <h2 style="color: #333; text-align: center;">BookMyHall - Booking Completed</h2>
+                        <h2 style="color: #333; text-align: center;">Facility Booking - Booking Completed</h2>
                         <p>A booking has been completed for your hall.</p>
                         <p><strong>Hall:</strong> ${hallData.name}</p>
                         <p><strong>Date:</strong> ${appointmentData.slotDate}</p>
@@ -410,7 +410,7 @@ const appointmentComplete = async (req, res) => {
                         <p>Email: ${user.email}</p>
                         <p>Phone: ${user.phone || ''}</p>
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                            <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+                            <p style="color: #999; font-size: 12px;">This is an automated message from Facility Booking, please do not reply to this email.</p>
                         </div>
                     </div>
                 `
@@ -458,7 +458,7 @@ const appointmentCancel = async (req, res) => {
         // Email to user
         await sendEmail({
             to: appointmentData.userData.email,
-            subject: "Booking Cancelled - BookMyHall",
+            subject: "Booking Cancelled - Facility Booking",
             html: getBookingCancellationTemplate(
                 appointmentData.userData,
                 hallData,
@@ -470,7 +470,7 @@ const appointmentCancel = async (req, res) => {
         // Email to hall coordinator
         await sendEmail({
             to: hallData.email,
-            subject: "Booking Cancelled - BookMyHall",
+            subject: "Booking Cancelled - Facility Booking",
             html: getHallBookingCancellationTemplate(
                 appointmentData.userData,
                 hallData,
@@ -602,7 +602,7 @@ const cancelAppointment = async (req, res) => {
         // Email to user
         await sendEmail({
             to: appointmentData.userData.email,
-            subject: "Booking Cancelled - BookMyHall",
+            subject: "Booking Cancelled - Facility Booking",
             html: getBookingCancellationTemplate(
                 appointmentData.userData,
                 hallData,
@@ -614,7 +614,7 @@ const cancelAppointment = async (req, res) => {
         // Email to hall coordinator
         await sendEmail({
             to: hallData.email,
-            subject: "Booking Cancelled - BookMyHall",
+            subject: "Booking Cancelled - Facility Booking",
             html: getHallBookingCancellationTemplate(
                 appointmentData.userData,
                 hallData,
@@ -681,17 +681,17 @@ const updateHallEmail = async (req, res) => {
             // Email to old email address
             await sendEmail({
                 to: oldEmail,
-                subject: "Email Update Notification - BookMyHall",
+                subject: "Email Update Notification - Facility Booking",
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                        <h2 style="color: #333; text-align: center;">BookMyHall - Email Update Notification</h2>
+                        <h2 style="color: #333; text-align: center;">Facility Booking - Email Update Notification</h2>
                         <p>Dear ${hallName},</p>
                         <p>This is to inform you that your email address has been updated.</p>
                         <p>Your new email address is: <strong>${newEmail}</strong></p>
                         <p>Please use this new email address for all future communications.</p>
                         <p>If you did not request this change, please contact us immediately.</p>
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                            <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+                            <p style="color: #999; font-size: 12px;">This is an automated message from Facility Booking, please do not reply to this email.</p>
                         </div>
                     </div>
                 `
@@ -700,10 +700,10 @@ const updateHallEmail = async (req, res) => {
             // Email to new email address
             await sendEmail({
                 to: newEmail,
-                subject: "Welcome to BookMyHall - Email Update Confirmation",
+                subject: "Welcome to Facility Booking - Email Update Confirmation",
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-                        <h2 style="color: #333; text-align: center;">BookMyHall - Email Update Confirmation</h2>
+                        <h2 style="color: #333; text-align: center;">Facility Booking - Email Update Confirmation</h2>
                         <p>Dear ${hallName},</p>
                         <p>Your email address has been successfully updated.</p>
                         <p>You can now use this email address to:</p>
@@ -714,7 +714,7 @@ const updateHallEmail = async (req, res) => {
                         </ul>
                         <p>If you have any questions, please don't hesitate to contact us.</p>
                         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-                            <p style="color: #999; font-size: 12px;">This is an automated message from BookMyHall, please do not reply to this email.</p>
+                            <p style="color: #999; font-size: 12px;">This is an automated message from Facility Booking, please do not reply to this email.</p>
                         </div>
                     </div>
                 `

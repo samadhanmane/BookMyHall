@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Calendar from "react-calendar"; // Import the calendar component
 import "react-calendar/dist/Calendar.css"; // Calendar CSS
 import { AppContext } from "../context/AppContext";
-import { assets } from "../assets/assets";
+import { CheckBadgeIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import RelatedHalls from "../components/RelatedHalls";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -183,27 +183,27 @@ const Appointment = () => {
         <div className="flex flex-col sm:flex-row gap-4">
           <div>
             <img
-              className="bg-primary w-full sm:max-w-72 rounded-lg border-2 border-gray-400"
+              className="bg-primary w-full sm:max-w-72 rounded-xl border-2 border-[#123458]/30 shadow-lg"
               src={HallInfo.image}
               alt={HallInfo.name}
             />
           </div>
 
-          <div className="flex-1 border-2 border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0">
+          <div className="flex-1 bg-gray-50 border border-[#123458]/30 rounded-xl p-8 py-7 shadow-lg mx-2 sm:mx-0 mt-[-80px] sm:mt-0">
             <div>
-              <p className="flex items-center gap-2 text-2xl font-medium text-black-900 ">
+              <p className="flex items-center gap-2 text-2xl font-bold text-[#123458] ">
                 {HallInfo.name}
-                <img className="w-5" src={assets.verified_icon} alt="Verified Facility" />
+                <CheckBadgeIcon className="w-5 h-5 text-green-500" title="Verified Facility" />
               </p>
               <div className="flex items-center gap-2 text-sm mt-1 text-black-600">
                 <p> {HallInfo.speciality}</p>
-                <button className="py-0.5 px-2 border-2 text-xs rounded-full">
+                <button className="py-0.5 px-2 border-2 text-xs rounded-full border-[#123458]/30 bg-white font-semibold">
                   {HallInfo.experience}
                 </button>
               </div>
               <div>
                 <p className="flex items-center gap-1 text-sm font-medium text-black-900 mt-3">
-                  About <img src={assets.info_icon} alt="Info" />
+                  About <InformationCircleIcon className="inline w-4 h-4 text-[#123458] ml-1" title="Info" />
                 </p>
                 <p className="text-sm text-black-500 max-w-[700px] mt-1">
                   {HallInfo.about}
@@ -215,9 +215,9 @@ const Appointment = () => {
               </div>
             </div>
             <div className="mt-6">
-              <label className="block text-sm font-medium mb-1">Reason for Booking <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium mb-1 text-[#123458]">Reason for Booking <span className="text-red-500">*</span></label>
               <textarea
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458] min-h-[80px]"
+                className="w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] min-h-[80px] bg-white"
                 value={reason}
                 onChange={e => setReason(e.target.value)}
                 placeholder="Please specify the purpose or reason for booking this facility."
@@ -229,7 +229,8 @@ const Appointment = () => {
         <br />
 
         <div className="sm:ml-72 sm:pl-4 mt-4 font-medium text-black-700 ">
-          <p className="px-1 text-2xl">Booking Slots</p>
+          <p className="px-1 text-2xl font-bold text-[#123458]">Booking Slots</p>
+          <div className="bg-gray-50 border border-[#123458]/30 rounded-xl shadow-lg p-6 mt-4">
           <Calendar
             onChange={setSelectedDate}
             value={selectedDate}
@@ -377,9 +378,9 @@ const Appointment = () => {
                 onClick={() =>
                   setSlotTime(slotTime === item.time ? "" : item.time)
                 }
-                className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-md cursor-pointer border-2 border-black-300 ${item.time === slotTime
-                  ? "bg-primary text-white"
-                  : "text-black-400 border border-black-300"
+                  className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-lg cursor-pointer border-2 border-[#123458]/20 ${item.time === slotTime
+                    ? "bg-[#123458] text-white"
+                    : "text-black-400 border border-[#123458]/20 bg-white"
                   }`}
                 key={index}
               >
@@ -390,10 +391,11 @@ const Appointment = () => {
           <button
             onClick={bookAppointment}
             disabled={!slotTime || isBooking}
-            className="bg-primary text-white text-sm font-light px-14 py-3 rounded-md my-6 disabled:bg-gray-400"
+              className="bg-[#123458] text-white text-sm font-semibold px-14 py-3 rounded-lg my-6 shadow disabled:bg-gray-400"
           >
             {isBooking ? "Booking..." : "Book an Appointment"}
           </button>
+          </div>
         </div>
 
         <RelatedHalls HallId={hallId} speciality={HallInfo.speciality} />

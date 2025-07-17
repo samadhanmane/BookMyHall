@@ -26,14 +26,16 @@ const HallsList = () => {
   const renderVenueCard = (item, index) => (
     <div
       key={index}
-      className="border border-[#123458] rounded-lg max-w-56 bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+      className="bg-gray-50 border border-[#123458]/30 rounded-xl max-w-56 shadow-lg"
     >
       <div className="w-full h-36 overflow-hidden">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="object-cover w-full h-full transition-all duration-300 group-hover:opacity-90"
-        />
+        <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+          <img
+            src={item.image}
+            alt={item.name}
+            className="object-cover w-full h-full transition-all duration-300 group-hover:opacity-90"
+          />
+        </div>
       </div>
       <div className="p-3">
         <p className="text-[#030303] text-base font-semibold">{item.name}</p>

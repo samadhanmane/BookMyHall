@@ -1,7 +1,11 @@
+import { CheckBadgeIcon, XCircleIcon } from '@heroicons/react/24/outline';
+
 const HallCard = ({ hall }) => {
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img src={hall.image} alt={hall.name} className="w-full h-48 object-cover" />
+        <div className="bg-gray-50 rounded-xl shadow-lg overflow-hidden border border-[#123458]/30">
+            <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+                <img src={hall.image} alt={hall.name} className="w-full h-full object-cover" />
+            </div>
             <div className="p-4">
                 <h3 className="text-xl font-semibold mb-2">{hall.name}</h3>
                 {/* Only show capacity (speciality + experience) for halls */}

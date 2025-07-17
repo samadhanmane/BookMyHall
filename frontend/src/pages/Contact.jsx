@@ -4,10 +4,8 @@ import { assets } from '../assets/assets';
 const Contact = () => {
   return (
     <div className="px-4 md:px-20 font-[Poppins] bg-white text-[#030303]">
-      <div className="text-center pt-12 text-3xl font-bold">
-        <p>
-          CONTACT <span className="text-[#123458] font-semibold">US</span>
-        </p>
+      <div className="text-center mt-20 mb-16 text-[#123458]">
+        <h1 className="text-5xl font-bold">Contact <span className="text-[#123458] font-semibold">Us</span></h1>
       </div>
 
       <div className="my-14 flex flex-col md:flex-row gap-12 md:gap-20 border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -19,7 +17,7 @@ const Contact = () => {
 
         <div className="flex flex-col justify-center gap-6 text-base">
           <div>
-            <p className="text-xl font-semibold text-[#123458] mb-2">OUR OFFICE</p>
+            <p className="text-xl font-semibold text-[#123458] mb-2">Our Office</p>
             <p className="text-[#030303]">
               Student Section, Design Building <br />
               MITAOE, Alandi, Pune 412105, Maharashtra, India

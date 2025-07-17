@@ -365,7 +365,7 @@ const requestAcceptance = async (req, res) => {
         }
 
         // Mark appointment as accepted
-        await appointmentModel.findByIdAndUpdate(appointmentId, { isAccepted: true });
+        await appointmentModel.findByIdAndUpdate(appointmentId, { isAccepted: true, directorDecision: 'approved' });
 
         res.json({ success: true, message: 'Appointment Accepted' });
 
@@ -546,7 +546,7 @@ const deleteHallOrRoom = async (req, res) => {
                 // Send cancellation emails
                 await sendEmail({
                     to: appointment.userData.email,
-                    subject: "Booking Cancelled - BookMyHall",
+                    subject: "Booking Cancelled - Facility Booking",
                     html: getBookingCancellationTemplate(
                         appointment.userData,
                         hall,
@@ -603,7 +603,7 @@ const addCoordinator = async (req, res) => {
         // Send welcome email to coordinator
         await sendEmail({
             to: email,
-            subject: 'Welcome to BookMyHall as a Coordinator!',
+            subject: 'Welcome to Facility Booking as a Coordinator!',
             html: getCoordinatorWelcomeTemplate(name)
         });
 

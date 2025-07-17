@@ -45,51 +45,52 @@ const AddHall = () => {
     }
   }, [isVehicle]);
 
-  // Coordinator selection now uses _id
+  // Coordinator selection now uses email
   const handleCoordinatorChange = (e) => {
-    const value = e.target.value
-    setSelectedCoordinator(value)
+    const value = e.target.value;
+    setSelectedCoordinator(value);
     if (value === 'new') {
-      setIsNewCoordinator(true)
-      setEmail('')
-      setPassword('')
-      setNewCoordName('')
-      setNewCoordEmail('')
-      setNewCoordPassword('')
+      setIsNewCoordinator(true);
+      setEmail('');
+      setPassword('');
+      setNewCoordName('');
+      setNewCoordEmail('');
+      setNewCoordPassword('');
     } else {
-      setIsNewCoordinator(false)
-      setEmail('') // No email for guest room/vehicle
-      setPassword('')
+      setIsNewCoordinator(false);
+      setEmail(value); // Use coordinator email for guest room/vehicle
+      setPassword('');
     }
-  }
+  };
 
   const onSubmitHandler = async (event) => {
-    event.preventDefault()
-    setLoading(true)
+    event.preventDefault();
+    setLoading(true);
 
     if (!hallImg) {
-      toast.error('Please upload an image')
-      setLoading(false)
-      return
+      toast.error('Please upload an image');
+      setLoading(false);
+      return;
     }
 
     if (!name || !about || (!isVehicle && (!address1 || !address2))) {
-      toast.error('Please fill all required fields')
-      setLoading(false)
-      return
+      toast.error('Please fill all required fields');
+      setLoading(false);
+      return;
     }
 
+    let coordinatorEmail = '';
     if (isGuestRoom || isVehicle) {
       if (!selectedCoordinator && !isNewCoordinator) {
-        toast.error('Please select a coordinator or create a new one')
-        setLoading(false)
-        return
+        toast.error('Please select a coordinator or create a new one');
+        setLoading(false);
+        return;
       }
       if (isNewCoordinator) {
         if (!newCoordName || !newCoordEmail || !newCoordPassword) {
-          toast.error('Please fill in all new coordinator details')
-          setLoading(false)
-          return
+          toast.error('Please fill in all new coordinator details');
+          setLoading(false);
+          return;
         }
         // Create new coordinator first
         try {
@@ -97,50 +98,56 @@ const AddHall = () => {
             backendUrl + '/api/admin/add-coordinator',
             { name: newCoordName, email: newCoordEmail, password: newCoordPassword },
             { headers: { aToken } }
-          )
+          );
           if (data.success && data.coordinator) {
-            setSelectedCoordinator(data.coordinator._id)
+            coordinatorEmail = data.coordinator.email;
+            setSelectedCoordinator(data.coordinator.email);
+            setEmail(data.coordinator.email);
+            setIsNewCoordinator(false);
           } else {
-            toast.error(data.message || 'Failed to add coordinator')
-            setLoading(false)
-            return
+            toast.error(data.message || 'Failed to add coordinator');
+            setLoading(false);
+            return;
           }
         } catch (error) {
-          toast.error(error.response?.data?.message || 'Failed to add coordinator')
-        setLoading(false)
-        return
-        }
+          toast.error(error.response?.data?.message || 'Failed to add coordinator');
+          setLoading(false);
+          return;
       }
     } else {
-      if (!email || !password) {
-        toast.error('Please fill in email and password for the hall')
-        setLoading(false)
-        return
+        coordinatorEmail = selectedCoordinator;
       }
     }
 
-    const formData = new FormData()
-    formData.append('image', hallImg)
-    formData.append('name', name)
+    // For halls, require email and password
     if (!isGuestRoom && !isVehicle) {
-      formData.append('email', email)
-      formData.append('password', password)
+      if (!email || !password) {
+        toast.error('Please fill in email and password for the hall');
+        setLoading(false);
+        return;
+      }
     }
-    formData.append('speciality', speciality)
-    formData.append('experience', experience)
-    formData.append('about', about)
+
+    const formData = new FormData();
+    formData.append('image', hallImg);
+    formData.append('name', name);
+    if (!isGuestRoom && !isVehicle) {
+      formData.append('email', email);
+      formData.append('password', password);
+    }
+    formData.append('speciality', speciality);
+    formData.append('experience', experience);
+    formData.append('about', about);
     formData.append('address', JSON.stringify(
       isVehicle
         ? {}
         : { line1: address1, line2: address2 }
-    ))
-    formData.append('isGuestRoom', isGuestRoom.toString())
-    formData.append('isVehicle', isVehicle.toString())
-    if ((isGuestRoom || isVehicle) && !isNewCoordinator) {
-      formData.append('email', selectedCoordinator)
-    } else if ((isGuestRoom || isVehicle) && isNewCoordinator) {
-      // Use the email from the newly created coordinator
-      formData.append('email', newCoordEmail)
+    ));
+    formData.append('isGuestRoom', isGuestRoom.toString());
+    formData.append('isVehicle', isVehicle.toString());
+    if ((isGuestRoom || isVehicle)) {
+      // Always use coordinator email for guest room/vehicle
+      formData.append('email', isNewCoordinator ? newCoordEmail : coordinatorEmail);
     }
 
     try {
@@ -149,41 +156,55 @@ const AddHall = () => {
           'Content-Type': 'multipart/form-data',
           token: aToken
         }
-      })
+      });
       if (data.success) {
-        toast.success(data.message)
+        toast.success(data.message);
         // Reset form
-        setHallImg(false)
-        setName('')
-        setEmail('')
-        setPassword('')
-        setExperience('10 Seats')
-        setAbout('')
-        setSpeciality('High Capacity')
-        setAddress1('')
-        setAddress2('')
-        setSelectedCoordinator('')
-        setIsNewCoordinator(false)
-        setNewCoordName('')
-        setNewCoordEmail('')
-        setNewCoordPassword('')
-        navigate('/hall-list')
+        setHallImg(false);
+        setName('');
+        setEmail('');
+        setPassword('');
+        setExperience('10 Seats');
+        setAbout('');
+        setSpeciality('High Capacity');
+        setAddress1('');
+        setAddress2('');
+        setSelectedCoordinator('');
+        setIsNewCoordinator(false);
+        setNewCoordName('');
+        setNewCoordEmail('');
+        setNewCoordPassword('');
+        navigate('/hall-list');
       } else {
-        toast.error(data.message)
+        toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to add hall/room')
+      toast.error(error.response?.data?.message || 'Failed to add hall/room');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  // Dropdown options
+  const capacityOptions = [
+    { label: 'High Capacity', value: 'High Capacity' },
+    { label: 'Low Capacity', value: 'Low Capacity' },
+  ];
+  const hallSeatOptions = ['10', '20', '30', '40', '50', '100', '200'];
+  const guestRoomBedOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  const vehicleSeatOptions = [
+    '2-seater', '4-seater', '5-seater', '7-seater', '12-seater', '20-seater', '30-seater', '50-seater'
+  ];
+  const vehicleTypeOptions = [
+    'Bus', 'Car', 'Van', 'Mini Bus', 'SUV', 'Tempo Traveller', 'Auto', 'Bike'
+  ];
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Add {isGuestRoom ? 'Guest Room' : isVehicle ? 'Vehicle' : 'Hall'}</h1>
-      <form onSubmit={onSubmitHandler} className="space-y-4">
+    <div className="max-w-3xl mx-auto bg-gray-50 border border-[#123458]/30 rounded-xl shadow-lg p-10 mt-10 font-[Poppins]">
+      <h1 className="text-3xl font-bold mb-8 text-[#123458]">Add {isGuestRoom ? 'Guest Room' : isVehicle ? 'Vehicle' : 'Hall'}</h1>
+      <form onSubmit={onSubmitHandler} className="space-y-8">
         {/* Type Selection */}
-        <div className="flex items-center gap-4 border-b pb-6">
+        <div className="flex flex-wrap gap-6 mb-6">
           <div className="flex items-center gap-2">
             <input
               type="radio"
@@ -198,9 +219,9 @@ const AddHall = () => {
                 setEmail('');
                 setPassword('');
               }}
-              className="accent-[#123458]"
+              className="accent-[#123458] w-5 h-5"
             />
-            <label htmlFor="hall" className="text-sm text-[#030303]">Hall</label>
+            <label htmlFor="hall" className="text-base font-semibold text-[#123458]">Hall</label>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -214,9 +235,9 @@ const AddHall = () => {
                 setEmail('');
                 setPassword('');
               }}
-              className="accent-[#123458]"
+              className="accent-[#123458] w-5 h-5"
             />
-            <label htmlFor="guestRoom" className="text-sm text-[#030303]">Guest Room</label>
+            <label htmlFor="guestRoom" className="text-base font-semibold text-[#123458]">Guest Room</label>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -227,266 +248,251 @@ const AddHall = () => {
               onChange={() => {
                 setIsVehicle(true);
                 setIsGuestRoom(false);
-                setEmail('');
-                setPassword('');
+                setEmail('202301040256@mitaoe.ac.in');
               }}
-              className="accent-[#123458]"
+              className="accent-[#123458] w-5 h-5"
             />
-            <label htmlFor="vehicle" className="text-sm text-[#030303]">Vehicle</label>
+            <label htmlFor="vehicle" className="text-base font-semibold text-[#123458]">Vehicle</label>
           </div>
         </div>
 
-        {/* Image Upload */}
-        <div className="flex items-center gap-4 border-b pb-6">
-          <label htmlFor="hall-img">
-            <img
-              className="w-20 h-20 object-cover border rounded-full cursor-pointer"
-              src={hallImg ? URL.createObjectURL(hallImg) : assets.upload_area}
-              alt="Upload"
-            />
-          </label>
-          <input onChange={(e) => setHallImg(e.target.files[0])} type="file" id="hall-img" hidden />
-          <p className="text-sm text-[#030303]">Upload {isGuestRoom ? 'guest room' : isVehicle ? 'vehicle' : 'hall'} <br /> picture</p>
-        </div>
-
-        {/* Guest Room Coordinator Selection or Hall Email/Password */}
-        {(isGuestRoom || isVehicle) ? (
-          <div className="border-b pb-6">
-            <p className="mb-2 text-sm text-[#030303]">Select Coordinator</p>
+        {/* Coordinator selection for Guest Room/Vehicle */}
+        {(isGuestRoom || isVehicle) && (
+          <div className="mb-6">
+            <label className="mb-2 block text-[#123458] font-semibold">Coordinator *</label>
             <select
               value={selectedCoordinator}
               onChange={handleCoordinatorChange}
-              className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
+              className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+              required={!isNewCoordinator}
             >
-              <option value="">Select a coordinator</option>
+              <option value="">Select Coordinator</option>
               {coordinators.map((coord) => (
-                <option key={coord.email} value={coord.email}>
-                  {coord.name} ({coord.email})
-                </option>
+                <option key={coord.email} value={coord.email}>{coord.name} ({coord.email})</option>
               ))}
-              <option value="new">Add New Coordinator</option>
             </select>
             {isNewCoordinator && (
-              <div className="mt-4 space-y-4">
-                <div>
-                  <p className="mb-1 text-sm text-[#030303]">New Coordinator Name *</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <input
                     type="text"
                     value={newCoordName}
-                    onChange={(e) => setNewCoordName(e.target.value)}
-                    className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                    placeholder="Enter coordinator name"
-                  />
-                </div>
-                <div>
-                  <p className="mb-1 text-sm text-[#030303]">New Coordinator Email *</p>
+                  onChange={e => setNewCoordName(e.target.value)}
+                  className="p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  placeholder="Coordinator Name"
+                  required
+                />
                   <input
                     type="email"
                     value={newCoordEmail}
-                    onChange={(e) => setNewCoordEmail(e.target.value)}
-                    className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                    placeholder="Enter coordinator email"
-                  />
-                </div>
-                <div>
-                  <p className="mb-1 text-sm text-[#030303]">New Coordinator Password *</p>
+                  onChange={e => setNewCoordEmail(e.target.value)}
+                  className="p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  placeholder="Coordinator Email"
+                  required
+                />
                   <input
                     type="password"
                     value={newCoordPassword}
-                    onChange={(e) => setNewCoordPassword(e.target.value)}
-                    className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                    placeholder="Enter coordinator password"
+                  onChange={e => setNewCoordPassword(e.target.value)}
+                  className="p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  placeholder="Coordinator Password"
+                  required
                   />
-                </div>
               </div>
             )}
           </div>
-        ) : (
-          <div className="border-b pb-6 space-y-4">
-            <div>
-              <p className="mb-1 text-sm text-[#030303]">{isVehicle ? 'Vehicle Email' : 'Hall Email'} *</p>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                placeholder={`Enter unique ${isVehicle ? 'vehicle' : 'hall'} email`}
-                readOnly={isVehicle}
-              />
-              <p className="text-xs text-gray-500 mt-1">{isVehicle ? 'All vehicles can be managed by a single manager email.' : 'Email must be unique for halls'}</p>
-            </div>
-            <div>
-              <p className="mb-1 text-sm text-[#030303]">{isVehicle ? 'Vehicle Password' : 'Hall Password'} *</p>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                placeholder={`Enter ${isVehicle ? 'vehicle' : 'hall'} password`}
-              />
-            </div>
-          </div>
         )}
 
-        {/* Inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Left Side */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <p className="mb-1 text-sm text-[#030303]">Name *</p>
+              <label className="mb-2 block text-[#123458] font-semibold">Name *</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
+                className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
                 placeholder={`Enter ${isGuestRoom ? 'guest room' : isVehicle ? 'vehicle' : 'hall'} name`}
+                required
               />
             </div>
-
             <div>
-              <p className="mb-1 text-sm text-[#030303]">About *</p>
+              <label className="mb-2 block text-[#123458] font-semibold">About *</label>
               <textarea
                 value={about}
                 onChange={(e) => setAbout(e.target.value)}
-                className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
+                className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458] resize-none"
                 placeholder={`Enter ${isGuestRoom ? 'guest room' : isVehicle ? 'vehicle' : 'hall'} description`}
                 rows="3"
+                required
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-[#123458] font-semibold">Image *</label>
+              <input
+                type="file"
+                onChange={(e) => setHallImg(e.target.files[0])}
+                className="w-full p-2 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                required
               />
             </div>
           </div>
-
           {/* Right Side */}
-          <div className="space-y-4">
-            {!isVehicle && (
-              <>
-                <div>
-                  <p className="mb-1 text-sm text-[#030303]">Address Line 1 *</p>
-                  <input
-                    type="text"
-                    value={address1}
-                    onChange={(e) => setAddress1(e.target.value)}
-                    className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                    placeholder="Enter address line 1"
-                    required
-                  />
-                </div>
-                <div>
-                  <p className="mb-1 text-sm text-[#030303]">Address Line 2 *</p>
-                  <input
-                    type="text"
-                    value={address2}
-                    onChange={(e) => setAddress2(e.target.value)}
-                    className="w-full border border-[#123458] rounded px-3 py-2 text-[#030303] shadow-sm"
-                    placeholder="Enter address line 2"
-                    required
-                  />
-                </div>
-              </>
-            )}
-            {/* Hall Capacity */}
+          <div className="space-y-6">
+            {/* Email field for Hall only */}
             {!isGuestRoom && !isVehicle && (
-              <div className="flex flex-col">
-                <label className="font-medium mb-1">Capacity</label>
+                <div>
+                <label className="mb-2 block text-[#123458] font-semibold">Email *</label>
+                  <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  placeholder="Enter email"
+                    required
+                  />
+                </div>
+            )}
+            {/* Password field for Hall only */}
+            {!isGuestRoom && !isVehicle && (
+                <div>
+                <label className="mb-2 block text-[#123458] font-semibold">Password *</label>
+                  <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  placeholder="Enter password"
+                    required
+                  />
+                </div>
+            )}
+            {/* Capacity/No. of Beds/No. of Seats dropdowns */}
+            {/* Hall & Guest Room: Capacity */}
+            {(!isVehicle) && (
+              <div>
+                <label className="mb-2 block text-[#123458] font-semibold">Capacity *</label>
                 <select
                   value={speciality}
                   onChange={e => setSpeciality(e.target.value)}
-                  className="border rounded px-3 py-2"
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
                   required
                 >
                   <option value="">Select Capacity</option>
-                  <option value="High Capacity">High Capacity</option>
-                  <option value="Low Capacity">Low Capacity</option>
+                  {capacityOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </select>
+              </div>
+            )}
+            {/* Hall: No. of Seats */}
+            {!isGuestRoom && !isVehicle && (
+              <div>
+                <label className="mb-2 block text-[#123458] font-semibold">No. of Seats *</label>
+              <select
+                  value={experience}
+                  onChange={e => setExperience(e.target.value)}
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                required
+              >
+                  <option value="">Select No. of Seats</option>
+                  {hallSeatOptions.map(opt => (
+                    <option key={opt} value={`${opt} Seats`}>{opt} Seats</option>
+                  ))}
+              </select>
+            </div>
+            )}
+            {/* Guest Room: No. of Beds */}
+            {isGuestRoom && (
+              <div>
+                <label className="mb-2 block text-[#123458] font-semibold">No. of Beds *</label>
+              <select
+                value={experience}
+                onChange={e => setExperience(e.target.value)}
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                required
+              >
+                  <option value="">Select No. of Beds</option>
+                  {guestRoomBedOptions.map(opt => (
+                    <option key={opt} value={`${opt} Bed${opt === '1' ? '' : 's'}`}>{opt} Bed{opt === '1' ? '' : 's'}</option>
+                  ))}
+              </select>
+          </div>
+        )}
+            {/* Vehicle: Type */}
+           {isVehicle && (
+             <div>
+               <label className="mb-2 block text-[#123458] font-semibold">Vehicle Type *</label>
+               <select
+                 value={speciality}
+                 onChange={e => setSpeciality(e.target.value)}
+                 className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                 required
+               >
+                 <option value="">Select Vehicle Type</option>
+                 {vehicleTypeOptions.map(opt => (
+                   <option key={opt} value={opt}>{opt}</option>
+                 ))}
+               </select>
+             </div>
+           )}
+            {/* Vehicle: No. of Seats */}
+            {isVehicle && (
+              <div>
+                <label className="mb-2 block text-[#123458] font-semibold">No. of Seats *</label>
+            <select
+              value={experience}
+              onChange={e => setExperience(e.target.value)}
+              className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+              required
+            >
+              <option value="">Select No. of Seats</option>
+              {vehicleSeatOptions.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        )}
+            {/* Address for Hall and Guest Room only */}
+            {(!isVehicle) && (
+              <div>
+                <label className="mb-2 block text-[#123458] font-semibold">Address *</label>
+                <input
+                  type="text"
+                  value={address1}
+                  onChange={(e) => setAddress1(e.target.value)}
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458] mb-2"
+                  placeholder="Address line 1"
+                  required
+                />
+                <input
+                  type="text"
+                  value={address2}
+                  onChange={(e) => setAddress2(e.target.value)}
+                  className="w-full p-3 border border-[#123458]/20 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#123458]"
+                  placeholder="Address line 2"
+                  required
+                />
               </div>
             )}
           </div>
         </div>
-
-        {/* Vehicle Type and Seating Capacity */}
-        {isVehicle && (
-          <div className="flex gap-4">
-            <div className="flex flex-col">
-              <label className="font-medium mb-1">Type</label>
-              <select
-                value={speciality}
-                onChange={e => setSpeciality(e.target.value)}
-                className="border rounded px-3 py-2"
-                required
-              >
-                <option value="">Select Type</option>
-                <option value="Bus">Bus</option>
-                <option value="Car">Car</option>
-                <option value="Van">Van</option>
-                <option value="Mini Bus">Mini Bus</option>
-                <option value="SUV">SUV</option>
-                <option value="Tempo Traveller">Tempo Traveller</option>
-                <option value="Auto">Auto</option>
-                <option value="Bike">Bike</option>
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <label className="font-medium mb-1">Seating Capacity</label>
-              <select
-                value={experience}
-                onChange={e => setExperience(e.target.value)}
-                className="border rounded px-3 py-2"
-                required
-              >
-                <option value="">Select Capacity</option>
-                <option value="2-seater">2-seater</option>
-                <option value="4-seater">4-seater</option>
-                <option value="5-seater">5-seater</option>
-                <option value="7-seater">7-seater</option>
-                <option value="12-seater">12-seater</option>
-                <option value="20-seater">20-seater</option>
-                <option value="30-seater">30-seater</option>
-                <option value="50-seater">50-seater</option>
-              </select>
-            </div>
-          </div>
-        )}
-        {/* Guest Room No. of Beds */}
-        {isGuestRoom && (
-          <div className="flex flex-col">
-            <label className="font-medium mb-1">No. of Beds</label>
-            <select
-              value={experience}
-              onChange={e => setExperience(e.target.value)}
-              className="border rounded px-3 py-2"
-              required
-            >
-              <option value="">Select Beds</option>
-              <option value="1 Bed">1 Bed</option>
-              <option value="2 Bed">2 Bed</option>
-              <option value="3 Bed">3 Bed</option>
-              <option value="4 Bed">4 Bed</option>
-              <option value="5 Bed">5 Bed</option>
-              <option value="6 Bed">6 Bed</option>
-              <option value="7 Bed">7 Bed</option>
-              <option value="8 Bed">8 Bed</option>
-              <option value="9 Bed">9 Bed</option>
-            </select>
-          </div>
-        )}
-
-        <div className="flex justify-end">
           <button
             type="submit"
             disabled={loading}
-            className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2 ${
+            className={`w-full mt-8 py-3 bg-[#123458] text-white text-lg font-bold rounded-lg shadow hover:bg-[#0e2e47] transition ${
               loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            } flex items-center justify-center gap-3`}
           >
             {loading ? (
               <>
-                <FaSpinner className="animate-spin" />
-                Adding {isGuestRoom ? 'Guest Room' : isVehicle ? 'Vehicle' : 'Hall'}...
+                <FaSpinner className="animate-spin text-2xl" />
+                <span>Adding {isGuestRoom ? 'Guest Room' : isVehicle ? 'Vehicle' : 'Hall'}...</span>
               </>
             ) : (
               `Add ${isGuestRoom ? 'Guest Room' : isVehicle ? 'Vehicle' : 'Hall'}`
             )}
           </button>
-        </div>
       </form>
     </div>
   )

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { HallContext } from '../../context/HallContext'
 import { AppContext } from '../../context/AppContext'
-import { assets } from '../../assets/assets.js'
+import { XCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import FeedbackModal from '../../components/FeedbackModal'
 import axios from 'axios'
 import { toast } from 'react-hot-toast'
@@ -138,78 +138,71 @@ const HallAppointments = () => {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-5 font-[Poppins] text-[#030303]">
-      <div className="flex justify-between items-center mb-5">
-        <h2 className="text-xl font-semibold">All Appointments</h2>
+    <div className="w-full max-w-6xl mx-auto p-6 font-[Poppins] text-[#030303] bg-[#f8fafc]">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-[#123458]">All Appointments</h2>
         <button
           onClick={downloadCSV}
-          className="px-4 py-2 bg-[#123458] text-white rounded border border-[#123458] shadow-sm hover:shadow-md transition"
+          className="px-5 py-2 bg-[#123458] text-white rounded-lg border-none shadow font-semibold hover:bg-[#0e2e47] transition"
         >
           Download CSV
         </button>
       </div>
 
-      <div className="bg-white border rounded-md overflow-y-scroll max-h-[80vh] min-h-[50vh] shadow-sm">
-        <div className="hidden sm:grid grid-cols-[0.5fr_2fr_2fr_2fr_1fr_1fr_1fr_1fr] px-6 py-3 border-b font-medium text-sm text-[#030303] bg-[#f9f9f9]">
+      {/* Table header */}
+      <div className="w-full bg-gray-50 border border-[#123458]/30 rounded-xl shadow-lg overflow-x-auto">
+        <div className="grid grid-cols-[0.5fr_2fr_2.5fr_2fr_1.5fr_1.5fr_1.5fr_1.5fr_1.5fr] py-3 px-8 bg-[#f8fafc] border-b border-[#123458]/10 font-medium text-[#030303] text-sm rounded-t-xl">
           <p className="text-center">#</p>
           <p className="text-center">User</p>
           <p className="text-center">Email</p>
           <p className="text-center">Date & Time</p>
+          <p className="text-center">Facility</p>
           <p className="text-center">Status</p>
           <p className="text-center">Feedback</p>
           <p className="text-center">Action</p>
           <p className="text-center">Complete</p>
         </div>
-
         {appointments.length > 0 ? (
           appointments.slice().reverse().map((item, index) => (
             <div
               key={item._id}
-              className="grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_2fr_2fr_1fr_1fr_1fr_1fr] gap-2 px-6 py-3 items-center border-b hover:shadow-sm transition text-sm"
+              className={`grid grid-cols-[0.5fr_2fr_2.5fr_2fr_1.5fr_1.5fr_1.5fr_1.5fr_1.5fr] items-center py-4 px-8 border-b border-[#123458]/10 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} min-h-[60px] text-sm`}
+              style={{ lineHeight: 1.5 }}
             >
-              <p className="sm:block hidden text-center">{index + 1}</p>
-
-              <div className="flex items-center gap-2 justify-center text-center">
+              <p className="text-center">{index + 1}</p>
+              <div className="flex items-center gap-2 justify-center">
                 <img
                   className="w-8 h-8 rounded-full object-cover shadow-sm border"
-                  src={item.userData && item.userData.image ? item.userData.image : assets.userIcon}
+                  src={item.userData && item.userData.image ? item.userData.image : ''}
                   alt="User"
                 />
-                <p>{item.userData && item.userData.name ? item.userData.name : 'User'}</p>
+                <span className="truncate font-medium" title={item.userData?.name}>{item.userData?.name || 'User'}</span>
               </div>
-
-              <p className="sm:block hidden text-center">{item.userData && item.userData.email ? item.userData.email : '-'}</p>
-
-              <p className="text-center">{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
-
+              <p className="truncate text-center" title={item.userData?.email}>{item.userData?.email || '-'}</p>
+              <div className="flex flex-col text-center">
+                <span className="text-base">{slotDateFormat(item.slotDate)}</span>
+                <span className="text-xs text-black">{item.slotTime}</span>
+              </div>
+              <span className="truncate font-bold text-base text-[#123458] text-center" title={item.hallData?.name || item.facilityName}>{item.hallData?.name || item.facilityName || 'Facility'}</span>
+              {/* Status */}
               <p className="text-center">
                 {item.cancelled ? (
                   <span className="text-red-600 font-semibold text-sm">Cancelled</span>
-                ) : item.coordinatorDecision === 'pending' ? (
-                  <span className="text-orange-500 font-semibold text-sm">Pending Coordinator Approval</span>
-                ) : item.coordinatorDecision === 'rejected' ? (
-                  <span className="text-red-500 font-semibold text-sm">Rejected by Coordinator{item.coordinatorComment ? `: ${item.coordinatorComment}` : ''}</span>
-                ) : item.directorDecision === 'pending' ? (
-                  <span className="text-orange-500 font-semibold text-sm">Pending Director Approval</span>
-                ) : item.directorDecision === 'rejected' ? (
-                  <span className="text-red-500 font-semibold text-sm">Rejected by Director{item.directorComment ? `: ${item.directorComment}` : ''}</span>
-                ) : item.directorDecision === 'approved' ? (
-                  <span className="text-green-600 font-semibold text-sm">Approved</span>
+                ) : item.isCompleted ? (
+                  <span className="text-green-600 font-semibold text-sm">Completed</span>
                 ) : item.isAccepted ? (
-                  <span className="text-green-600 font-semibold text-sm">Confirmed</span>
-                ) : (item.isAccepted || item.directorDecision === 'approved') ? (
                   <span className="text-green-600 font-semibold text-sm">Confirmed</span>
                 ) : (
                   <span className="text-yellow-600 font-semibold text-sm">Pending</span>
                 )}
               </p>
-
-              <div className="flex flex-wrap gap-2 justify-center text-center">
+              {/* Feedback */}
+              <div className="flex flex-wrap gap-2 justify-center">
                 {item.isCompleted && getFeedbacksForAppointment(item._id).length > 0 ? (
                   getFeedbacksForAppointment(item._id).map(fb => (
                     <button
                       key={fb._id}
-                      className="px-3 py-1 rounded bg-[#123458] text-white text-xs shadow hover:bg-[#0e2e47] transition"
+                      className="px-3 py-1 rounded-lg bg-[#123458] text-white text-xs shadow hover:bg-[#0e2e47] transition"
                       onClick={() => handleShowFeedback(fb)}
                     >
                       Feedback
@@ -219,45 +212,37 @@ const HallAppointments = () => {
                   <span className="text-gray-400 text-xs">-</span>
                 )}
               </div>
-
-              <div className="flex gap-3 justify-center text-center">
-                {!item.cancelled &&
-                  item.coordinatorDecision === 'pending' &&
-                  (!item.directorDecision || item.directorDecision === 'pending') && (
+              {/* Action */}
+              <div className="flex gap-2 justify-center">
+                {item.cancelled || item.directorDecision === 'rejected' || item.coordinatorDecision === 'rejected' || item.isCompleted ? null : (
                     <>
-                      <img
+                    <XCircleIcon
                         onClick={() => handleCancelAppointment(item._id)}
-                        className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                        src={assets.cancel_icon}
-                        alt="Cancel"
+                      className="w-6 h-6 text-red-500 cursor-pointer"
+                      aria-label="Cancel"
                       />
-                      <img
+                    <CheckCircleIcon
                         onClick={() => handleRequestAppointment(item._id, item.hallData?.isGuestRoom ? 'guestroom' : item.hallData?.isVehicle ? 'vehicle' : 'hall')}
-                        className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                        src={assets.tick_icon}
-                        alt="Confirm"
+                      className="w-6 h-6 text-green-500 cursor-pointer"
+                      aria-label="Accept"
                       />
                     </>
                   )}
               </div>
-
-              <div className="flex justify-center text-center">
-                {(item.isAccepted || item.directorDecision === 'approved') && !item.isCompleted && (
-                  <img
+              {/* Complete */}
+              <div className="flex justify-center">
+                {item.isAccepted && !item.isCompleted && (
+                  <CheckCircleIcon
                     onClick={() => handleCompleteAppointment(item._id)}
-                    className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                    src={assets.tick_icon}
-                    alt="Complete"
+                    className="w-6 h-6 text-green-500 cursor-pointer"
+                    aria-label="Complete"
                   />
-                )}
-                {item.isCompleted && (
-                  <p className="text-green-600 font-semibold text-sm">Completed</p>
                 )}
               </div>
             </div>
           ))
         ) : (
-          <p className="p-4 text-center text-[#123458] font-medium">No appointments found.</p>
+          <div className="text-center text-gray-500 py-8">No appointments found.</div>
         )}
       </div>
 

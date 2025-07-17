@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
+import { StarIcon } from '@heroicons/react/24/solid';
 
 const FACILITY_TYPES = [
   { label: 'Halls', value: 'hall' },
@@ -97,37 +98,63 @@ const Halls = () => {
         ))}
       </div>
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        {filterOptions[selectedType].map(filter => (
-          <div key={filter.key} className="flex flex-col">
-            <span className="font-semibold mb-1">{filter.label}:</span>
-            <div className="flex gap-2">
-              {filter.options.map(option => (
+      <div className="flex flex-col gap-4 mb-8">
+        <div className="flex flex-wrap gap-4 items-center">
+          <span className="font-bold text-base text-[#123458]">Type:</span>
+          <div className="flex flex-wrap gap-3">
+            {filterOptions[selectedType][0]?.options
+              .filter(option => typeof option === 'string' && option.trim() !== "")
+              .map((option) => (
                 <button
                   key={option}
-                  className={`px-4 py-2 rounded border-2 text-sm font-medium transition-all ${activeFilters[filter.key] === option ? 'bg-[#123458] text-white border-[#123458]' : 'bg-white text-[#123458] border-[#123458]'}`}
-                  onClick={() => handleFilterChange(filter.key, option)}
+                  className={`px-4 py-2 rounded-lg border border-[#123458]/40 font-semibold shadow-sm transition-all duration-200 ${
+                    activeFilters[filterOptions[selectedType][0]?.key] === option
+                      ? 'bg-[#123458] text-white'
+                      : 'bg-white text-[#123458]'
+                  }`}
+                  onClick={() => handleFilterChange(filterOptions[selectedType][0]?.key, option)}
                 >
                   {option}
                 </button>
               ))}
+          </div>
+        </div>
+        {filterOptions[selectedType][1] && (
+          <div className="flex flex-wrap gap-4 items-center">
+            <span className="font-bold text-base text-[#123458]">Seating Capacity:</span>
+            <div className="flex flex-wrap gap-3">
+              {filterOptions[selectedType][1]?.options
+                .filter(option => typeof option === 'string' && option.trim() !== "")
+                .map((option) => (
+                  <button
+                    key={option}
+                    className={`px-4 py-2 rounded-lg border border-[#123458]/40 font-semibold shadow-sm transition-all duration-200 ${
+                      activeFilters[filterOptions[selectedType][1]?.key] === option
+                        ? 'bg-[#123458] text-white'
+                        : 'bg-white text-[#123458]'
+                    }`}
+                    onClick={() => handleFilterChange(filterOptions[selectedType][1]?.key, option)}
+                  >
+                    {option}
+                  </button>
+                ))}
             </div>
           </div>
-        ))}
+        )}
+      </div>
         {Object.values(activeFilters).some(Boolean) && (
           <button
             onClick={clearFilters}
-            className="px-4 py-2 rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-medium transition-all"
+            className="px-4 py-2 rounded border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-medium transition-all mb-8"
           >
             Clear All Filters
           </button>
         )}
-      </div>
       {/* Facility List */}
       <div className="w-full flex flex-col gap-10">
         <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4">{FACILITY_TYPES.find(t => t.value === selectedType).label}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <h2 className="text-xl font-bold text-[#123458] mb-4">{FACILITY_TYPES.find(t => t.value === selectedType).label}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {filteredFacilities.length === 0 && (
               <p className="col-span-3 text-center text-gray-500">No facilities found for the selected filters.</p>
             )}
@@ -135,24 +162,26 @@ const Halls = () => {
               <div
                 key={index}
                 onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); navigate(`/appointment/${item._id}`); }}
-                className="border-2 border-[#123458] rounded-xl overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-1 bg-white"
+                className="bg-gray-50 border border-[#123458]/30 rounded-xl overflow-hidden cursor-pointer shadow-lg transition-transform duration-300"
               >
-                <img
-                  className="w-full h-48 object-cover bg-blue-100"
-                  src={item.image}
-                  alt={item.name}
-                />
-                <div className="p-4 bg-white">
+                <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-blue-100">
+                  <img
+                    className="w-full h-full object-cover"
+                    src={item.image}
+                    alt={item.name}
+                  />
+                </div>
+                <div className="p-5 bg-gray-50">
                   <div className={`flex items-center gap-2 text-sm mb-1 ${item.available ? 'text-green-600' : 'text-red-500'}`}>
                     <span className={`w-2 h-2 rounded-full ${item.available ? 'bg-green-600' : 'bg-red-500'}`}></span>
                     <p>{item.available ? 'Available' : 'Not Available'}</p>
                   </div>
-                  <p className="text-lg font-semibold text-[#030303] flex items-center gap-2">
+                  <p className="text-lg font-bold text-[#123458] flex items-center gap-2">
                     {item.name}
                     {facilityRatings[item._id] && (
                       <span className="flex items-center gap-1 ml-2">
                         {[1,2,3,4,5].map(star => (
-                          <span key={star} className={`text-base ${star <= Math.round(facilityRatings[item._id].averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                          <StarIcon key={star} className={`w-4 h-4 ${star <= Math.round(facilityRatings[item._id].averageRating) ? 'text-yellow-400' : 'text-gray-300'}`} />
                         ))}
                         <span className="text-xs text-gray-500 ml-1">({facilityRatings[item._id].averageRating.toFixed(1)})</span>
                         <span className="text-xs text-gray-400 ml-1">[{facilityRatings[item._id].ratingCount}]</span>

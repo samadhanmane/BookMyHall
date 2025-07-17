@@ -18,14 +18,16 @@ const TopFacilities = () => {
                 navigate(`/appointment/${item._id}`)
                 scrollTo({ top: 0, behavior: 'smooth' })
             }}
-            className="bg-white border-2 border-[#123458] rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-transform duration-300 hover:-translate-y-1"
+            className="bg-gray-50 border border-[#123458]/30 rounded-xl overflow-hidden cursor-pointer shadow-lg transition-transform duration-300"
         >
-            <img
-                className="w-full h-40 object-cover rounded-t-lg"
-                src={item.image}
-                alt={item.name}
-                loading="lazy"
-            />
+            <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+                <img
+                    className="w-full h-full object-cover"
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                />
+            </div>
             <div className="p-4 space-y-2 border-t-2 border-[#123458]">
                 <div
                     className={`flex items-center gap-2 text-sm ${
@@ -90,7 +92,7 @@ const TopFacilities = () => {
             </div>
             <button
                 onClick={() => {
-                    navigate(`/facilities`)
+                    navigate(`/halls`)
                     scrollTo({ top: 0, behavior: 'smooth' })
                 }}
                 className="mt-10 px-8 py-3 rounded-full bg-[#123458] text-white border-2 border-[#123458] hover:bg-white hover:text-[#123458] transition-all duration-300"

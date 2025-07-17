@@ -1,7 +1,8 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
-import { assets } from '../assets/assets'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
+import { ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { assets } from '../assets/assets';
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -34,10 +35,10 @@ const Navbar = () => {
   }, [])
 
   // Always use the default icon
-  const getProfileImage = () => assets.upload_icon;
+  const getProfileImage = () => userData?.profile_image || assets.upload_icon;
 
   return (
-    <div className='relative flex items-center justify-between text-lg font-bold py-8 mb-7 border-b-2 border-gray-300 font-poppins bg-white px-10' style={{ minHeight: '96px' }}>
+    <div className='sticky top-0 z-40 flex items-center justify-between text-lg font-bold py-8 mb-7 border-b-2 border-[#123458]/20 font-poppins bg-gray-50 px-10' style={{ minHeight: '96px' }}>
       <img
         onClick={() => navigate('/')}
         className='w-56 cursor-pointer mr-14 drop-shadow-lg'
@@ -89,7 +90,7 @@ const Navbar = () => {
                 src={getProfileImage()}
                 alt='Profile'
               />
-              <img className='w-4' src={assets.dropdown_icon} alt='Dropdown' />
+              <ChevronDownIcon className='w-4 h-4 text-[#123458]' />
             </div>
             {dropdownOpen && (
               <div className='absolute top-12 right-0 z-20 bg-white border border-gray-200 rounded-md flex flex-col gap-2 p-3 text-[#030303] min-w-48 shadow-lg'>
@@ -120,22 +121,18 @@ const Navbar = () => {
         )}
 
         {/* ----------- Hamburger Menu Icon ----------- */}
-        <img
+        <Bars3Icon
           onClick={() => setShowMenu(true)}
-          className='w-6 md:hidden cursor-pointer'
-          src={assets.menu_icon}
-          alt="Menu"
+          className='w-6 h-6 md:hidden cursor-pointer text-[#123458]'
         />
 
         {/* ----------- Mobile Menu ----------- */}
         <div className={`${showMenu ? 'fixed w-full h-full' : 'h-0 w-0'} md:hidden right-0 top-0 z-30 overflow-hidden bg-white transition-all`}>
           <div className='flex items-center justify-between px-5 py-5 border-b border-gray-300'>
             <img className='w-36' src={assets.mitaoe_logo} alt="Logo" />
-            <img
-              className='w-6 cursor-pointer'
+            <XMarkIcon
+              className='w-6 h-6 cursor-pointer text-[#123458]'
               onClick={() => setShowMenu(false)}
-              src={assets.cross_icon}
-              alt="Close"
             />
           </div>
           <ul className='flex flex-col items-center gap-2 mt-6 px-5 text-base font-medium text-[#030303]'>
@@ -174,7 +171,7 @@ const Navbar = () => {
               src={getProfileImage()}
               alt='Profile'
             />
-            <img className='w-4' src={assets.dropdown_icon} alt='Dropdown' />
+            <ChevronDownIcon className='w-4 h-4 text-[#123458]' />
           </div>
           {dropdownOpen && (
             <div className='absolute top-12 right-0 z-20 bg-white border border-gray-200 rounded-md flex flex-col gap-2 p-3 text-[#030303] min-w-48 shadow-lg'>

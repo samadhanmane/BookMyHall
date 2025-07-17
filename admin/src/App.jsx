@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { AdminContext } from './context/AdminContext'
 import Navbar from './components/Navbar'
 import Slidebar from './components/Slidebar'
-import { Route, Routes, Navigate } from 'react-router-dom'
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Admin/Dashboard'
 import AllAppointment from './pages/Admin/AllAppointment'
 import AddHall from './pages/Admin/AddHall'
@@ -16,18 +16,28 @@ import HallAppointments from './pages/Hall/HallAppointments'
 import HallProfile from './pages/Hall/HallProfile'
 import CoordinatorManagement from './pages/Admin/CoordinatorManagement'
 import DirectorDashboard from './pages/DirectorDashboard.jsx'
+import { useEffect } from 'react';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+  return null;
+}
 
 const App = () => {
   const { aToken: adminToken } = useContext(AdminContext)
   const { dToken: coordinatorToken } = useContext(HallContext)
 
   return adminToken || coordinatorToken ? (
-    <div className='min-h-screen bg-white font-poppins text-[#030303]'>
+    <div className='min-h-screen bg-[#f8fafc] font-poppins text-[#030303] px-2 sm:px-8 py-4'>
       <ToastContainer />
       <Navbar />
       <div className='flex items-start'>
         <Slidebar />
         <div className='flex-1 border-l border-gray-200 p-4'>
+          <ScrollToTop />
           <Routes>
             {/* Default Route: Redirect based on role */}
             <Route path='/' element={<Navigate to={adminToken ? '/admin-dashboard' : '/hall-dashboard'} replace />} />
@@ -50,6 +60,7 @@ const App = () => {
   ) : (
     <>
       <Routes>
+        <ScrollToTop />
         <Route path="/director/login" element={<Login />} />
         <Route path="/director-dashboard" element={<DirectorDashboard />} />
         <Route path="*" element={<Login />} />

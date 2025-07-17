@@ -33,7 +33,7 @@ app.use('/api/user', userRouter)
 app.use('/api/director', directorRouter)
 
 app.get('/', (req, res) => {
-    res.send('BookMyHall API is running.')
+    res.send('Facility Booking API is running.')
 })
 
 app.listen(port, () => {

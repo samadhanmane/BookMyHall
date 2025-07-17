@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
-import { assets } from '../../assets/assets'
+import { XCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 // Tooltip component
 const Tooltip = ({ children, text }) => {
@@ -88,19 +88,19 @@ const AllAppointment = () => {
   }
 
   return (
-    <div className="w-full max-w-7xl m-5 p-4 rounded-lg shadow-md border border-gray-200 bg-white font-[Poppins]">
-      <div className="flex justify-between items-center mb-4">
-        <p className="text-xl font-semibold text-[#030303]">All Appointments</p>
+    <div className="w-full max-w-7xl m-5 p-6 rounded-xl shadow-lg border border-[#123458]/30 bg-gray-50 font-[Poppins]">
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-2xl font-bold text-[#123458]">All Appointments</p>
         <button
           onClick={handleDownloadCSV}
-          className="px-4 py-2 bg-[#123458] text-white text-sm rounded hover:bg-[#0e2e47] transition"
+          className="px-5 py-2 bg-[#123458] text-white text-sm rounded-lg shadow font-semibold hover:bg-[#0e2e47] transition"
         >
           Download CSV
         </button>
       </div>
 
-      <div className="border rounded overflow-x-auto max-h-[80vh] text-sm">
-        <div className="min-w-[1100px] grid grid-cols-[3rem_2.5fr_3fr_3fr_3fr_1.5fr_1.5fr] py-3 px-8 bg-[#f9f9f9] border-b text-[#030303] font-medium">
+      <div className="border border-[#123458]/20 rounded-xl overflow-x-auto max-h-[80vh] text-sm bg-white">
+        <div className="min-w-[1100px] grid grid-cols-[3rem_2.5fr_3fr_3fr_3fr_1.5fr_1.5fr] py-3 px-8 bg-[#f8fafc] border-b text-[#030303] font-medium rounded-t-xl">
           <p className="truncate border-r border-gray-300 px-6">#</p>
           <p className="truncate border-r border-gray-300 px-6">User</p>
           <p className="truncate border-r border-gray-300 px-6">Email</p>
@@ -111,16 +111,16 @@ const AllAppointment = () => {
         </div>
 
         {appointments.slice().reverse().map((item, index) => {
-          const facilityImage = item.facilityData && item.facilityData.image ? item.facilityData.image : assets.cross_icon;
+          const facilityImage = item.facilityData && item.facilityData.image ? item.facilityData.image : 'N/A';
           const facilityName = item.facilityData && item.facilityData.name ? item.facilityData.name : 'N/A';
-          const userImage = item.userData && item.userData.image ? item.userData.image : assets.cross_icon;
+          const userImage = item.userData && item.userData.image ? item.userData.image : 'N/A';
           const userName = item.userData && item.userData.name ? item.userData.name : 'N/A';
           const userEmail = item.userData && item.userData.email ? item.userData.email : 'N/A';
 
           return (
             <div
               key={index}
-              className="min-w-[1100px] grid grid-cols-[3rem_2.5fr_3fr_3fr_3fr_1.5fr_1.5fr] items-center py-4 px-8 border-b hover:bg-gray-50 transition-all min-h-[60px] bg-white"
+              className={`min-w-[1100px] grid grid-cols-[3rem_2.5fr_3fr_3fr_3fr_1.5fr_1.5fr] items-center py-4 px-8 border-b border-[#123458]/10 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
               style={{ lineHeight: 1.5 }}
             >
               <p className="truncate text-center border-r border-gray-300 px-6">{index + 1}</p>
@@ -143,36 +143,35 @@ const AllAppointment = () => {
               <div className="flex items-center justify-center border-r border-gray-300 px-6">
                 {item.cancelled ? (
                   <span className="text-red-600 text-sm font-semibold">Cancelled</span>
+                ) : item.isCompleted ? (
+                  <span className="text-green-600 text-sm font-semibold">Completed</span>
                 ) : item.isAccepted ? (
                   <span className="text-green-600 text-sm font-semibold">Accepted</span>
                 ) : (
-                  <div className="flex gap-3">
-                    <img
-                      onClick={() => cancelAppointment(item._id)}
-                      className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                      src={assets.cancel_icon}
-                      alt="cancel"
-                    />
-                    <img
-                      onClick={() => requestAcceptance(item._id)}
-                      className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                      src={assets.tick_icon}
-                      alt="accept"
-                    />
-                  </div>
+                  <span className="text-yellow-600 text-sm font-semibold">Pending</span>
                 )}
               </div>
               <div className="flex items-center justify-center px-6">
-                {item.isAccepted && !item.cancelled && (
-                  item.isCompleted ? (
-                    <span className="text-green-600 text-sm font-semibold">Completed</span>
-                  ) : (
-                    <img
+                {item.cancelled || item.isCompleted ? null : (
+                  item.isAccepted ? (
+                    <CheckCircleIcon
                       onClick={() => completeAppointment(item._id)}
-                      className="w-8 h-8 cursor-pointer hover:scale-110 transition-transform"
-                      src={assets.tick_icon}
-                      alt="complete"
+                      className="w-8 h-8 text-green-500 cursor-pointer hover:scale-110 transition-transform"
+                      aria-label="Complete"
                     />
+                  ) : (
+                    <div className="flex gap-3">
+                      <XCircleIcon
+                        onClick={() => cancelAppointment(item._id)}
+                        className="w-8 h-8 text-red-500 cursor-pointer hover:scale-110 transition-transform"
+                        aria-label="Cancel"
+                      />
+                      <CheckCircleIcon
+                        onClick={() => requestAcceptance(item._id)}
+                        className="w-8 h-8 text-green-500 cursor-pointer hover:scale-110 transition-transform"
+                        aria-label="Accept"
+                    />
+                    </div>
                   )
                 )}
               </div>

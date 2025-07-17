@@ -17,7 +17,7 @@ export const sendEmail = async ({ to, subject, html }) => {
     try {
         const mailOptions = {
             from: {
-                name: "",
+                name: "Facility Booking Team",
                 address: process.env.EMAIL
             },
             to,
@@ -28,8 +28,8 @@ export const sendEmail = async ({ to, subject, html }) => {
                 'X-MSMail-Priority': 'High',
                 'Importance': 'high',
                 'Precedence': 'bulk',
-                'List-Unsubscribe': '<mailto:unsubscribe@bookmyhall.com>',
-                'X-Mailer': 'BookMyHall',
+                'List-Unsubscribe': '<mailto:unsubscribe@facilitybooking.com>',
+                'X-Mailer': 'Facility Booking',
                 'Reply-To': process.env.EMAIL,
                 'Content-Type': 'text/html; charset=utf-8',
                 'MIME-Version': '1.0',

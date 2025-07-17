@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom'
+import { CheckBadgeIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const RelatedHalls = ({ speciality, hallsId }) => {
   const { halls } = useContext(AppContext)
@@ -42,14 +43,16 @@ const RelatedHalls = ({ speciality, hallsId }) => {
               navigate(`/appointment/${item._id}`)
               window.scrollTo({ top: 0, behavior: 'smooth' })
             }}
-            className="border border-[#123458] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-2 shadow-md"
+            className="bg-gray-50 border border-[#123458]/30 rounded-xl overflow-hidden cursor-pointer shadow-lg transition-all duration-300"
           >
-            <img
-              src={item.image}
-              alt={item.name}
-              onError={(e) => { e.target.src = '/default-hall.jpg' }}
-              className="w-full h-40 object-cover bg-blue-50"
-            />
+            <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-blue-50">
+              <img
+                src={item.image}
+                alt={item.name}
+                onError={(e) => { e.target.src = '/default-hall.jpg' }}
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div className="p-4">
               <div className={`flex items-center gap-2 text-sm mb-1 ${item.available ? 'text-green-500' : 'text-red-500'}`}>
                 <span className={`w-2 h-2 ${item.available ? 'bg-green-500' : 'bg-red-500'} rounded-full`}></span>
@@ -85,7 +88,7 @@ const RelatedHalls = ({ speciality, hallsId }) => {
               navigate(`/appointment/${item._id}`)
               window.scrollTo({ top: 0, behavior: 'smooth' })
             }}
-            className="border border-[#123458] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-2 shadow-md"
+            className="bg-gray-50 border border-[#123458]/30 rounded-xl overflow-hidden cursor-pointer shadow-lg transition-all duration-300"
           >
             <img
               src={item.image}

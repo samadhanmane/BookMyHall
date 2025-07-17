@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { AdminContext } from '../context/AdminContext'
 import { NavLink } from 'react-router-dom'
-import { assets } from '../assets/assets'
+import { HomeIcon, CalendarDaysIcon, PlusCircleIcon, UsersIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import { HallContext } from '../context/HallContext'
 
 const Slidebar = () => {
@@ -15,45 +15,95 @@ const Slidebar = () => {
 
   const navTextClass = 'hidden md:block text-sm font-medium'
 
+  const iconClass = (isActive) => `w-5 h-5 object-contain ${isActive ? 'text-blue-500' : 'text-[#123458]'}`;
+
   return (
-    <div className='min-h-screen bg-white border-r border-gray-200 font-poppins'>
+    <div className='min-h-screen bg-gray-50 border-r border-[#123458]/20 font-poppins'>
       {adminToken && (
         <ul className='mt-5'>
           <NavLink to='/admin-dashboard' className={linkClass}>
-            <img src={assets.home_icon} alt="Dashboard" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <HomeIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Dashboard</p>
+              </>
+            )}
           </NavLink>
           <NavLink to='/all-appointments' className={linkClass}>
-            <img src={assets.appointment_icon} alt="Appointments" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <CalendarDaysIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Appointments</p>
+              </>
+            )}
           </NavLink>
           <NavLink to='/add-hall' className={linkClass}>
-            <img src={assets.add_icon} alt="Add Facility" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <PlusCircleIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Add Facility</p>
+              </>
+            )}
           </NavLink>
           <NavLink to='/hall-list' className={linkClass}>
-            <img src={assets.people_icon} alt="Facility List" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <UsersIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Facility List</p>
+              </>
+            )}
           </NavLink>
           <NavLink to='/coordinator-management' className={linkClass}>
-            <img src={assets.list_icon} alt="Coordinator Management" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <ListBulletIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Coordinator Management</p>
+              </>
+            )}
           </NavLink>
         </ul>
       )}
       {coordinatorToken && (
         <ul className='mt-5'>
           <NavLink to='/hall-dashboard' className={linkClass}>
-            <img src={assets.home_icon} alt="Dashboard" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <HomeIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Dashboard</p>
+              </>
+            )}
           </NavLink>
           <NavLink to='/hall-appointments' className={linkClass}>
-            <img src={assets.appointment_icon} alt="Appointments" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <CalendarDaysIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Appointments</p>
+              </>
+            )}
           </NavLink>
           <NavLink to='/hall-profile' className={linkClass}>
-            <img src={assets.people_icon} alt="Profile" className='w-5 h-5 object-contain' />
+            {({ isActive }) => (
+              <>
+                <span className={iconClass(isActive)}>
+                  <UsersIcon className={iconClass(isActive)} aria-hidden="true" />
+                </span>
             <p className={navTextClass}>Profile</p>
+              </>
+            )}
           </NavLink>
         </ul>
       )}

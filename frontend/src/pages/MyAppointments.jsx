@@ -3,6 +3,7 @@ import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import FeedbackModal from '../components/FeedbackModal';
+import { CheckCircleIcon, XCircleIcon, StarIcon } from '@heroicons/react/24/outline';
 
 const MyAppointments = () => {
   const { backendUrl, token, getHallsData, getAppointments, userRole } = useContext(AppContext);
@@ -135,18 +136,18 @@ const MyAppointments = () => {
   };
 
   return (
-    <div className="min-h-screen px-6 sm:px-10 py-10 bg-white font-poppins text-[#030303]">
-      <h2 className="text-2xl font-bold mb-6">My Facility Bookings</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="min-h-screen px-6 sm:px-10 py-10 bg-[#f8fafc] font-poppins text-[#030303]">
+      <h2 className="text-2xl font-bold mb-8 text-[#123458]">My Facility Bookings</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {appointments.length === 0 ? (
-          <div className="col-span-2 text-center text-gray-500 border-2 border-gray-400 rounded-lg p-8">
+          <div className="col-span-2 text-center text-gray-500 border border-[#123458]/30 rounded-xl p-10 bg-gray-50 shadow-lg">
             You have not booked any facilities yet.
           </div>
         ) : (
           appointments.map((appointment) => (
-            <div key={appointment._id} className="border-2 border-gray-400 rounded-lg p-6 bg-white flex flex-col gap-2">
+            <div key={appointment._id} className="bg-gray-50 border border-[#123458]/30 rounded-xl p-7 shadow-lg flex flex-col gap-2">
               <div className="flex items-center gap-3 mb-2">
-                <span className="font-semibold text-lg">{appointment.facilityName || appointment.facilityId?.name || 'Facility'}</span>
+                <span className="font-semibold text-lg text-[#123458]">{appointment.facilityName || appointment.facilityId?.name || 'Facility'}</span>
                 <span className="text-sm text-gray-500">{appointment.facilityId?.type}</span>
               </div>
               {/* Approval Status */}
@@ -155,6 +156,8 @@ const MyAppointments = () => {
                   <span className="text-red-500">Status: Cancelled</span>
                 ) : appointment.isCompleted ? (
                   <span className="text-green-600">Status: Completed</span>
+                ) : appointment.directorDecision === 'approved' || appointment.isAccepted ? (
+                  <span className="text-green-600">Status: Approved</span>
                 ) : appointment.coordinatorDecision === 'pending' ? (
                   <span className="text-orange-500">Status: Pending Coordinator Approval</span>
                 ) : appointment.coordinatorDecision === 'rejected' ? (
@@ -163,8 +166,6 @@ const MyAppointments = () => {
                   <span className="text-orange-500">Status: Pending Director Approval</span>
                 ) : appointment.directorDecision === 'rejected' ? (
                   <span className="text-red-500">Status: Rejected by Director{appointment.directorComment ? `: ${appointment.directorComment}` : ''}</span>
-                ) : appointment.directorDecision === 'approved' ? (
-                  <span className="text-green-600">Status: Approved</span>
                 ) : (
                   <span className="text-orange-500">Status: Pending Approval</span>
                 )}
@@ -175,25 +176,22 @@ const MyAppointments = () => {
               <div className="text-sm text-gray-700">
                 <span className="font-medium">Time:</span> {appointment.time}
               </div>
-              {/* Only show reason for all, and for vehicles, skip vehicle-specific details */}
               {appointment.reason && (
                 <div className="text-sm text-gray-700">
                   <span className="font-medium">Reason:</span> {appointment.reason}
                 </div>
               )}
-              {/* Feedback button for completed appointments */}
               {appointment.isCompleted && !hasFeedback(appointment._id) && (
                 <button
-                  className="mt-2 px-4 py-1 rounded bg-[#123458] text-white text-sm w-max hover:bg-[#0e2e47] transition"
+                  className="mt-2 px-5 py-2 rounded-lg bg-[#123458] text-white text-sm font-semibold shadow hover:bg-[#0e2e47] transition"
                   onClick={() => handleOpenFeedback(appointment)}
                 >
                   Give Feedback
                 </button>
               )}
-              {/* View feedback button if feedback exists */}
               {appointment.isCompleted && hasFeedback(appointment._id) && (
                 <button
-                  className="mt-2 px-4 py-1 rounded bg-gray-200 text-[#123458] text-sm w-max hover:bg-gray-300 transition"
+                  className="mt-2 px-5 py-2 rounded-lg bg-gray-200 text-[#123458] text-sm font-semibold shadow hover:bg-gray-300 transition"
                   onClick={() => handleViewFeedback(appointment._id)}
                 >
                   View Feedback

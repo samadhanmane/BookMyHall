@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DirectorContext } from '../context/DirectorContext';
-import { assets } from '../assets/assets.js';
+import { CalendarDaysIcon, ListBulletIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import mitaoeLogo from '../assets/MITAOE-logo.png';
 
 const DirectorDashboard = () => {
   const { dToken, backendUrl, logoutDirector } = useContext(DirectorContext);
@@ -12,6 +13,10 @@ const DirectorDashboard = () => {
   const [error, setError] = useState('');
   const [comment, setComment] = useState('');
   const [selectedId, setSelectedId] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState('');
+  const [expandedHistory, setExpandedHistory] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,6 +25,7 @@ const DirectorDashboard = () => {
       return;
     }
     fetchBookings();
+    fetchHistory();
     // eslint-disable-next-line
   }, [dToken]);
 
@@ -39,6 +45,25 @@ const DirectorDashboard = () => {
       setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/director/approval-history`, {
+        headers: { dtoken: dToken },
+      });
+      if (data.success) {
+        setHistory(data.bookings);
+      } else {
+        setHistoryError(data.message || 'Failed to fetch approval history');
+      }
+    } catch (err) {
+      setHistoryError(err.response?.data?.message || err.message);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -65,6 +90,10 @@ const DirectorDashboard = () => {
     }
   };
 
+  const toggleExpandHistory = (id) => {
+    setExpandedHistory((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div className="font-[Poppins] text-[#030303] min-h-screen bg-[#f9f9f9]">
       {/* Navbar */}
@@ -74,8 +103,8 @@ const DirectorDashboard = () => {
           <img
             onClick={() => navigate('/director-dashboard')}
             className="w-52 sm:w-60 cursor-pointer rounded-md object-contain transition-transform duration-200 hover:scale-105 drop-shadow-lg"
-            src={assets.MITAOE_logo}
-            alt='College Logo'
+            src={mitaoeLogo}
+            alt='MITAOE Logo'
           />
           <span className='flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold text-[#030303] border border-[#030303] bg-gray-50'>
             {/* Optionally add an icon here: <img src={assets.admin_logo} alt="Director" className="w-6 h-6 rounded-full" /> */}
@@ -95,8 +124,8 @@ const DirectorDashboard = () => {
       <div className="m-5">
         {/* Header Cards */}
         <div className="flex flex-wrap gap-4 mb-8">
-          <div className="flex items-center gap-3 bg-white p-4 min-w-52 rounded border border-gray-200 shadow-sm shadow-black hover:shadow-md transition-all duration-200">
-            <img className="w-12 h-12 object-contain rounded-md shadow-sm" src={assets.appointments_icon} alt="pending" />
+          <div className="flex items-center gap-3 bg-gray-50 p-4 min-w-52 rounded-xl border border-[#123458]/30 shadow-lg">
+            <CalendarDaysIcon className="w-12 h-12 text-[#123458]" />
             <div>
               <p className="text-xl font-semibold">{bookings.length}</p>
               <p className="text-[#123458] font-medium">Bookings Pending Approval</p>
@@ -106,9 +135,9 @@ const DirectorDashboard = () => {
         </div>
 
         {/* Latest Bookings Section */}
-        <div className="bg-white rounded shadow-sm shadow-black border">
+        <div className="bg-gray-50 rounded-xl shadow-lg border border-[#123458]/30 mb-10">
           <div className="flex items-center gap-3 px-5 py-4 border-b bg-[#123458] text-white rounded-t">
-            <img src={assets.list_icon} alt="list" className="w-5 h-5" />
+            <ListBulletIcon className="w-5 h-5" />
             <p className="font-semibold">Pending Bookings</p>
           </div>
 
@@ -158,6 +187,66 @@ const DirectorDashboard = () => {
                       </button>
                     </div>
                   </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Approval History Section */}
+        <div className="bg-gray-50 rounded-xl shadow-lg border border-[#123458]/30">
+          <div className="flex items-center gap-3 px-5 py-4 border-b bg-[#123458] text-white rounded-t">
+            <ListBulletIcon className="w-5 h-5" />
+            <p className="font-semibold">Director Approval History</p>
+          </div>
+          <div className="divide-y max-h-[70vh] overflow-y-auto">
+            {historyLoading ? (
+              <div className="text-center text-gray-500 py-8">Loading...</div>
+            ) : historyError ? (
+              <div className="text-center text-red-600 py-8">{historyError}</div>
+            ) : history.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">No approval history found.</div>
+            ) : (
+              history.map((h) => (
+                <div
+                  key={h._id}
+                  className="flex flex-col md:flex-row md:items-center gap-2 px-6 py-4 hover:bg-gray-50 transition-all border-b border-gray-400"
+                >
+                  <div className="flex-1 text-sm">
+                    <p className="font-bold text-lg text-[#123458]">{h.hallData?.name || 'Facility'}</p>
+                    <p className="text-xs text-gray-600 mb-1">Type: {h.hallData?.isGuestRoom ? 'Guest Room' : h.hallData?.isVehicle ? 'Vehicle' : 'Facility'}</p>
+                    <p className="text-xs text-gray-600">User: {h.userData?.name} ({h.userData?.email})</p>
+                    <p className="text-xs text-gray-600">Date: {h.slotDate} | Time: {h.slotTime}</p>
+                    {h.reason && <p className="text-xs text-gray-600">Reason: {h.reason}</p>}
+                  </div>
+                  <div className="flex flex-col gap-2 min-w-[220px]">
+                    <span className={`font-semibold text-sm ${h.directorDecision === 'approved' ? 'text-green-600' : 'text-red-600'}`}>{h.status}</span>
+                    <button
+                      className="text-xs underline text-[#123458] hover:text-[#0e2e47] transition self-start"
+                      onClick={() => toggleExpandHistory(h._id)}
+                    >
+                      {expandedHistory[h._id] ? 'Hide Status History' : 'Show Status History'}
+                    </button>
+                  </div>
+                  {expandedHistory[h._id] && (
+                    <div className="w-full mt-2 bg-white border border-[#123458]/10 rounded p-3 text-xs">
+                      <p className="font-semibold mb-2 text-[#123458]">Status History:</p>
+                      <ul className="space-y-1">
+                        {h.statusHistory && h.statusHistory.length > 0 ? (
+                          h.statusHistory.map((s, idx) => (
+                            <li key={idx} className="flex flex-col md:flex-row md:items-center gap-2 border-b last:border-b-0 pb-1">
+                              <span className="font-medium">{s.status}</span>
+                              <span className="text-gray-500">by {s.by}</span>
+                              <span className="text-gray-500">{new Date(s.date).toLocaleString()}</span>
+                              {s.comment && <span className="text-gray-700">Comment: {s.comment}</span>}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-gray-400">No status history available.</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ))
             )}

@@ -70,6 +70,31 @@ export const directorDecision = async (req, res) => {
     }
 };
 
+// List all bookings that required director approval (history)
+export const listDirectorApprovalHistory = async (req, res) => {
+    try {
+        const history = await appointmentModel.find({
+            coordinatorDecision: 'approved',
+            directorDecision: { $ne: 'pending' },
+            cancelled: false
+        }).populate('userId hallId');
+        // Only guestroom/vehicle
+        const filtered = history.filter(app => app.hallId && (app.hallId.isGuestRoom || app.hallId.isVehicle));
+        // Add status field for frontend clarity
+        const bookings = filtered.map(app => ({
+            ...app.toObject(),
+            userData: app.userId ? app.userId : { name: 'Unknown', email: '-' },
+            hallData: app.hallId ? app.hallId : { name: 'Unknown', email: '-' },
+            status: app.directorDecision === 'approved' ? 'Approved by Director' : 'Rejected by Director',
+            statusHistory: app.statusHistory || []
+        }));
+        res.json({ success: true, bookings });
+    } catch (error) {
+        console.error('Error in listDirectorApprovalHistory:', error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
 // Director login
 export const loginDirector = async (req, res) => {
     try {

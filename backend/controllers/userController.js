@@ -55,7 +55,7 @@ const sendOtp = async (req, res) => {
         // Send email using the email service
         const emailSent = await sendEmail({
             to: email,
-            subject: 'Password Reset OTP - BookMyHall',
+            subject: 'Password Reset OTP - Facility Booking',
             html: getOtpTemplate(otp)
         });
 
@@ -170,7 +170,7 @@ const registerUser = async (req, res) => {
         // Send welcome email
         await sendEmail({
             to: user.email,
-            subject: 'Welcome to BookMyHall!',
+            subject: 'Welcome to Facility Booking!',
             html: getUserWelcomeTemplate(user.name)
         });
 
@@ -346,7 +346,7 @@ const bookAppointment = async (req, res) => {
         try {
             await sendEmail({
                 to: userData.email,
-                subject: "Booking Confirmation - BookMyHall",
+                subject: "Booking Confirmation - Facility Booking",
                 html: getBookingConfirmationTemplate(
                     userData,
                     hallData,
@@ -356,7 +356,7 @@ const bookAppointment = async (req, res) => {
             });
             await sendEmail({
                 to: hallData.email,
-                subject: "New Booking Confirmation - BookMyHall",
+                subject: "New Booking Confirmation - Facility Booking",
                 html: getHallBookingConfirmationTemplate(
                     userData,
                     hallData,
@@ -424,12 +424,12 @@ const cancelAppointment = async (req, res) => {
         Promise.all([
             sendEmail({
                 to: hall.email,
-                subject: 'Booking Cancellation Notice - BookMyHall',
+                subject: 'Booking Cancellation Notice - Facility Booking',
                 html: getHallBookingCancellationTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             }),
             sendEmail({
                 to: user.email,
-                subject: 'Booking Cancellation Confirmation - BookMyHall',
+                subject: 'Booking Cancellation Confirmation - Facility Booking',
                 html: getBookingCancellationTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             })
         ]).catch(error => {
@@ -472,14 +472,14 @@ const approveBooking = async (req, res) => {
             // Email to hall
             sendEmail({
                 to: hall.email,
-                subject: 'Booking Approval Confirmation - BookMyHall',
+                subject: 'Booking Approval Confirmation - Facility Booking',
                 html: getBookingApprovalTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             }),
 
             // Email to user
             sendEmail({
                 to: user.email,
-                subject: 'Your Booking has been Approved! - BookMyHall',
+                subject: 'Your Booking has been Approved! - Facility Booking',
                 html: getBookingApprovalTemplate(user, hall, appointmentData.slotDate, appointmentData.slotTime)
             })
         ]).catch(error => {
@@ -532,7 +532,7 @@ const changePassword = async (req, res) => {
         // Send password change notification email
         await sendEmail({
             to: user.email,
-            subject: 'Your BookMyHall Password Has Been Changed',
+            subject: 'Your Facility Booking Password Has Been Changed',
             html: getUserPasswordChangeTemplate(user.name)
         });
 

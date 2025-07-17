@@ -604,12 +604,12 @@ const HallProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {guestRooms.map((room) => (
               room && room._id && (
-                <div key={room._id} className="bg-white rounded-lg shadow-lg p-6">
+                <div key={room._id} className="bg-gray-50 rounded-xl shadow-lg p-4 border border-[#123458]/30 max-w-xs mx-auto">
                   {editingRoom === room._id ? (
                     renderEditForm(room, false)
                   ) : (
                     <>
-                      <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
+                      <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
                         <img 
                           src={room.image || 'https://placehold.co/300x200/e2e8f0/475569?text=No+Image'} 
                           alt={room.name || 'Guest Room'}
@@ -660,12 +660,12 @@ const HallProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {halls.map((hall) => (
               hall && hall._id && (
-                <div key={hall._id} className="bg-white rounded-lg shadow-lg p-6">
+                <div key={hall._id} className="bg-gray-50 rounded-xl shadow-lg p-6 border border-[#123458]/30">
                   {editingHall === hall._id ? (
                     renderEditForm(hall, true)
                   ) : (
                     <>
-                      <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
+                      <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
                         <img 
                           src={hall.image || 'https://placehold.co/300x200/e2e8f0/475569?text=No+Image'} 
                           alt={hall.name || 'Hall'}
@@ -716,12 +716,12 @@ const HallProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {vehicles.map((vehicle) => (
               vehicle && vehicle._id && (
-                <div key={vehicle._id} className="bg-white rounded-lg shadow-lg p-6">
+                <div key={vehicle._id} className="bg-gray-50 rounded-xl shadow-lg p-6 border border-[#123458]/30">
                   {editingRoom === vehicle._id ? (
                     renderEditForm(vehicle, false)
                   ) : (
                     <>
-                      <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
+                      <div className="w-full aspect-[4/3] overflow-hidden rounded-t-xl">
                         <img
                           src={vehicle.image || 'https://placehold.co/300x200/e2e8f0/475569?text=No+Image'}
                           alt={vehicle.name || 'Vehicle'}

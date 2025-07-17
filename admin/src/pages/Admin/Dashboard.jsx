@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
-import { assets } from '../../assets/assets.js'
+import { BuildingOffice2Icon, CalendarDaysIcon, UsersIcon, ListBulletIcon, XCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
   const {
@@ -27,15 +27,15 @@ const Dashboard = () => {
       <div className='flex flex-wrap gap-4'>
         {/* Cards */}
         {[
-          { icon: assets.hall_icon, label: 'Facilities', value: dashData.halls },
-          { icon: assets.appointments_icon, label: 'Bookings', value: dashData.appointments },
-          { icon: assets.people_icon, label: 'Users', value: dashData.users },
+          { icon: <BuildingOffice2Icon className="w-12 h-12 text-[#123458]" />, label: 'Facilities', value: dashData.halls },
+          { icon: <CalendarDaysIcon className="w-12 h-12 text-[#123458]" />, label: 'Bookings', value: dashData.appointments },
+          { icon: <UsersIcon className="w-12 h-12 text-[#123458] p-2" />, label: 'Users', value: dashData.users },
         ].map((card, index) => (
           <div
             key={index}
-            className='flex items-center gap-3 bg-white p-4 min-w-52 rounded border border-gray-200 shadow-sm shadow-black hover:shadow-md transition-all duration-200'
+            className='flex items-center gap-3 bg-gray-50 p-4 min-w-52 rounded-xl border border-[#123458]/30 shadow-lg'
           >
-            <img className={`w-12 h-12 object-contain rounded-md shadow-sm ${card.label === 'Users' ? 'p-2' : ''}`} src={card.icon} alt={card.label} />
+            {card.icon}
             <div>
               <p className='text-xl font-semibold'>{card.value}</p>
               <p className='text-[#123458] font-medium'>{card.label}</p>
@@ -45,9 +45,9 @@ const Dashboard = () => {
       </div>
 
       {/* Latest Bookings Section */}
-      <div className='mt-10 bg-white rounded shadow-sm shadow-black border'>
+      <div className='mt-10 bg-gray-50 rounded-xl shadow-lg border border-[#123458]/30'>
         <div className='flex items-center gap-3 px-5 py-4 border-b bg-[#123458] text-white rounded-t'>
-          <img src={assets.list_icon} alt="list" className='w-5 h-5' />
+          <ListBulletIcon className='w-5 h-5' />
           <p className='font-semibold'>Latest Bookings</p>
         </div>
 
@@ -65,39 +65,38 @@ const Dashboard = () => {
 
                 {item.cancelled ? (
                   <p className='text-red-600 text-xs font-medium'>Cancelled</p>
+                ) : item.isCompleted ? (
+                  <p className='text-green-600 text-xs font-medium'>Completed</p>
                 ) : item.isAccepted ? (
                   <p className='text-green-600 text-xs font-medium'>Confirmed</p>
                 ) : (
+                  <p className='text-yellow-600 text-xs font-medium'>Pending</p>
+                )}
+                {/* Actions */}
                   <div className='flex items-center gap-2'>
-                    <img
+                  {item.cancelled || item.isCompleted ? null : (
+                    item.isAccepted ? (
+                      <CheckCircleIcon
+                        onClick={() => completeAppointment(item._id)}
+                        className='w-6 h-6 text-green-500 cursor-pointer'
+                        aria-label="Complete"
+                      />
+                    ) : (
+                      <>
+                        <XCircleIcon
                       onClick={() => cancelAppointment(item._id)}
-                      className='w-6 cursor-pointer'
-                      src={assets.cancel_icon}
-                      alt="cancel"
+                          className='w-6 h-6 text-red-500 cursor-pointer'
+                          aria-label="Cancel"
                     />
-                    <img
+                        <CheckCircleIcon
                       onClick={() => requestAcceptance(item._id)}
-                      className='w-6 cursor-pointer'
-                      src={assets.tick_icon}
-                      alt="accept"
+                          className='w-6 h-6 text-green-500 cursor-pointer'
+                          aria-label="Accept"
                     />
+                      </>
+                    )
+                  )}
                   </div>
-                )}
-
-                {item.isAccepted && !item.isCompleted && (
-                  <div className='ml-2'>
-                    <img
-                      onClick={() => completeAppointment(item._id)}
-                      className='w-6 cursor-pointer'
-                      src={assets.tick_icon}
-                      alt="complete"
-                    />
-                  </div>
-                )}
-
-                {item.isAccepted && item.isCompleted && (
-                  <p className='text-green-600 text-xs font-medium'>Completed</p>
-                )}
               </div>
             ) : null
           ))}

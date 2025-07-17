@@ -22,12 +22,12 @@ const Navbar = () => {
   }
 
   return (
-    <div className='flex justify-between items-center px-10 py-7 border-b-2 border-gray-300 bg-white' style={{ minHeight: '90px' }}>
+    <div className='sticky top-0 z-40 flex justify-between items-center px-10 py-7 border-b-2 border-[#123458]/20 bg-gray-50' style={{ minHeight: '90px' }}>
       {/* Left Section */}
       <div className='flex items-center gap-6'>
         <img
           onClick={() => navigate('/')}
-          className='w-52 sm:w-60 cursor-pointer rounded-md object-contain transition-transform duration-200 hover:scale-105 drop-shadow-lg'
+          className='w-52 sm:w-60 cursor-pointer rounded-md object-contain drop-shadow-lg'
           src={assets.MITAOE_logo}
           alt='College Logo'
         />

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { HallContext } from '../../context/HallContext'
-import { assets } from '../../assets/assets'
+import { CalendarDaysIcon, UsersIcon, ListBulletIcon, XCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { AppContext } from '../../context/AppContext'
 
 const HallDashboard = () => {
@@ -57,16 +57,16 @@ const HallDashboard = () => {
     <div className="m-5 font-poppins">
       {/* Stats */}
       <div className="flex flex-wrap gap-4 mb-6">
-        <div className="flex items-center gap-3 bg-white p-5 min-w-52 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <img className="w-12 h-12" src={assets.appointments_icon} alt="appointments" />
+        <div className="flex items-center gap-3 bg-gray-50 p-5 min-w-52 rounded-xl border border-[#123458]/30 shadow-lg">
+          <CalendarDaysIcon className="w-12 h-12 text-[#123458]" />
           <div>
             <p className="text-xl font-semibold text-[#030303]">{dashData.appointments}</p>
             <p className="text-sm text-gray-500">Appointments</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white p-5 min-w-52 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <img className="w-8 h-8" src={assets.people_icon} alt="users" />
+        <div className="flex items-center gap-3 bg-gray-50 p-5 min-w-52 rounded-xl border border-[#123458]/30 shadow-lg">
+          <UsersIcon className="w-8 h-8 text-[#123458]" />
           <div>
             <p className="text-xl font-semibold text-[#030303]">{dashData.users}</p>
             <p className="text-sm text-gray-500">Users</p>
@@ -75,9 +75,9 @@ const HallDashboard = () => {
       </div>
 
       {/* Latest Bookings */}
-      <div className="bg-white border border-gray-200 rounded-lg">
+      <div className="bg-gray-50 border border-[#123458]/30 rounded-xl shadow-lg">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200 bg-[#123458] rounded-t-lg">
-          <img className="w-5" src={assets.list_icon} alt="list icon" />
+          <ListBulletIcon className="w-5 h-5 text-white" />
           <p className="text-white font-medium">Latest Bookings</p>
         </div>
 
@@ -96,22 +96,22 @@ const HallDashboard = () => {
               {/* Status */}
               {item.cancelled ? (
                 <p className="text-red-600 text-xs font-semibold">Cancelled</p>
+              ) : item.isCompleted ? (
+                <p className="text-green-600 text-xs font-semibold">Completed</p>
               ) : (item.isAccepted || item.directorDecision === 'approved') ? (
                 <p className="text-green-600 text-xs font-semibold">Confirmed</p>
               ) : (
                 (item.coordinatorDecision === 'pending' && (!item.directorDecision || item.directorDecision === 'pending')) ? (
                   <div className="flex gap-2">
-                    <img
+                    <XCircleIcon
                       onClick={() => handleCancelAppointment(item._id)}
-                      className="w-8 cursor-pointer"
-                      src={assets.cancel_icon}
-                      alt="cancel"
+                      className="w-8 h-8 text-red-500 cursor-pointer"
+                      aria-label="Cancel"
                     />
-                    <img
+                    <CheckCircleIcon
                       onClick={() => handleRequestAppointment(item._id)}
-                      className="w-8 cursor-pointer"
-                      src={assets.tick_icon}
-                      alt="accept"
+                      className="w-8 h-8 text-green-500 cursor-pointer"
+                      aria-label="Accept"
                     />
                   </div>
                 ) : null
@@ -120,16 +120,12 @@ const HallDashboard = () => {
               {/* Completion */}
               {(item.isAccepted || item.directorDecision === 'approved') && !item.isCompleted && (
                 <div className="ml-2">
-                  <img
+                  <CheckCircleIcon
                     onClick={() => handleCompleteAppointment(item._id)}
-                    className="w-8 cursor-pointer"
-                    src={assets.tick_icon}
-                    alt="complete"
+                    className="w-8 h-8 text-green-500 cursor-pointer"
+                    aria-label="Complete"
                   />
                 </div>
-              )}
-              {item.isAccepted && item.isCompleted && (
-                <p className="text-green-600 text-xs font-semibold">Completed</p>
               )}
             </div>
           ))}

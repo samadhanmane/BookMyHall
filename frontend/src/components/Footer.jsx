@@ -3,7 +3,7 @@ import { assets } from '../assets/assets';
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t border-[#e0e0e0] font-poppins text-[#030303]">
+    <footer className="bg-gray-50 border-t border-[#123458]/20 font-poppins text-[#030303] mt-10">
       <div className="container mx-auto px-6 md:px-10 py-12 grid gap-10 md:grid-cols-[3fr_1fr_1fr] text-sm">
         
         {/* Left Section */}
@@ -41,7 +41,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="text-center py-5 text-sm text-[#030303]/70 border-t border-[#e0e0e0]">
+      <div className="text-center py-5 text-sm text-[#030303]/70 border-t border-[#123458]/20">
         © 2025 MITAOE Hall Booking System. All rights reserved.
       </div>
     </footer>

@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../context/AppContext'
-import { assets } from '../assets/assets'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 
 const MyProfile = () => {
   const { userData, setUserData, token, backendUrl, loadUserProfileData } = useContext(AppContext)
@@ -143,19 +143,19 @@ const MyProfile = () => {
   }
 
   return (
-    <div className='min-h-screen flex flex-col items-center justify-start bg-white font-poppins text-[#030303] px-4 py-10'>
-      <div className='max-w-lg w-full bg-white border border-gray-200 rounded-lg p-8 shadow'>
-        <div className='flex flex-col items-center mb-6'>
-          <img className='w-32 h-32 object-cover rounded-full border border-gray-300 mb-2' src={getProfileImage()} alt="Profile" />
-          <div className='text-xl font-bold mt-2'>{userData?.name || ''}</div>
+    <div className='min-h-screen flex flex-col items-center justify-start bg-[#f8fafc] font-poppins text-[#030303] px-4 py-10'>
+      <div className='max-w-lg w-full bg-gray-50 border border-[#123458]/30 rounded-xl p-10 shadow-lg'>
+        <div className='flex flex-col items-center mb-8'>
+          <UserCircleIcon className='w-32 h-32 text-[#123458] mb-2 shadow' />
+          <div className='text-2xl font-bold mt-2 text-[#123458]'>{userData?.name || ''}</div>
           <div className='text-sm text-gray-500'>{position || <span className='text-gray-300'>No position set</span>}</div>
         </div>
-        <hr className='my-6 border-gray-300' />
-        <form className='flex flex-col gap-4'>
+        <hr className='my-8 border-[#123458]/20' />
+        <form className='flex flex-col gap-6'>
           <div>
-            <label className='block text-sm mb-1 font-medium'>Full Name</label>
+            <label className='block text-sm mb-1 font-medium text-[#123458]'>Full Name</label>
             <input
-              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+              className='w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] bg-white shadow-sm'
               type='text'
               value={userData?.name || ''}
               disabled={!isEdit}
@@ -163,18 +163,18 @@ const MyProfile = () => {
             />
           </div>
           <div>
-            <label className='block text-sm mb-1 font-medium'>Email</label>
+            <label className='block text-sm mb-1 font-medium text-[#123458]'>Email</label>
             <input
-              className='w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500'
+              className='w-full p-3 border border-[#123458]/20 rounded-lg bg-gray-100 text-gray-500 shadow-sm'
               type='email'
               value={userData?.email || ''}
               disabled
             />
           </div>
           <div>
-            <label className='block text-sm mb-1 font-medium'>Phone Number</label>
+            <label className='block text-sm mb-1 font-medium text-[#123458]'>Phone Number</label>
             <input
-              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+              className='w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] bg-white shadow-sm'
               type='text'
               value={userData?.phone || ''}
               disabled={!isEdit}
@@ -182,9 +182,9 @@ const MyProfile = () => {
             />
           </div>
           <div>
-            <label className='block text-sm mb-1 font-medium'>Position</label>
+            <label className='block text-sm mb-1 font-medium text-[#123458]'>Position</label>
             <input
-              className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+              className='w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] bg-white shadow-sm'
               type='text'
               value={position}
               disabled={!isEdit}
@@ -215,24 +215,24 @@ const MyProfile = () => {
         </form>
         {changePassword && (
           <div className='mt-8 border-t pt-6'>
-            <h3 className='text-lg font-semibold mb-4'>Change Password</h3>
+            <h3 className='text-lg font-semibold mb-4 text-[#123458]'>Change Password</h3>
             <div className='flex flex-col gap-3'>
               <input
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+                className='w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] bg-white shadow-sm'
                 type='password'
                 placeholder='Current Password'
                 value={currentPassword}
                 onChange={e => setCurrentPassword(e.target.value)}
               />
               <input
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+                className='w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] bg-white shadow-sm'
                 type='password'
                 placeholder='New Password'
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
               />
               <input
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#123458]'
+                className='w-full p-3 border border-[#123458]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#123458] bg-white shadow-sm'
                 type='password'
                 placeholder='Confirm New Password'
                 value={confirmPassword}
@@ -253,7 +253,7 @@ const MyProfile = () => {
       {/* Feedback Section */}
       <div className='max-w-4xl w-full mt-10'>
         <div className='p-6 border rounded-lg bg-white'>
-          <h3 className='text-xl font-semibold mb-4'>My Feedback</h3>
+          <h3 className='text-xl font-semibold mb-4 text-[#123458]'>My Feedback</h3>
           {feedbacksLoading ? (
             <p className='text-center text-gray-600'>Loading feedbacks...</p>
           ) : feedbacks.length === 0 ? (
