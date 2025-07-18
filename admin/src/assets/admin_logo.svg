@@ -1,8 +1,0 @@
-
-<svg xmlns="http://www.w3.org/2000/svg" width="700" height="200" viewBox="0 0 700 200">
-  <!-- Text -->
-  <text font-family="Arial, sans-serif" font-size="120" font-weight="bold" x="0" y="100" alignment-baseline="central" dominant-baseline="central">
-    <tspan fill="black">BookMy</tspan>
-    <tspan fill="orange" x="450">Hall</tspan>
-  </text>
-</svg>
