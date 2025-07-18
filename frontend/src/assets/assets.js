@@ -1,4 +1,4 @@
-import upload_icon from './usericon.png'
+import upload_icon from './userIcon.png'
 import header_hall from './header_hall.png'
 import High_Capacity_img from './High_Capacity_img.jpg'
 import mitaoe from './mitaoe.jpeg'
