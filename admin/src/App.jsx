@@ -59,8 +59,8 @@ const App = () => {
     </div>
   ) : (
     <>
+      <ScrollToTop />
       <Routes>
-        <ScrollToTop />
         <Route path="/director/login" element={<Login />} />
         <Route path="/director-dashboard" element={<DirectorDashboard />} />
         <Route path="*" element={<Login />} />
