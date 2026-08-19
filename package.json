@@ -1,0 +1,12 @@
+{
+  "author": "Samadhan Mane <samadhanmane2324@gmail.com>",
+  "name": "bookmyhall",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BookMyHall - College Management & Multi-Tenant Facility Booking ERP",
+  "dependencies": {
+    "redis": "^6.0.0",
+    "vite": "^7.1.0",
+    "@vitejs/plugin-react-swc": "^3.11.0"
+  }
+}

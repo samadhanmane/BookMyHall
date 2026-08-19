@@ -1,0 +1,112 @@
+================================================================================
+                    PROJECT SUMMARY & OVERVIEW
+              MITAOE Unified College Management ERP System
+================================================================================
+
+================================================================================
+PART 1: NON-TECHNICAL OVERVIEW (WHAT IS THIS WEBSITE & HOW IS IT USED?)
+================================================================================
+
+1. WHAT IS THIS WEBSITE?
+------------------------
+This website is an all-in-one digital campus management portal built for 
+colleges and educational institutions. It replaces traditional paper forms, 
+endless phone calls, and manual registers with a smart, easy-to-use web portal 
+where students, teachers, department heads, and campus staff can manage 
+day-to-day college operations in one place.
+
+
+2. WHAT REAL-WORLD PROBLEMS DOES IT SOLVE?
+------------------------------------------
+* Prevent Double-Bookings: Ensures auditoriums, seminar halls, computer labs, 
+  and campus equipment are never booked by two people at the same time.
+* Fast Food & Refreshment Ordering: Streamlines official food orders for college 
+  events, meetings, and guest visits without paper vouchers.
+* Track Campus Repairs easily: Ends forgotten complaints about broken ACs, 
+  projectors, benches, or electrical outlets by providing a transparent repair 
+  tracking ticket system.
+* AI Chatbot Assistant: Allows staff and students to reserve campus facilities 
+  simply by typing messages in plain English to a smart AI chatbot.
+
+
+3. MAIN FEATURES & HOW THEY WORK FOR EVERYDAY USERS:
+-----------------------------------------------------
+
+A) FACILITY & RESOURCE BOOKING
+   - Browse all available college facilities (auditoriums, labs, conference rooms).
+   - Select a date and time slot. When you select a slot, it is temporarily locked 
+     for 5 minutes so no one else can steal it while you fill in details.
+   - Smart AI Chatbot: You can open the chatbot and say "Book the Main Auditorium 
+     for tomorrow at 2 PM for a Tech Seminar", and it will guide and complete the 
+     booking for you.
+
+B) CANTEEN & EVENT REQUISITIONS (FOOD ORDERS)
+   - When a department hosts an official event, faculty can request food, tea, 
+     or snacks directly through the website.
+   - The request automatically flows through an approval process:
+     Faculty Request -> HOD Approval -> Registrar Stamp -> Director Approval -> Canteen Kitchen.
+   - Canteen staff receive the approved order, cook the food, assign delivery 
+     staff, and mark it delivered.
+
+C) WORKSHOP & MAINTENANCE SYSTEM (REPAIRS)
+   - If a projector, computer, fan, or light bulb breaks down in a classroom, 
+     faculty can submit a maintenance repair ticket.
+   - The ticket tracks progress step-by-step: 
+     Submitted -> Approved by Department Head -> Assigned to Technician -> In Progress -> Fixed & Completed.
+   - If a technician needs a replacement part, they can pause the ticket with a 
+     reason and resume once the part arrives.
+
+
+4. WHO USES THIS WEBSITE? (ROLES & USES)
+----------------------------------------
+- Students & Faculty (Requesters): Book halls, order event refreshments, and 
+  report broken equipment.
+- Department Heads (HODs): Approve booking requests, food orders, and repair 
+  tickets for their department.
+- College Director & Registrar: Provide financial verification and final approval 
+  for official college requests.
+- Canteen Staff: View approved food orders, manage preparation, and deliver orders.
+- Maintenance Technicians / Workers: Receive assigned repair tasks, update job 
+  progress, and report when repairs are done.
+- College Administrators (Admins): Manage college user accounts, settings, and 
+  view overall campus statistics.
+
+
+================================================================================
+PART 2: TECHNICAL OVERVIEW (FOR DEVELOPERS & SYSTEM ADMINISTRATORS)
+================================================================================
+
+1. ARCHITECTURE & STRUCTURE
+---------------------------
+- Architecture: Monorepo with decoupled Frontend and Backend services.
+- Multi-Tenancy: Supports multiple independent educational institutions/colleges 
+  on a single platform instance.
+
+
+2. FRONTEND TECH STACK
+----------------------
+- Framework: React.js with TypeScript (powered by Vite)
+- UI & Styling: Tailwind CSS & Shadcn UI components
+- Icons: Lucide React
+- State & Auth Management: React Context API, Session-based storage (clears token 
+  on tab/browser close for enhanced security)
+
+
+3. BACKEND TECH STACK
+---------------------
+- Server & API: Node.js with Express.js
+- Database: MongoDB with Mongoose ODM
+- AI Engine: Google Gemini Pro API (powers conversational slot reservations)
+- Email Queue: Nodemailer (asynchronous background notifications for approval steps)
+- Security: JWT Tokens, Express Rate-Limiter, Role-Based Access Control (RBAC)
+
+
+4. CORE WORKFLOW & LOGIC ENGINES
+--------------------------------
+- Concurrency Locking: 5-minute atomic slot reservation lock to prevent race 
+  conditions during simultaneous bookings.
+- Sequential Approval Pipeline: Multi-stage workflow engine governing Canteen 
+  and Workshop module state transitions.
+- SuperAdmin Analytics: Platform-wide dashboard tracking organization onboardings, 
+  active colleges, system admins, and AI Chatbot API usage metrics.
+================================================================================

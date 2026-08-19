@@ -1,0 +1,32 @@
+# robots.txt — MITAOE Campus Resource Management System
+# Public pages are allowed. Private dashboards and API routes are blocked.
+
+User-agent: *
+
+# Allow public-facing pages
+Allow: /$
+Allow: /org/*/about
+Allow: /org/*/contact
+Allow: /org/*/facilities
+Allow: /org/*/facilities/*
+Allow: /org/*/login
+
+# Block all private/authenticated routes
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /org/*/admin/
+Disallow: /org/*/dashboard
+Disallow: /org/*/coordinator/
+Disallow: /org/*/analytics
+Disallow: /org/*/maintenance
+Disallow: /org/*/canteen
+Disallow: /org/*/my-bookings
+Disallow: /org/*/profile
+Disallow: /org/*/approvals
+Disallow: /org/*/utilities
+
+# Block API endpoints
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://mitaoe-erp.vercel.app/sitemap.xml

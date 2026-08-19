@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — MITAOE Campus Resource Management System
+
+  DOMAIN: Automatically filled from VITE_APP_BASE_URL at build time via Vite env substitution.
+  Set VITE_APP_BASE_URL in your .env file when you have a domain:
+    VITE_APP_BASE_URL=https://bookmyhall.vercel.app
+
+  ORG SLUGS: Routes are dynamic per organization (/org/:orgId/).
+  Add one <url> block per organization slug for each public page.
+  Example org slugs: mitaoe, mitwpu, etc.
+
+  To auto-generate this from the database, consider using a build script
+  that queries your organizations collection and generates sitemap entries.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Root / Organization Selector -->
+  <url>
+    <loc>%VITE_APP_BASE_URL%/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- MITAOE org public pages -->
+  <url>
+    <loc>%VITE_APP_BASE_URL%/org/mitaoe</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>%VITE_APP_BASE_URL%/org/mitaoe/facilities</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>%VITE_APP_BASE_URL%/org/mitaoe/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>%VITE_APP_BASE_URL%/org/mitaoe/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!--
+    Add more organizations below as you onboard them:
+
+    <url>
+      <loc>%VITE_APP_BASE_URL%/org/mitwpu</loc>
+      <changefreq>weekly</changefreq>
+      <priority>0.9</priority>
+    </url>
+    <url>
+      <loc>%VITE_APP_BASE_URL%/org/mitwpu/facilities</loc>
+      <changefreq>daily</changefreq>
+      <priority>0.8</priority>
+    </url>
+  -->
+
+</urlset>

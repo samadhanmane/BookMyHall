@@ -1,0 +1,15 @@
+<svg width="600" height="200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title1 {
+      font: bold 64px sans-serif;
+      fill: #0057b7; /* Blue */
+    }
+    .title2 {
+      font: bold 64px serif;
+      fill: #666666; /* Gray */
+    }
+  </style>
+
+  <text x="10" y="70" class="title1">MITAOE</text>
+  <text x="10" y="150" class="title2">BOOKING</text>
+</svg>
