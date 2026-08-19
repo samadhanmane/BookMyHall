@@ -1,0 +1,231 @@
+[
+  {
+    "_id": {
+      "$oid": "6a854abd9ec1b1658c2fbeb2"
+    },
+    "name": "Platform Super Admin",
+    "email": "test.superadmin@test.local",
+    "role": "super_admin",
+    "organizationId": null,
+    "department": "Platform",
+    "phone": "+919999900000",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.412Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.418Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a8547df845d9ba4cba3675d"
+    },
+    "name": "College Admin",
+    "email": "test.admin@test.local",
+    "role": "org_admin",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Administration",
+    "phone": "+919999900001",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.476Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.476Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb3"
+    },
+    "name": "Director",
+    "email": "test.director@test.local",
+    "role": "director",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Directorate",
+    "phone": "+919999900002",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.529Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.529Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb4"
+    },
+    "name": "Registrar",
+    "email": "test.registrar@test.local",
+    "role": "registrar",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Administration",
+    "phone": "+919999900003",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.570Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.570Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb5"
+    },
+    "name": "Computer Dept HOD",
+    "email": "test.hod@test.local",
+    "role": "hod",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Computer Engg",
+    "phone": "+919999900004",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.620Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.620Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb6"
+    },
+    "name": "Lab Coordinator",
+    "email": "test.coord@test.local",
+    "role": "coordinator",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Computer Engg",
+    "phone": "+919999900005",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.658Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.658Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb7"
+    },
+    "name": "Updated Faculty Name",
+    "email": "faculty.new@test.local",
+    "role": "faculty",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Computer Engg",
+    "phone": "+919999988888",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.726Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.726Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb8"
+    },
+    "name": "Canteen Assistant",
+    "email": "test.assistant@test.local",
+    "role": "assistant",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Canteen",
+    "phone": "+918888877777",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.780Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.780Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeb9"
+    },
+    "name": "Workshop HOD",
+    "email": "test.workshophod@test.local",
+    "role": "workshop_hod",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Workshop",
+    "phone": "+918888877777",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.820Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.820Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbeba"
+    },
+    "name": "Technician Worker",
+    "email": "test.worker@test.local",
+    "role": "worker",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Workshop",
+    "phone": "+919999999999",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.882Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.882Z"
+    },
+    "__v": 0
+  },
+  {
+    "_id": {
+      "$oid": "6a854abe9ec1b1658c2fbebb"
+    },
+    "name": "Canteen Owner",
+    "email": "test.canteenowner@test.local",
+    "role": "canteen_owner",
+    "organizationId": {
+      "$oid": "6a6f4f96c19855009412158f"
+    },
+    "department": "Canteen",
+    "phone": "+918888877777",
+    "passwordHash": "$2a$10$T99xSM5rD.DBWjollgp.5OzGIA7RVXbJzkHCm.PXNNByU4nhhEPii",
+    "createdAt": {
+      "$date": "2026-08-19T06:18:37.941Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-19T06:18:37.941Z"
+    },
+    "__v": 0
+  }
+]
