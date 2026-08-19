@@ -1,81 +1,228 @@
-# BookMyHall - College Management & Multi-Tenant Facility Booking ERP
+# BookMyHall — College Management & Multi-Tenant Facility Booking ERP
 
-BookMyHall is a comprehensive, multi-tenant monorepo application designed to manage college resources, facility bookings, canteen orders, and workshop maintenance. It features an automated approval workflow, role-based access control (RBAC), and an integrated AI Gemini Chatbot for conversational slot booking.
+**BookMyHall** is an enterprise-grade, multi-tenant monorepo application designed for colleges and universities to manage campus resources, seminar hall bookings, canteen food requisitions, and workshop infrastructure maintenance. It features automated multi-tier approval workflows, strict Role-Based Access Control (RBAC), temporary concurrency slot locking, and an integrated **Google Gemini AI Chatbot** for conversational slot booking.
 
 ---
 
-## 🚀 Quick Start
+## 🏛️ System Architecture
 
-### 1. Backend Setup (Express & MongoDB)
+```mermaid
+graph TD
+    subgraph Client Layer
+        UI[React 18 + Vite + TypeScript]
+        Shadcn[Tailwind CSS + Shadcn UI]
+        ChatWidget[Gemini AI Chatbot Widget]
+    end
+
+    subgraph API Gateway & Security
+        Router[Express.js REST API]
+        Auth[JWT Session & Route-Level RBAC]
+        Sanitizer[NoSQL Sanitizer & Helmet Security]
+        Limiter[Express Rate Limiter]
+    end
+
+    subgraph Business Logic & Services
+        BookingSvc[Facility & Slot Booking Service]
+        LockManager[5-Min Concurrency Lock Manager]
+        CanteenSvc[Multi-Tier Canteen Requisition Service]
+        MaintSvc[Workshop Ticketing & Lifecycle Service]
+        ChatbotSvc[Gemini Pro Conversational Engine]
+    end
+
+    subgraph External & Storage Layer
+        MongoDB[(MongoDB Atlas / Mongoose)]
+        Cloudinary[Cloudinary Media Storage]
+        Mailer[Nodemailer SMTP Queue]
+        GeminiAPI[Google Gemini AI API]
+    end
+
+    UI --> Router
+    ChatWidget --> Router
+    Router --> Sanitizer --> Limiter --> Auth
+    Auth --> BookingSvc
+    Auth --> CanteenSvc
+    Auth --> MaintSvc
+    Auth --> ChatbotSvc
+    BookingSvc --> LockManager
+    BookingSvc --> MongoDB
+    CanteenSvc --> MongoDB
+    MaintSvc --> MongoDB
+    ChatbotSvc --> GeminiAPI
+    ChatbotSvc --> BookingSvc
+    BookingSvc --> Mailer
+    CanteenSvc --> Mailer
+    MaintSvc --> Mailer
+    MaintSvc --> Cloudinary
+```
+
+---
+
+## 🔄 Core Workflow Pipelines
+
+```mermaid
+flowchart LR
+    subgraph 1. Hall & Utility Booking
+        F1[Faculty / User] -->|1. Select / Chatbot Slot| L1[5-Min Temporary Slot Lock]
+        L1 -->|2. Confirm Booking Purpose| C1[Coordinator / HOD Review]
+        C1 -->|3. Approve / Reject| S1[Confirmed Booking & Email Notification]
+    end
+
+    subgraph 2. Canteen Food Requisition
+        F2[Faculty Order] --> H2[HOD Approval]
+        H2 --> R2[Registrar Budget Stamp]
+        R2 --> D2[Director Final Sign-off]
+        D2 --> CO2[Canteen Owner Prep & Delivery]
+    end
+
+    subgraph 3. Workshop Maintenance
+        F3[Issue Raised] --> H3[Dept HOD Verification]
+        H3 --> WH3[Workshop HOD Assigns Worker]
+        WH3 --> W3[Technician In-Progress / Pause / Complete]
+        W3 --> CL3[Closed Ticket & Status Logs]
+    end
+```
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+* **Core Framework**: React 18, TypeScript, Vite
+* **Styling & UI**: Tailwind CSS, Shadcn UI Components, Lucide Icons, Radix UI Primitives
+* **Data Fetching & State**: TanStack React Query, Axios, Custom Caching Layer
+* **Charts & Visualizations**: Recharts
+* **SEO & Metadata**: Dynamic OpenGraph, Canonical URLs, Schema.org Structured Data
+
+### Backend
+* **Runtime & Framework**: Node.js, Express.js (ES Modules)
+* **Database & ODM**: MongoDB, Mongoose
+* **AI & Natural Language**: Google Gemini Pro API (`@google/genai`)
+* **Security & Auth**: JSON Web Tokens (JWT), BCrypt.js, Helmet, Express Rate-Limit, Mongo Sanitize
+* **Email & Notifications**: Nodemailer (asynchronous queues for workflow transitions)
+* **File Uploads**: Cloudinary & Multer
+
+---
+
+## ✨ Key Features & Modules
+
+### 1. Seminar Hall & Resource Booking
+* **5-Minute Slot Lock**: Prevents race conditions and double-booking by temporarily reserving slots while users complete confirmation.
+* **Gemini Conversational Booking**: Natural language chatbot capable of finding open slots, answering facility FAQs, and locking slots directly in dialogue.
+* **Auto-Release Mechanism**: Instantly frees held slots upon cancellation or lock expiration.
+
+### 2. Multi-Tier Canteen Requisitions
+* **Sequential Approval Chain**: `Faculty` $\to$ `HOD` $\to$ `Registrar (Budget Check)` $\to$ `Director (Sign-off)` $\to$ `Canteen Fulfillment`.
+* **Live Order Tracking**: Preparation status, delivery personnel assignment, and billing records.
+
+### 3. Maintenance & Workshop Ticketing Pipeline
+* **End-to-End Resolution**: Categorized ticket creation with image attachment, HOD review, technician dispatch, progress updates, and resolution sign-offs.
+* **Pause & Reopen Capability**: Workers can pause tickets with mandatory blocker reasons; requesters can unpause with resolution feedback.
+
+### 4. Multi-Tenant Architecture
+* Support for multiple organizations/institutions with isolated user registries, custom facility categories, and dedicated admin controls.
+
+---
+
+## 👥 Role-Based Access Control (RBAC) & Demo Logins
+
+All demo accounts use the default password: **`123456`** (accessible directly from the dropdown on the login page).
+
+| Role | Demo Email | Access Scope & Capabilities |
+| :--- | :--- | :--- |
+| **Super Admin** | `superadmin@demo.com` | Platform administration, organization creation, system metrics |
+| **Org Admin** | `admin@demo.com` | Organization settings, user management, facility controls |
+| **Director** | `director@demo.com` | Executive approvals for canteen requisitions & institutional events |
+| **Registrar** | `registrar@demo.com` | Budget validation & administrative stamping |
+| **Head of Department (HOD)** | `hod@demo.com` | Departmental approvals for bookings, food requests & repairs |
+| **Coordinator / Hall Manager** | `coordinator@demo.com` | Facility slot reviews, conflict resolution & calendar management |
+| **Faculty (Requester)** | `faculty@demo.com` | Hall/lab booking, canteen requisition submission, repair ticketing |
+| **Assistant** | `assistant@demo.com` | Departmental support, view schedules & food orders |
+| **Workshop HOD** | `workshophod@demo.com` | Maintenance workload review & technician job assignment |
+| **Workshop Technician (Worker)** | `worker@demo.com` | Repair task execution, ticket pause/resume & job completion |
+| **Canteen Owner / Manager** | `canteen@demo.com` | Order processing, menu management & delivery tracking |
+| **Student** | `student@demo.com` | View campus facilities, events & schedules |
+
+---
+
+## 🚀 Quick Start & Installation
+
+### Prerequisites
+* **Node.js** (v18.x or higher)
+* **MongoDB** (Local instance or MongoDB Atlas cluster)
+* **npm** or **pnpm** / **yarn**
+
+---
+
+### 1. Clone & Configure Repository
+
+```bash
+git clone https://github.com/samadhanmane/BookMyHall.git
+cd BookMyHall
+```
+
+---
+
+### 2. Backend Setup
+
 ```bash
 cd backend
-cp .env.example .env   # Configure MONGODB_URI, JWT_SECRET, SMTP options, & GEMINI_API_KEY
-npm install
-npm run dev            # API runs on http://localhost:4000
-```
 
-### 2. Frontend Setup (React, Vite & Tailwind CSS)
+# Copy sample environment configuration
+cp .env.example .env
+
+# Install dependencies
+npm install
+
+# Run in development mode (with hot-reload)
+npm run dev
+```
+> The API will start on **`http://localhost:4000`**
+
+---
+
+### 3. Frontend Setup
+
 ```bash
-cd frontend
-cp .env.example .env   # Set VITE_API_URL=http://localhost:4000/api
+cd ../frontend
+
+# Copy sample environment configuration
+cp .env.example .env
+
+# Install dependencies
 npm install
-npm run dev            # Development server runs on http://localhost:5173
+
+# Start Vite development server
+npm run dev
 ```
+> The web application will run on **`http://localhost:5173`**
 
 ---
 
-## 🏛️ Core Modules & Workflows
+## ⚙️ Environment Variables Overview
 
-### 1. Facility & Resource Booking
-* **Lock System**: When a user selects a facility slot (e.g. Auditorium, Lab), the system creates a temporary `LOCKED` booking for **5 minutes** to prevent concurrency conflicts.
-* **Chatbot Integration**: Users can book facilities conversationally via the AI Chatbot. The chatbot locks the slot, prompts the user for the mandatory booking purpose, and confirms the request.
-* **Cancellation**: If a user cancels during checkout, the chatbot or page immediately invokes `releaseLock` to reopen the slot.
+### Backend (`backend/.env`)
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `PORT` | API Server Port | `4000` |
+| `MONGODB_URI` | MongoDB Connection String | `mongodb+srv://...` |
+| `JWT_SECRET` | JWT Signing Key | `your_secret_key` |
+| `GEMINI_API_KEY` | Google Gemini API Key | `AIzaSy...` |
+| `SMTP_HOST` | SMTP Server Host | `smtp.gmail.com` |
+| `SMTP_PORT` | SMTP Server Port | `587` |
+| `SMTP_USER` | SMTP Username / Email | `noreply@domain.com` |
+| `SMTP_PASS` | SMTP App Password | `app_password` |
+| `CLOUDINARY_*` | Cloudinary Storage Credentials | `cloud_name, api_key, secret` |
 
-### 2. Canteen Requisitions
-An sequential approval chain for department food orders:
-1. **Submit**: Faculty submits a food requisition for a department event.
-2. **HOD Approval**: Department Head reviews and approves/rejects the request.
-3. **Registrar Stamp**: Central Registrar stamps and verifies budget availability.
-4. **Director Sign-off**: College Director provides final administrative approval.
-5. **Canteen Owner**: Receives fully approved orders, manages preparation status, assigns delivery peons, and marks orders as `Delivered`.
-
-### 3. Workshop & Maintenance System
-A robust ticketing pipeline for physical infrastructure repairs:
-1. **Ticket Creation**: Faculty raises a ticket detailing the problem, category, location, and department.
-2. **HOD Verification**: Department HOD approves the ticket to advance it to the central queue.
-3. **Workshop HOD Assignment**: Central Workshop HOD reviews active workloads and assigns the ticket to a specific Worker (Technician).
-4. **Technician Action**: Worker accepts and marks the ticket as `In Progress`.
-5. **Pause & Reopen Flow**:
-   * If the worker needs external parts or user action, they can **Pause** the ticket with a mandatory reason. Discussion chat is locked, and email notifications are sent to HODs and the requester.
-   * Faculty completes offline steps and clicks **Reopen** (entering a mandatory reason). The ticket status resets to `Assigned`, notifying the technician and panel members to resume.
-6. **Completion**: The worker completes the repair, and all panel members receive automated email confirmations that the ticket has closed successfully.
+### Frontend (`frontend/.env`)
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `VITE_API_URL` | Base Backend API URL | `http://localhost:4000/api` |
 
 ---
 
-## 👥 Roles & Functionalities
+## 👨‍💻 Author & Maintainer
 
-| Role | Key Capabilities & Functionality |
-| :--- | :--- |
-| **Super Admin** | Platform-level administrator. Creates organizations/colleges, assigns Organization Admins, and monitors platform-wide statistics. |
-| **Org Admin** | Tenant administrator. Manages user accounts, configures facilities/utilities and categories, monitors analytics, and overrides bookings. |
-| **Coordinator** | Resource manager. Assigned to specific utilities (e.g., Lab HOD) to review and approve/reject booking requests. |
-| **Head of Department (HOD)** | Department overseer. Approves department-level booking requests, canteen requisitions, and maintenance tickets before they go central. |
-| **Registrar** | Financial gatekeeper. Verifies budget availability and stamps canteen/maintenance workflows. |
-| **Director** | Executive authority. Grants final administrative sign-off for canteen requisitions. |
-| **Canteen Owner** | Canteen manager. Updates preparation states, assigns delivery details, and logs total revenues. |
-| **Worker (Technician)** | Workshop field staff. Receives assigned repair tasks, updates progress, pauses tickets with reason, and marks jobs completed. |
-| **Faculty (Requester)** | End-user. Books resources (via UI or AI Chatbot), requests department food orders, raises maintenance tickets, and reopens paused tasks. |
-
----
-
-
-
-## 🛠️ Tech Stack & Conventions
-
-* **Backend**: Node.js, Express, MongoDB (Mongoose), Nodemailer (asynchronous background email queues), Gemini Pro API (Chatbot Engine).
-* **Frontend**: React, TypeScript, Vite, Tailwind CSS, Lucide icons, Shadcn UI Components.
-* **Security & Auth**: Session-based tokens (`sessionStorage` for immediate logout on tab/window close), Express Rate-Limiter (configured for reverse proxy environments), Route-level RBAC.
-
----
-*Last Updated/Deployed: 31 July 2026 (Chatbot Syntax Fix)*
-
+* **Samadhan Mane**
+* **Repository**: [samadhanmane/BookMyHall](https://github.com/samadhanmane/BookMyHall)
+* **Contact**: [samadhanmane2324@gmail.com](mailto:samadhanmane2324@gmail.com)
+* **Portfolio**: [samadhanportfolio.vercel.app](https://samadhanportfolio.vercel.app/)
