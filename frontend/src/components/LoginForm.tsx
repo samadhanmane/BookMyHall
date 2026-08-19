@@ -97,6 +97,13 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     group: 'Operations & Maintenance',
     description: 'Technician / Worker (resolves maintenance tasks)',
   },
+  {
+    id: 'canteen_owner',
+    role: 'Canteen Owner',
+    email: 'test.canteenowner@test.local',
+    group: 'Operations & Maintenance',
+    description: 'Canteen Management (food orders, menus & fulfillment)',
+  },
 ];
 
 const LoginForm = () => {

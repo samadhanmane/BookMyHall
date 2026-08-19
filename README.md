@@ -139,6 +139,7 @@ All demo accounts use the default password: **`123456`** (accessible directly fr
 | **Canteen Assistant** | `test.assistant@test.local` | Canteen department food orders, requisitions & delivery support |
 | **Workshop HOD** | `test.workshophod@test.local` | Maintenance workload review & technician job assignment |
 | **Technician Worker** | `test.worker@test.local` | Repair task execution, ticket pause/resume & job completion |
+| **Canteen Owner** | `test.canteenowner@test.local` | Canteen management, food orders, menus & fulfillment |
 
 ---
 
