@@ -71,7 +71,7 @@ flowchart LR
         F2[Faculty Order] --> H2[HOD Approval]
         H2 --> R2[Registrar Budget Stamp]
         R2 --> D2[Director Final Sign-off]
-        D2 --> CO2[Canteen Owner Prep & Delivery]
+        D2 --> CO2[Canteen Assistant Prep & Delivery]
     end
 
     subgraph 3. Workshop Maintenance
@@ -111,7 +111,7 @@ flowchart LR
 * **Auto-Release Mechanism**: Instantly frees held slots upon cancellation or lock expiration.
 
 ### 2. Multi-Tier Canteen Requisitions
-* **Sequential Approval Chain**: `Faculty` $\to$ `HOD` $\to$ `Registrar (Budget Check)` $\to$ `Director (Sign-off)` $\to$ `Canteen Fulfillment`.
+* **Sequential Approval Chain**: `Faculty` $\to$ `HOD` $\to$ `Registrar (Budget Check)` $\to$ `Director (Sign-off)` $\to$ `Canteen Assistant Fulfillment`.
 * **Live Order Tracking**: Preparation status, delivery personnel assignment, and billing records.
 
 ### 3. Maintenance & Workshop Ticketing Pipeline
@@ -129,18 +129,16 @@ All demo accounts use the default password: **`123456`** (accessible directly fr
 
 | Role | Demo Email | Access Scope & Capabilities |
 | :--- | :--- | :--- |
-| **Super Admin** | `superadmin@demo.com` | Platform administration, organization creation, system metrics |
-| **Org Admin** | `admin@demo.com` | Organization settings, user management, facility controls |
-| **Director** | `director@demo.com` | Executive approvals for canteen requisitions & institutional events |
-| **Registrar** | `registrar@demo.com` | Budget validation & administrative stamping |
-| **Head of Department (HOD)** | `hod@demo.com` | Departmental approvals for bookings, food requests & repairs |
-| **Coordinator / Hall Manager** | `coordinator@demo.com` | Facility slot reviews, conflict resolution & calendar management |
-| **Faculty (Requester)** | `faculty@demo.com` | Hall/lab booking, canteen requisition submission, repair ticketing |
-| **Assistant** | `assistant@demo.com` | Departmental support, view schedules & food orders |
-| **Workshop HOD** | `workshophod@demo.com` | Maintenance workload review & technician job assignment |
-| **Workshop Technician (Worker)** | `worker@demo.com` | Repair task execution, ticket pause/resume & job completion |
-| **Canteen Owner / Manager** | `canteen@demo.com` | Order processing, menu management & delivery tracking |
-| **Student** | `student@demo.com` | View campus facilities, events & schedules |
+| **Super Admin** | `test.superadmin@test.local` | Platform administration, organization creation, system metrics |
+| **Org Admin** | `test.admin@test.local` | College administration, user management, facility controls |
+| **Director** | `test.director@test.local` | Executive approvals for canteen requisitions & institutional events |
+| **Registrar** | `test.registrar@test.local` | Budget validation & administrative stamping |
+| **Head of Department (HOD)** | `test.hod@test.local` | Departmental approvals for bookings, food requests & repairs |
+| **Coordinator / Hall Manager** | `test.coord@test.local` | Facility slot reviews, conflict resolution & calendar management |
+| **Faculty (Requester)** | `faculty.new@test.local` | Hall/lab booking, canteen requisition submission, repair ticketing |
+| **Canteen Assistant** | `test.assistant@test.local` | Canteen department food orders, requisitions & delivery support |
+| **Workshop HOD** | `test.workshophod@test.local` | Maintenance workload review & technician job assignment |
+| **Technician Worker** | `test.worker@test.local` | Repair task execution, ticket pause/resume & job completion |
 
 ---
 

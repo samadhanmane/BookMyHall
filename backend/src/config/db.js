@@ -2,7 +2,7 @@ import dns from "dns";
 import mongoose from "mongoose";
 import { env } from "./env.js";
 
-const DB_NAME = "final_hall";
+const DB_NAME = "final_hall_test";
 
 /** Node on Windows often cannot resolve mongodb+srv via restrictive LAN DNS. */
 const usePublicDnsForSrv = (uri) => {
